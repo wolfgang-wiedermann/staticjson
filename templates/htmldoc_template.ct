@@ -1,0 +1,51 @@
+{{ use model;
+use filehandler;
+use util;
+
+//
+// This generate Method is the entry point to generation
+// of html documentation about the given types
+//
+pub fn generate(types:&Box<Vec<Box<model::Type>>>, folder:&str) {
+  for typ in (*types).iter() {
+    let result = gen_type(typ);
+    let filename = format!("{}/{}.html", folder, typ.typename);
+    filehandler::write_file(filename, result);
+  }
+}
+
+// 
+// Generate code for type
+//
+fn gen_type(typ:&Box<model::Type>) -> String {
+  let mut str:String = String::new(); 
+}}<html>
+<head><title>Documentation about Type:  {{= typ.typename }} </title></head>
+<body>
+<h1>Dokumentation zu den SimpleJSON-Typen</h1>
+<h2>Typ:  {{= typ.typename }}</h2>
+<ul>
+<li>PHP: {{= util::ucamel_to_lsnake(&typ.typename) }}</li>
+</ul>
+{{     for attribut in typ.attributes.iter() { }}
+<h3>Attribut:  {{= attribut.name }}</h3>
+<ul>
+  <li>Java:  {{= util::lsnake_to_lcamel(&attribut.name) }}</li>
+  <li>C# Property:  {{= util::lsnake_to_ucamel(&attribut.name) }}</li>
+</ul>
+<ul>
+{{       if model::Type::is_basic_type(&attribut.attribute_type) { }}
+  <li>Typ:  {{= attribut.attribute_type }}</li>
+{{ } else { }} 
+  <li><a href="./ {{= attribut.attribute_type }}.html">Typ: {{= attribut.attribute_type }}</a></li>
+{{ } }} 
+  <li>Attribut is Array: {{ if attribut.is_array { str.push_str("true"); } else { str.push_str("false"); } }} </li>
+{{       for param in attribut.params.iter() { }}
+  <li> {{= param.name }}: {{= param.value }}</li>
+{{       } }}
+</ul>
+{{     } }}
+</body>
+</html>
+{{   return str;
+} }}

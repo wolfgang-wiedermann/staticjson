@@ -1,0 +1,137 @@
+=== Static-JSON Language-Guide ===
+
+This document describes the core principles of the staticjson language.
+It is the langauge specification and an introductional guide.
+
+== Language Sample ==
+
+// Some comment about the Address type.
+// The Address type in this sample is a child of the Person type.
+type Address {
+  street:string(maxlen="50");
+  number:string(maxlen="10");
+  postcode:string(regex="[0-9A-Z]{2-10}");
+  city:string(maxlen="50");
+  internal_id:int;
+}
+
+// A Person can have multiple Adresses
+type Person {
+  // A string does not necessarily need a maxlen parameter
+  surname:string;
+  prename:string;
+
+  // The primary Address of the Person
+  postaddress:Address(mandatory="true");
+
+  // The default is "mandatory == false" so this mandatory=false is
+  // not really needed, but it is nice to see how parameters can
+  // be applied on array fields
+  adresses:Address[](mandatory="false");
+
+  internal_id:int;
+}
+
+== Language Specification == 
+
+<staticjsonprogram> 	::= ( <comment> | <type> )*
+<comment>		::= '//' [^\n]* '\n'
+<type>			::= 'type' <blank> <typename> ( '(' <typeparameters> ')' )? '{' <typedefinition> '}'
+<blank>			::= ' ' | '\t'
+<typeparameters>        ::= <typeparameter> ( ',' <typeparameter> )*
+<typeparameter>         ::= <typeparametername> '=' '"' <typeparametervalue> '"'
+<typedefinition>        ::= ( <attribute> '\n' )+
+<attribute>		::= <attributename> ':' <attributetype> ( '(' <attributeparameters> ')'  )? ';'
+<attributename>		::= [a-zA-Z0-9]+
+<attributetype>		::= <basictype> | <customtype>
+<attributeparameters>	::= <attributeparameter> ( ',' <attributeparameter> )*
+<attributeparameter>    ::= <attributeparametername> '=' '"' <attributparametervalue> '"'
+
+== Basic Types ==
+
+The Static-JSON Language comes with a small set of primitive types, basic types
+or core types, however you want to call them. During the process of code generation
+these types are automatically convertet in the corresponding basic types of
+the target language. 
+
+All basic types have to be written in lower case. The whole language is case sensitive.
+
+Basic Types:
+------------
+
+* byte
+* char
+* int
+* uint
+* long
+* ulong
+* decimal
+* string
+* date
+* time
+* datetime
+
+== Conventions ==
+
+Type names have to be written in upper camel case (camel case with first letter in upper case).
+
+Attribute names have to be written in snake case (words separated by underscores).
+
+If you hold on this two conventions, the code generation can automatically apply the styleguides of
+the target language.
+
+The curly brackets around the type definition should be applied as shown in the example section.
+The opening bracket in the line of the typename the closing bracket in a separate line.
+
+NOTE:
+
+All those conventions are not mandatory but some of them will lead to additional benefits if applied.
+
+== Type Parameters ==
+
+In the round brackets after the typename there can be some type parameters. Type parameters
+specify additional information about how code for the given type has to be generated.
+This means as well the generated code for the data structures as the code for the parser or
+serializer.
+
+In general there are two types of type parameters:
+
+* Target language specific parameters
+* Target language independent parameters
+
+= Target Language Specific Parameters =
+
+Target language specific parameters have to follow the this syntax: 
+
+<Target_Language_Specific_Parameter_Name> ::=  gen_TARGETLANGUAGE_PARAMETERNAME
+
+TARGETLANGUAGE means one of the following: c, swift, rust, csharp, java
+PARAMETERNAME can be out of a bigger amount of specific names which have to specified later.
+
+Sample:
+-------
+
+gen_java_entity="true" means that the generated java bean will be annotated with @Entity
+gen_java_xmlroot="true" means that the generated java bean will be annotated with @XmlRootElement
+
+gen_csharp_entity="true" means that staticjson will generate a c# class valid for entity framework
+
+gen_c_standard="c99" means that the generated c code will be fully compatible with c99 standard
+gen_c_standard="visualc" means that the generated c code will have to compile on visual studio
+
+= Target Language Independent Parameters =
+
+There is currently one defined language independent type parameter
+
+* allow_undefined_fieldnames
+
+This parameter helps to control whether the generated json parser should fail or ignore if
+a given json string contains fields which are not present in the given type definition.
+
+Valid options:
+
+* allow_undefined_fieldnames="true" means that the json string can contain an unlimited number of
+  additional fields/attributes which are not specified in the type definition.
+
+* allow_undefinied_fieldnames="false" means that no fieldnames other then in the type definition are allowed.
+  If the json string contains an additional field name the parser will produce an error message.

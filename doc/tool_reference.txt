@@ -1,0 +1,64 @@
+=== Tool Interface Specification ===
+
+This document specifies the interface of the staticjson commandline tool.
+It is the tool to be used to compile staticjsons idl code into code of
+the chosen target language.
+
+== Tool Packaging ==
+
+The tools name has to be "staticjson". All relevant binary code has to be
+packed in this one executable binary file. This leads to a very simple 
+installation because this means just copying the "staticjson" binary
+file into /usr/bin Folder at Linux, Unix or OSx systems or 
+into C:\Windows\system32 Folder on Windows systems.
+
+== Tool Options ==
+
+The commandline tool has the following call syntax:
+
+staticjson INPUTFILENAME [-o OUTPUTFOLDERNAME] [-t TARGETLANGUAGE]
+
+= INPUTFILENAME =
+
+The param INPUTFILENAME has to be the absolute or relative to current work directory
+path to a existing StaticJSON-File. 
+
+StaticJSON-Files should have names ending with ".sjs".
+
+= OUTPUTFOLDERNAME =
+
+The value of the param OUTPUTFOLDERNAME has to be the absolute or the relative to 
+current work directory path to the folder, StaticJSON should generate the code to. 
+Minimum the parent of the referenced folder must be already existing.
+
+= TARGETLANGUAGE =
+
+The value of the param TARGETLANGUAGE have to be one of the following:
+
+* swift => if you want to generate Apple swift code
+* c     => if you want to generate C code
+* rust  => if you want to generate Rust code
+
+Maybe in later versions there will be support for additional languages,
+but thats something which is not currently planned.
+
+== Samples ==
+
+In this section there are three samples to make the specification easier to
+understand.
+
+
+# staticjson ./src/model.sjs -t rust -o ./generated
+
+this call reads the code from ./src/model.sjs and generates rust-language code
+into the folder ./generated.
+
+# staticjson /home/username/develop/src/filename.sjs -o ./generated
+
+this call reads from the given absolute path and generates swift-code into 
+the folder ./generated. (Because swift is default for TARGETLANGUAGE)
+
+# staticjson model.sjs
+
+this call reads from the file model.sjs from current directory and writes 
+the generated swift code into the same directory.

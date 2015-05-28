@@ -1,0 +1,7 @@
+see
+
+http://bits.citrusbyte.com/extending-xcode-6-with-plugins/
+
+https://github.com/kattrali/Xcode-Plugin-Template
+
+http://www.overacker.me/blog/2015/01/25/creating-an-xcode-plugin

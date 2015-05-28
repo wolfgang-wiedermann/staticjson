@@ -1,0 +1,42 @@
+Die Codegenerierung sollte ich über Templates abbilden, die durch einen 
+eigenen Template-Parser gelesen und in Rust-Code, der die Ergebnisse
+aus dem Static-JSON-Parser anwendet, umgesetzt werden.
+
+Dazu schließen wir in den Template-Text die Code-Abschnitte in doppelte
+geschweifte Klammern ein:
+
+Beispiel-Templatetext: 
+
+{{ foreach type in types }}
+#include <stdio.h>
+#include <string.h>
+
+typedef enum {{ to_upper_case(type.name)  }}STATES {
+{{ foreach attribute in type.attributes }}
+  {{ to_upper_case(attribute.name) }} ;
+{{ /foreach }}
+};
+
+{{ to_snake_case(type.name) }} * parse_{{ to_snake_case(type.name) }} (char *code) {
+  // TODO: hier einen echten Parser generieren!
+  return NULL;
+}
+
+{{ /foreach }}
+
+== Was braucht die Template-Sprache ==
+
+Kontrollstrukturen:
+===================
+
+* foreach
+* if else endif
+
+Funktionen:
+===========
+
+* to_upper_case
+* to_lower_case
+* to_snake_case
+* to_lower_camel_case
+* to_upper_camel_case

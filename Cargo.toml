@@ -1,0 +1,7 @@
+[package]
+name = "staticjson"
+version = "0.1.0"
+authors = ["Wolfgang Wiedermann <wolfgang.wiedermann@hs-regensburg.de>"]
+
+[dependencies]
+getopts = "0.2.4"
