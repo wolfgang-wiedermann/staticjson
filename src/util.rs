@@ -141,6 +141,16 @@ pub fn ucamel_to_lcamel(txt:&str) -> String {
   return buf.clone();
 }
 
+pub fn to_upper(txt:&str) -> String {
+  let mut buf:String = String::new();
+  for c in txt.chars() {
+    for c2 in c.to_uppercase() {
+      buf.push(c2);
+    }
+  }
+  return buf.clone();
+}
+
 enum SnakeState {
   TXT, UNDERSCORE
 }

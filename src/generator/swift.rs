@@ -22,7 +22,9 @@ fn gen_type(typ:&Box<model::Type>) -> String {
 
 str.push_str("//\n// ");
 str.push_str(&typ.typename);
-str.push_str(".swift\n// \n\nimport Foundation\n\npublic struct ");
+str.push_str(".swift\n// \n\nimport Foundation\n\n//\n// Datastructure for ");
+str.push_str(&typ.typename);
+str.push_str("\n//\npublic struct ");
 str.push_str(&typ.typename);
 str.push_str(" {");
 for attr in typ.attributes.iter() { 
@@ -40,7 +42,29 @@ str.push_str(" = ");
 str.push_str(&get_default_value(&attr.attribute_type));
 str.push_str(";");
 } 
-str.push_str("\n    }\n}");
+str.push_str("\n    }\n}\n\n//\n// ParserState-Enum for type ");
+str.push_str(&typ.typename);
+str.push_str("\n//\nenum ");
+str.push_str(&typ.typename);
+str.push_str("ParserState {\n    case INITIAL\n    case INOBJECT\n    case INFIELDNAME\n    case BEHINDFIELDNAME\n    case BEHINDFIELDVALUE\n    case FINAL");
+for attr in typ.attributes.iter() { 
+str.push_str("\n    // TODO: Typabhängige Parserstates einbauen\n    case IN_");
+str.push_str(&util::to_upper(&attr.name));
+str.push_str("_VALUE\n    case IN_");
+str.push_str(&util::to_upper(&attr.name));
+str.push_str("_STRING");
+} 
+str.push_str("\n}\n\n//\n// Parsing-Function for type ");
+str.push_str(&typ.typename);
+str.push_str("\n//\nfunc parse_");
+str.push_str(&util::ucamel_to_lsnake(&typ.typename));
+str.push_str(" -> ");
+str.push_str(&typ.typename);
+str.push_str(" {\n    var entity:");
+str.push_str(&typ.typename);
+str.push_str(" = ");
+str.push_str(&typ.typename);
+str.push_str("();\n\n    // TODO: continue here with generation of parser code\n\n    return entity;\n} \n");
   return str;
 } 
 

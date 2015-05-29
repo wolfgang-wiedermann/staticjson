@@ -25,6 +25,9 @@ fn gen_type(typ:&Box<model::Type>) -> String {
 
 import Foundation
 
+//
+// Datastructure for  {{= typ.typename }}
+//
 public struct  {{= typ.typename }} {
 {{ for attr in typ.attributes.iter() { }}
     public var  {{= attr.name }}: {{= translate_basic_type(&attr.attribute_type) }};
@@ -36,6 +39,35 @@ public struct  {{= typ.typename }} {
 {{ } }}
     }
 }
+
+//
+// ParserState-Enum for type  {{= typ.typename }}
+//
+enum  {{= typ.typename }}ParserState {
+    case INITIAL
+    case INOBJECT
+    case INFIELDNAME
+    case BEHINDFIELDNAME
+    case BEHINDFIELDVALUE
+    case FINAL
+{{ for attr in typ.attributes.iter() { }}
+    // TODO: Typabhängige Parserstates einbauen
+    case IN_ {{= util::to_upper(&attr.name) }}_VALUE
+    case IN_ {{= util::to_upper(&attr.name) }}_STRING
+{{ } }}
+}
+
+//
+// Parsing-Function for type  {{= typ.typename }}
+//
+func parse_ {{= util::ucamel_to_lsnake(&typ.typename) }} ->  {{= typ.typename }} {
+    var entity: {{= typ.typename }} =  {{= typ.typename }}();
+
+    // TODO: continue here with generation of parser code
+
+    return entity;
+} 
+
 {{   return str;
 } 
 
