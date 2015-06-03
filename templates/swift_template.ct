@@ -50,23 +50,72 @@ enum  {{= typ.typename }}ParserState {
     case BEHINDFIELDNAME
     case BEHINDFIELDVALUE
     case FINAL
-{{ for attr in typ.attributes.iter() { }}
-    // TODO: Typabhängige Parserstates einbauen
+{{ for attr in typ.attributes.iter() {
+  if attr.attribute_type == "string" { 
+    if attr.is_array == true { }}
+    case IN_ {{= util::to_upper(&attr.name) }}_ARRAY
+{{     } }}
     case IN_ {{= util::to_upper(&attr.name) }}_VALUE
     case IN_ {{= util::to_upper(&attr.name) }}_STRING
-{{ } }}
+{{ } else if attr.attribute_type == "date" { }}
+    case IN_ {{= util::to_upper(&attr.name) }}_VALUE
+    case IN_ {{= util::to_upper(&attr.name) }}_DTSTR
+{{ } else { }}
+    case IN_ {{= util::to_upper(&attr.name) }}_VALUE
+{{   }
+} }}
 }
 
 //
-// Parsing-Function for type  {{= typ.typename }}
+// Parser and serializer utility class
 //
-func parse_ {{= util::ucamel_to_lsnake(&typ.typename) }} ->  {{= typ.typename }} {
+class  {{= typ.typename }}Util {
+
+  //
+  // Parsing-Function for type  {{= typ.typename }}
+  //
+  func parse(json:String) ->  {{= typ.typename }} {
     var entity: {{= typ.typename }} =  {{= typ.typename }}();
 
     // TODO: continue here with generation of parser code
 
     return entity;
-} 
+  } 
+
+  //
+  // Function to serialize objects of type  {{= typ.typename }}
+  //
+  func serialize(obj: {{= typ.typename }}) -> String {
+    var buf = "{";
+{{ for attr in typ.attributes.iter() { }}
+    buf.append("\"");
+    buf.append(" {{= attr.name }}");
+    buf.append("\":");
+{{   if attr.is_array {  }}
+      buf.append("[");
+      for val in obj. {{= attr.name }} {
+{{       if attr.attribute_type == "string" { }}
+        buf.append("\"");
+        buf.append(obj. {{= attr.name }});
+        buf.append("\"");
+{{       } else { }} 
+        buf.append(obj. {{= attr.name }});
+{{       } }}       
+      }
+      buf.append("]");
+{{   } else if attr.attribute_type == "string" {  }}
+    buf.append("\"");
+    buf.append(attr.name);
+    buf.append("\"");
+{{   } else { }}
+    buf.append(obj. {{= attr.name }});
+{{   } }}
+{{ } }}
+    buf.append("}");
+    return buf;
+  }
+
+}
 
 {{   return str;
 } 

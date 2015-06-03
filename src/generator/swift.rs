@@ -47,24 +47,73 @@ for attr in typ.attributes.iter() {
   str.push_str("\n//\nenum ");
   str.push_str(&typ.typename);
   str.push_str("ParserState {\n    case INITIAL\n    case INOBJECT\n    case INFIELDNAME\n    case BEHINDFIELDNAME\n    case BEHINDFIELDVALUE\n    case FINAL");
-for attr in typ.attributes.iter() { 
-    str.push_str("\n    // TODO: Typabhängige Parserstates einbauen\n    case IN_");
-    str.push_str(&util::to_upper(&attr.name));
-    str.push_str("_VALUE\n    case IN_");
-    str.push_str(&util::to_upper(&attr.name));
-    str.push_str("_STRING");
+for attr in typ.attributes.iter() {
+  if attr.attribute_type == "string" { 
+    if attr.is_array == true { 
+        str.push_str("\n    case IN_");
+        str.push_str(&util::to_upper(&attr.name));
+        str.push_str("_ARRAY");
+    } 
+      str.push_str("\n    case IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_VALUE\n    case IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_STRING");
+} else if attr.attribute_type == "date" { 
+      str.push_str("\n    case IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_VALUE\n    case IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_DTSTR");
+} else { 
+      str.push_str("\n    case IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_VALUE");
+  }
 } 
-  str.push_str("\n}\n\n//\n// Parsing-Function for type ");
+  str.push_str("\n}\n\n//\n// Parser and serializer utility class\n//\nclass ");
   str.push_str(&typ.typename);
-  str.push_str("\n//\nfunc parse_");
-  str.push_str(&util::ucamel_to_lsnake(&typ.typename));
-  str.push_str(" -> ");
+  str.push_str("Util {\n\n  //\n  // Parsing-Function for type ");
+  str.push_str(&typ.typename);
+  str.push_str("\n  //\n  func parse(json:String) -> ");
   str.push_str(&typ.typename);
   str.push_str(" {\n    var entity:");
   str.push_str(&typ.typename);
   str.push_str(" = ");
   str.push_str(&typ.typename);
-  str.push_str("();\n\n    // TODO: continue here with generation of parser code\n\n    return entity;\n} \n");
+  str.push_str("();\n\n    // TODO: continue here with generation of parser code\n\n    return entity;\n  } \n\n  //\n  // Function to serialize objects of type ");
+  str.push_str(&typ.typename);
+  str.push_str("\n  //\n  func serialize(obj:");
+  str.push_str(&typ.typename);
+  str.push_str(") -> String {\n    var buf = \"{\";");
+for attr in typ.attributes.iter() { 
+    str.push_str("\n    buf.append(\"\\\"\");\n    buf.append(\"");
+    str.push_str(&attr.name);
+    str.push_str("\");\n    buf.append(\"\\\":\");");
+  if attr.is_array {  
+      str.push_str("\n      buf.append(\"[\");\n      for val in obj.");
+      str.push_str(&attr.name);
+      str.push_str(" {");
+      if attr.attribute_type == "string" { 
+        str.push_str("\n        buf.append(\"\\\"\");\n        buf.append(obj.");
+        str.push_str(&attr.name);
+        str.push_str(");\n        buf.append(\"\\\"\");");
+      } else { 
+        str.push_str(" \n        buf.append(obj.");
+        str.push_str(&attr.name);
+        str.push_str(");");
+      } 
+      str.push_str("       \n      }\n      buf.append(\"]\");");
+  } else if attr.attribute_type == "string" {  
+      str.push_str("\n    buf.append(\"\\\"\");\n    buf.append(attr.name);\n    buf.append(\"\\\"\");");
+  } else { 
+      str.push_str("\n    buf.append(obj.");
+      str.push_str(&attr.name);
+      str.push_str(");");
+  } 
+    str.push_str("");
+} 
+  str.push_str("\n    buf.append(\"}\");\n    return buf;\n  }\n\n}\n");
   return str;
 } 
 
