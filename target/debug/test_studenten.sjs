@@ -10,7 +10,8 @@ type StudentEntity {
   //       erlaubt sein sollten: [a-zA-Z0-9_-]
   nachname:string(mandatory="true");
   geburstdatum:date;
-  geburtsort:OrtEntity; 
+  geburtsort:OrtEntity;
+  ganzzahl:int; 
   custom_order_id:decimal;
 }
 

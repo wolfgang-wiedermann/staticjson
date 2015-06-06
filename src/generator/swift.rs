@@ -65,6 +65,10 @@ for attr in typ.attributes.iter() {
       str.push_str("_VALUE\n    case IN_");
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_DTSTR");
+} else if !model::Type::is_basic_type(&attr.attribute_type) { 
+      str.push_str("\n    case IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_OBJECT");
 } else { 
       str.push_str("\n    case IN_");
       str.push_str(&util::to_upper(&attr.name));
@@ -105,7 +109,53 @@ for attr in typ.attributes.iter() {
     str.push_str(&util::to_upper(&attr.name));
     str.push_str("_VALUE;");
 } 
-  str.push_str("\n            }\n            // TODO: if Strict-Mode then else with error output\n            // TODO: if flex-Mode then do something to overjump unknown attributes\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        default:\n          // This state is not allwoed to be reached\n          println(\"ERROR: ENCOUNTERED INVALID STATE\");\n      }\n      charbefore = c;\n      ptr.next();\n    }\n \n    return obj;\n  }\n\n  //\n  // Function to serialize objects of type ");
+  str.push_str("\n            }\n            // TODO: if Strict-Mode then else with error output\n            // TODO: if flex-Mode then do something to overjump unknown attributes\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .BEHIND_FIELDVALUE:\n          if c == \",\" {\n            self.state = ");
+  str.push_str(&typ.typename);
+  str.push_str("ParserState.INOBJECT;\n          } else if c == \"}\" {\n            self.state = ");
+  str.push_str(&typ.typename);
+  str.push_str("ParserState.FINAL;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
+for attr in typ.attributes.iter() { 
+    if !model::Type::is_basic_type(&attr.attribute_type) { 
+      str.push_str("\n        // Nested objects\n        case .IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_OBJECT:\n          if c == \"{\" {\n            var childParser = ");
+      str.push_str(&attr.attribute_type);
+      str.push_str("Parser();\n            obj.child = childParser.parse_internal(code, ptr:&ptr);\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
+} else if attr.attribute_type == "string"
+        || attr.attribute_type == "char"
+        || attr.attribute_type == "date"
+        || attr.attribute_type == "time"
+        || attr.attribute_type == "datetime" { 
+      str.push_str("\n        // Strings and other values enclosed by \"\n        case .IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_VALUE:\n          if c == \"\\\"\" {\n            self.state = ");
+      str.push_str(&typ.typename);
+      str.push_str("ParserState.IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_STRING;\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_STRING:\n          if c == \"\\\"\" && charbefore != \"\\\\\" {\n            self.state = ");
+      str.push_str(&typ.typename);
+      str.push_str("ParserState.BEHIND_FIELDVALUE;\n            obj.");
+      str.push_str(&attr.name);
+      str.push_str(" = buf;\n            buf = \"\";\n          } else {\n            buf.append(c);\n          }");
+  } else if attr.attribute_type == "int"
+            || attr.attribute_type == "uint"
+            || attr.attribute_type == "long"
+            || attr.attribute_type == "ulong" {  
+      str.push_str("\n        // int-type values without \"\n        case .IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_VALUE:\n          if c == \",\" { \n            self.state = ");
+      str.push_str(&typ.typename);
+      str.push_str("ParserState.INOBJECT;\n            // TODO: code it out\n          } else if c == \"}\" {\n            self.state = ");
+      str.push_str(&typ.typename);
+      str.push_str("ParserState.FINAL;\n            // TODO: code it out\n          } else if c >= \"0\" && c <= \"9\" {\n            buf.append(c);\n          } else {\n            // TODO: Handle syntax error\n          }");
+  } else { 
+      str.push_str("\n        // Other numeric values whithout \"\n        // TODO: code it out !!!");
+  } 
+    str.push_str("");
+} 
+  str.push_str("\n        default:\n          // This state is not allwoed to be reached\n          println(\"ERROR: ENCOUNTERED INVALID STATE\");\n      }\n      charbefore = c;\n      ptr.next();\n    }\n \n    return obj;\n  }\n\n  //\n  // Function to serialize objects of type ");
   str.push_str(&typ.typename);
   str.push_str("\n  //\n  public func serialize(obj:");
   str.push_str(&typ.typename);

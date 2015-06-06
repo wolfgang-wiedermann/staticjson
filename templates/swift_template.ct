@@ -60,6 +60,8 @@ enum  {{= typ.typename }}ParserState {
 {{ } else if attr.attribute_type == "date" { }}
     case IN_ {{= util::to_upper(&attr.name) }}_VALUE
     case IN_ {{= util::to_upper(&attr.name) }}_DTSTR
+{{ } else if !model::Type::is_basic_type(&attr.attribute_type) { }}
+    case IN_ {{= util::to_upper(&attr.name) }}_OBJECT
 {{ } else { }}
     case IN_ {{= util::to_upper(&attr.name) }}_VALUE
 {{   }
@@ -131,6 +133,68 @@ public class  {{= typ.typename }}Util {
           } else if !is_blank(c) {
             // TODO: Handle syntax error
           }
+        case .BEHIND_FIELDVALUE:
+          if c == "," {
+            self.state =  {{= typ.typename }}ParserState.INOBJECT;
+          } else if c == "}" {
+            self.state =  {{= typ.typename }}ParserState.FINAL;
+          } else if !is_blank(c) {
+            // TODO: Handle syntax error
+          }
+{{ for attr in typ.attributes.iter() { 
+    if !model::Type::is_basic_type(&attr.attribute_type) { }}
+        // Nested objects
+        case .IN_ {{= util::to_upper(&attr.name) }}_OBJECT:
+          if c == "{" {
+            var childParser =  {{= attr.attribute_type }}Parser();
+            obj.child = childParser.parse_internal(code, ptr:&ptr);
+          } else if !is_blank(c) {
+            // TODO: Handle syntax error
+          }
+{{ } else if attr.attribute_type == "string"
+        || attr.attribute_type == "char"
+        || attr.attribute_type == "date"
+        || attr.attribute_type == "time"
+        || attr.attribute_type == "datetime" { }}
+        // Strings and other values enclosed by "
+        case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
+          if c == "\"" {
+            self.state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_STRING;
+            buf = "";
+          } else if !is_blank(c) {
+            // TODO: Handle syntax error
+          }
+        case .IN_ {{= util::to_upper(&attr.name) }}_STRING:
+          if c == "\"" && charbefore != "\\" {
+            self.state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
+            obj. {{= attr.name }} = buf;
+            buf = "";
+          } else {
+            buf.append(c);
+          }
+{{   } else if attr.attribute_type == "int"
+            || attr.attribute_type == "uint"
+            || attr.attribute_type == "long"
+            || attr.attribute_type == "ulong" {  }}
+        // int-type values without "
+        case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
+          if c == "," { 
+            self.state =  {{= typ.typename }}ParserState.INOBJECT;
+            // TODO: code it out
+          } else if c == "}" {
+            self.state =  {{= typ.typename }}ParserState.FINAL;
+            // TODO: code it out
+          } else if c >= "0" && c <= "9" {
+            // TODO: also allow - for int and long (not for uint and ulong)
+            buf.append(c);
+          } else {
+            // TODO: Handle syntax error
+          }
+{{   } else { }}
+        // Other numeric values whithout "
+        // TODO: code it out !!!
+{{   } }}
+{{ } }}
         default:
           // This state is not allwoed to be reached
           println("ERROR: ENCOUNTERED INVALID STATE");
