@@ -14,8 +14,6 @@ use std::fs;
 * the referenced mutable String @content
 */
 pub fn read_file(filename:&String, content: &mut String) {
-  let mut success = false;
-
   let path = Path::new(&filename);
   let pathstr = path.display();
 
@@ -42,7 +40,10 @@ pub fn write_file(filename:String, content:String) {
   let path = Path::new(&filename);
 
   let parent = path.parent().unwrap();
-  fs::create_dir_all(parent);
+  match fs::create_dir_all(parent) {
+    Ok(m) => m,
+    Err(e) => panic!(e), // Parent-Folder could not be created
+  };
 
   let f = File::create(&filename);
   let mut file = match f {
@@ -50,5 +51,8 @@ pub fn write_file(filename:String, content:String) {
     Err(m) => panic!("Datei kann nicht geschrieben werden"),
   };
 
-  file.write_all(content.as_bytes());
+  match file.write_all(content.as_bytes()) {
+    Ok(m) => m,
+    Err(e) => panic!("The content of file {} could not be written", filename),
+  };
 }

@@ -35,13 +35,13 @@ pub fn parse_commandline(params:Vec<String>) -> model::CommandlineOptions {
     None    => format!("{}", "./output"),
   };
 
-  let languageString = match matches.opt_str("t") {
+  let language_string = match matches.opt_str("t") {
     Some(x) => format!("{}", x),
     None    => format!("{}", "swift"),
   };
-  let languageStr:&str = &languageString;
+  let language_str:&str = &language_string;
 
-  let language = match languageStr {
+  let language = match language_str {
     "swift"      => model::TargetLanguage::SWIFT,
     "c"          => model::TargetLanguage::C,
     "rust"       => model::TargetLanguage::RUST,
@@ -52,7 +52,7 @@ pub fn parse_commandline(params:Vec<String>) -> model::CommandlineOptions {
 
   println!("INPUT_FILE_NAME : {}", input);
   println!("OUTPUT_FOLDER   : {}", output);
-  println!("TARGET_LANGUAGE : {}", languageStr);
+  println!("TARGET_LANGUAGE : {}", language_str);
 
   opt.filename = format!("{}", input);
   opt.target_folder = output;
