@@ -46,9 +46,9 @@ public struct  {{= typ.typename }} {
 enum  {{= typ.typename }}ParserState {
     case INITIAL
     case INOBJECT
-    case INFIELDNAME
-    case BEHINDFIELDNAME
-    case BEHINDFIELDVALUE
+    case IN_FIELDNAME
+    case BEHIND_FIELDNAME
+    case BEHIND_FIELDVALUE
     case FINAL
 {{ for attr in typ.attributes.iter() {
   if attr.attribute_type == "string" { 
@@ -59,7 +59,7 @@ enum  {{= typ.typename }}ParserState {
     case IN_ {{= util::to_upper(&attr.name) }}_STRING
 {{ } else if attr.attribute_type == "date" { }}
     case IN_ {{= util::to_upper(&attr.name) }}_VALUE
-    case IN_ {{= util::to_upper(&attr.name) }}_DTSTR
+    case IN_ {{= util::to_upper(&attr.name) }}_STRING
 {{ } else if !model::Type::is_basic_type(&attr.attribute_type) { }}
     case IN_ {{= util::to_upper(&attr.name) }}_OBJECT
 {{ } else { }}
@@ -81,7 +81,7 @@ public class  {{= typ.typename }}Util {
   //
   // Parsing-Function for type  {{= typ.typename }}
   //
-  public func parse(json:String) ->  {{= typ.typename }} {
+  public func parse(code:String) ->  {{= typ.typename }} {
     var ptr = indices(code).generate();
     return parse_internal(code, ptr:&ptr);
   }
@@ -124,8 +124,12 @@ public class  {{= typ.typename }}Util {
               // TODO: Handle syntax error, empty names are not allowed
 {{ for attr in typ.attributes.iter() { }}
             } else if buf == " {{= attr.name}}" {
+{{ if !model::Type::is_basic_type(&attr.attribute_type) { }}
+              self.state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_OBJECT;
+{{ } else { }}
               self.state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_VALUE;
-{{ } }}
+{{ } 
+} }}
             }
             // TODO: if Strict-Mode then else with error output
             // TODO: if flex-Mode then do something to overjump unknown attributes
@@ -146,7 +150,7 @@ public class  {{= typ.typename }}Util {
         // Nested objects
         case .IN_ {{= util::to_upper(&attr.name) }}_OBJECT:
           if c == "{" {
-            var childParser =  {{= attr.attribute_type }}Parser();
+            var childParser =  {{= attr.attribute_type }}Util();
             obj.child = childParser.parse_internal(code, ptr:&ptr);
           } else if !is_blank(c) {
             // TODO: Handle syntax error
@@ -256,7 +260,7 @@ fn translate_basic_type(tname:&str) -> String {
   } else if tname == "uint" {
     result.push_str("UInt32");
   } else if tname == "decimal" {
-    result.push_str("decimal");
+    result.push_str("Double");
   } else if tname == "byte" {
     result.push_str("UInt8");
   } else if tname == "char" {

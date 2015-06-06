@@ -46,7 +46,7 @@ for attr in typ.attributes.iter() {
   str.push_str(&typ.typename);
   str.push_str("\n//\nenum ");
   str.push_str(&typ.typename);
-  str.push_str("ParserState {\n    case INITIAL\n    case INOBJECT\n    case INFIELDNAME\n    case BEHINDFIELDNAME\n    case BEHINDFIELDVALUE\n    case FINAL");
+  str.push_str("ParserState {\n    case INITIAL\n    case INOBJECT\n    case IN_FIELDNAME\n    case BEHIND_FIELDNAME\n    case BEHIND_FIELDVALUE\n    case FINAL");
 for attr in typ.attributes.iter() {
   if attr.attribute_type == "string" { 
     if attr.is_array == true { 
@@ -64,7 +64,7 @@ for attr in typ.attributes.iter() {
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_VALUE\n    case IN_");
       str.push_str(&util::to_upper(&attr.name));
-      str.push_str("_DTSTR");
+      str.push_str("_STRING");
 } else if !model::Type::is_basic_type(&attr.attribute_type) { 
       str.push_str("\n    case IN_");
       str.push_str(&util::to_upper(&attr.name));
@@ -83,7 +83,7 @@ for attr in typ.attributes.iter() {
   str.push_str(&typ.typename);
   str.push_str("ParserState.INITIAL;\n  }\n\n  //\n  // Parsing-Function for type ");
   str.push_str(&typ.typename);
-  str.push_str("\n  //\n  public func parse(json:String) -> ");
+  str.push_str("\n  //\n  public func parse(code:String) -> ");
   str.push_str(&typ.typename);
   str.push_str(" {\n    var ptr = indices(code).generate();\n    return parse_internal(code, ptr:&ptr);\n  }\n\n  //\n  // Internal parsing function, directly called by same classes parse function\n  // and any other class which has nested objects of this type.\n  // \n  public func parse_internal(code:String, inout ptr:RangeGenerator<String.Index>) -> ");
   str.push_str(&typ.typename);
@@ -103,11 +103,20 @@ for attr in typ.attributes.iter() {
 for attr in typ.attributes.iter() { 
     str.push_str("\n            } else if buf == \"");
     str.push_str(&attr.name);
-    str.push_str("\" {\n              self.state = ");
-    str.push_str(&typ.typename);
-    str.push_str("ParserState.IN_");
-    str.push_str(&util::to_upper(&attr.name));
-    str.push_str("_VALUE;");
+    str.push_str("\" {");
+if !model::Type::is_basic_type(&attr.attribute_type) { 
+      str.push_str("\n              self.state = ");
+      str.push_str(&typ.typename);
+      str.push_str("ParserState.IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_OBJECT;");
+} else { 
+      str.push_str("\n              self.state = ");
+      str.push_str(&typ.typename);
+      str.push_str("ParserState.IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_VALUE;");
+} 
 } 
   str.push_str("\n            }\n            // TODO: if Strict-Mode then else with error output\n            // TODO: if flex-Mode then do something to overjump unknown attributes\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .BEHIND_FIELDVALUE:\n          if c == \",\" {\n            self.state = ");
   str.push_str(&typ.typename);
@@ -120,7 +129,7 @@ for attr in typ.attributes.iter() {
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_OBJECT:\n          if c == \"{\" {\n            var childParser = ");
       str.push_str(&attr.attribute_type);
-      str.push_str("Parser();\n            obj.child = childParser.parse_internal(code, ptr:&ptr);\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
+      str.push_str("Util();\n            obj.child = childParser.parse_internal(code, ptr:&ptr);\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
 } else if attr.attribute_type == "string"
         || attr.attribute_type == "char"
         || attr.attribute_type == "date"
@@ -149,7 +158,7 @@ for attr in typ.attributes.iter() {
       str.push_str(&typ.typename);
       str.push_str("ParserState.INOBJECT;\n            // TODO: code it out\n          } else if c == \"}\" {\n            self.state = ");
       str.push_str(&typ.typename);
-      str.push_str("ParserState.FINAL;\n            // TODO: code it out\n          } else if c >= \"0\" && c <= \"9\" {\n            buf.append(c);\n          } else {\n            // TODO: Handle syntax error\n          }");
+      str.push_str("ParserState.FINAL;\n            // TODO: code it out\n          } else if c >= \"0\" && c <= \"9\" {\n            // TODO: also allow - for int and long (not for uint and ulong)\n            buf.append(c);\n          } else {\n            // TODO: Handle syntax error\n          }");
   } else { 
       str.push_str("\n        // Other numeric values whithout \"\n        // TODO: code it out !!!");
   } 
@@ -203,7 +212,7 @@ fn translate_basic_type(tname:&str) -> String {
   } else if tname == "uint" {
     result.push_str("UInt32");
   } else if tname == "decimal" {
-    result.push_str("decimal");
+    result.push_str("Double");
   } else if tname == "byte" {
     result.push_str("UInt8");
   } else if tname == "char" {

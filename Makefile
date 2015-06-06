@@ -8,3 +8,6 @@ template:
 
 test:
 	./target/debug/staticjson ./target/debug/test_studenten.sjs -t swift
+	
+copy: 
+	cp output/* ../../Desktop/develop/ParserSample/ParserSample/
