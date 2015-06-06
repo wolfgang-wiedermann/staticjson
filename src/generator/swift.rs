@@ -71,19 +71,43 @@ for attr in typ.attributes.iter() {
       str.push_str("_VALUE");
   }
 } 
-  str.push_str("\n}\n\n//\n// Parser and serializer utility class\n//\nclass ");
+  str.push_str("\n}\n\n//\n// Parser and serializer utility class\n//\npublic class ");
   str.push_str(&typ.typename);
-  str.push_str("Util {\n\n  //\n  // Parsing-Function for type ");
+  str.push_str("Util {\n  private var state:");
   str.push_str(&typ.typename);
-  str.push_str("\n  //\n  func parse(json:String) -> ");
+  str.push_str("ParserState;\n\n  init() {\n    self.state = ");
   str.push_str(&typ.typename);
-  str.push_str(" {\n    var entity:");
+  str.push_str("ParserState.INITIAL;\n  }\n\n  //\n  // Parsing-Function for type ");
+  str.push_str(&typ.typename);
+  str.push_str("\n  //\n  public func parse(json:String) -> ");
+  str.push_str(&typ.typename);
+  str.push_str(" {\n    var ptr = indices(code).generate();\n    return parse_internal(code, ptr:&ptr);\n  }\n\n  //\n  // Internal parsing function, directly called by same classes parse function\n  // and any other class which has nested objects of this type.\n  // \n  public func parse_internal(code:String, inout ptr:RangeGenerator<String.Index>) -> ");
+  str.push_str(&typ.typename);
+  str.push_str(" {\n    var obj:");
   str.push_str(&typ.typename);
   str.push_str(" = ");
   str.push_str(&typ.typename);
-  str.push_str("();\n\n    // TODO: continue here with generation of parser code\n\n    return entity;\n  } \n\n  //\n  // Function to serialize objects of type ");
+  str.push_str("();\n    var c:Character = \" \";\n    var charbefore:Character = \" \";\n    var buf = \"\";\n\n    while ptr.startIndex < ptr.endIndex && self.state != ");
   str.push_str(&typ.typename);
-  str.push_str("\n  //\n  func serialize(obj:");
+  str.push_str("ParserState.FINAL {\n      c = code[ptr.startIndex];\n      switch self.state {\n        case .INITIAL: \n          if c == \"{\" {\n            self.state = ");
+  str.push_str(&typ.typename);
+  str.push_str("ParserState.INOBJECT;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .INOBJECT:\n          if c == \"\\\"\" {\n            self.state = ");
+  str.push_str(&typ.typename);
+  str.push_str("ParserState.IN_FIELDNAME;\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .IN_FIELDNAME:\n          if c == \"\\\"\" && charbefore != \"\\\\\" {\n            self.state = ");
+  str.push_str(&typ.typename);
+  str.push_str("ParserState.BEHIND_FIELDNAME;\n          } else {\n            buf.append(c);\n          }\n        case .BEHIND_FIELDNAME:\n          if c == \":\" {\n            if buf == \"\" {\n              // TODO: Handle syntax error, empty names are not allowed");
+for attr in typ.attributes.iter() { 
+    str.push_str("\n            } else if buf == \"");
+    str.push_str(&attr.name);
+    str.push_str("\" {\n              self.state = ");
+    str.push_str(&typ.typename);
+    str.push_str("ParserState.IN_");
+    str.push_str(&util::to_upper(&attr.name));
+    str.push_str("_VALUE;");
+} 
+  str.push_str("\n            }\n            // TODO: if Strict-Mode then else with error output\n            // TODO: if flex-Mode then do something to overjump unknown attributes\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        default:\n          // This state is not allwoed to be reached\n          println(\"ERROR: ENCOUNTERED INVALID STATE\");\n      }\n      charbefore = c;\n      ptr.next();\n    }\n \n    return obj;\n  }\n\n  //\n  // Function to serialize objects of type ");
+  str.push_str(&typ.typename);
+  str.push_str("\n  //\n  public func serialize(obj:");
   str.push_str(&typ.typename);
   str.push_str(") -> String {\n    var buf = \"{\";");
 for attr in typ.attributes.iter() { 
