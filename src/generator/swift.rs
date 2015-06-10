@@ -129,10 +129,25 @@ for attr in typ.attributes.iter() {
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_OBJECT:\n          if c == \"{\" {\n            var childParser = ");
       str.push_str(&attr.attribute_type);
-      str.push_str("Util();\n            obj.child = childParser.parse_internal(code, ptr:&ptr);\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
+      str.push_str("Util();\n            obj.");
+      str.push_str(&attr.name);
+      str.push_str(" = childParser.parse_internal(code, ptr:&ptr);\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
 } else if attr.attribute_type == "string"
-        || attr.attribute_type == "char"
-        || attr.attribute_type == "date"
+        || attr.attribute_type == "char" { 
+      str.push_str("\n        // Strings and other values enclosed by \"\n        case .IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_VALUE:\n          if c == \"\\\"\" {\n            self.state = ");
+      str.push_str(&typ.typename);
+      str.push_str("ParserState.IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_STRING;\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_STRING:\n          if c == \"\\\"\" && charbefore != \"\\\\\" {\n            self.state = ");
+      str.push_str(&typ.typename);
+      str.push_str("ParserState.BEHIND_FIELDVALUE;\n            obj.");
+      str.push_str(&attr.name);
+      str.push_str(" = buf;\n            buf = \"\";\n          } else {\n            buf.append(c);\n          }");
+} else if  attr.attribute_type == "date"
         || attr.attribute_type == "time"
         || attr.attribute_type == "datetime" { 
       str.push_str("\n        // Strings and other values enclosed by \"\n        case .IN_");
@@ -147,7 +162,7 @@ for attr in typ.attributes.iter() {
       str.push_str(&typ.typename);
       str.push_str("ParserState.BEHIND_FIELDVALUE;\n            obj.");
       str.push_str(&attr.name);
-      str.push_str(" = buf;\n            buf = \"\";\n          } else {\n            buf.append(c);\n          }");
+      str.push_str(" = NSDate(string:buf)!; // TODO: prepare for other date types too\n            buf = \"\";\n          } else {\n            buf.append(c);\n          }");
   } else if attr.attribute_type == "int"
             || attr.attribute_type == "uint"
             || attr.attribute_type == "long"
@@ -170,33 +185,35 @@ for attr in typ.attributes.iter() {
   str.push_str(&typ.typename);
   str.push_str(") -> String {\n    var buf = \"{\";");
 for attr in typ.attributes.iter() { 
-    str.push_str("\n    buf.append(\"\\\"\");\n    buf.append(\"");
+    str.push_str("\n    buf += \"\\\"\";\n    buf += \"");
     str.push_str(&attr.name);
-    str.push_str("\");\n    buf.append(\"\\\":\");");
+    str.push_str("\";\n    buf += \"\\\":\";");
   if attr.is_array {  
-      str.push_str("\n      buf.append(\"[\");\n      for val in obj.");
+      str.push_str("\n      buf += \"[\";\n      for val in obj.");
       str.push_str(&attr.name);
       str.push_str(" {");
       if attr.attribute_type == "string" { 
-        str.push_str("\n        buf.append(\"\\\"\");\n        buf.append(obj.");
+        str.push_str("\n        buf += \"\\\"\";\n        buf += \"\\(obj.");
         str.push_str(&attr.name);
-        str.push_str(");\n        buf.append(\"\\\"\");");
+        str.push_str(")\";\n        buf += \"\\\"\";");
       } else { 
-        str.push_str(" \n        buf.append(obj.");
+        str.push_str(" \n        buf += \"\\(obj.");
         str.push_str(&attr.name);
-        str.push_str(");");
+        str.push_str(")\";");
       } 
-      str.push_str("       \n      }\n      buf.append(\"]\");");
+      str.push_str("       \n      }\n      buf += \"]\";");
   } else if attr.attribute_type == "string" {  
-      str.push_str("\n    buf.append(\"\\\"\");\n    buf.append(attr.name);\n    buf.append(\"\\\"\");");
-  } else { 
-      str.push_str("\n    buf.append(obj.");
+      str.push_str("\n    buf += \"\\\"\";\n    buf += \"\\(obj.");
       str.push_str(&attr.name);
-      str.push_str(");");
+      str.push_str(")\";\n    buf += \"\\\"\";");
+  } else { 
+      str.push_str("\n    buf += \"\\(obj.");
+      str.push_str(&attr.name);
+      str.push_str(")\";");
   } 
     str.push_str("");
 } 
-  str.push_str("\n    buf.append(\"}\");\n    return buf;\n  }\n\n}\n");
+  str.push_str("\n    buf += \"}\";\n    return buf;\n  }\n\n}\n");
   return str;
 } 
 

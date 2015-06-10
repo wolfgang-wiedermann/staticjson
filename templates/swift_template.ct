@@ -151,13 +151,29 @@ public class  {{= typ.typename }}Util {
         case .IN_ {{= util::to_upper(&attr.name) }}_OBJECT:
           if c == "{" {
             var childParser =  {{= attr.attribute_type }}Util();
-            obj.child = childParser.parse_internal(code, ptr:&ptr);
+            obj. {{= attr.name }} = childParser.parse_internal(code, ptr:&ptr);
           } else if !is_blank(c) {
             // TODO: Handle syntax error
           }
 {{ } else if attr.attribute_type == "string"
-        || attr.attribute_type == "char"
-        || attr.attribute_type == "date"
+        || attr.attribute_type == "char" { }}
+        // Strings and other values enclosed by "
+        case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
+          if c == "\"" {
+            self.state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_STRING;
+            buf = "";
+          } else if !is_blank(c) {
+            // TODO: Handle syntax error
+          }
+        case .IN_ {{= util::to_upper(&attr.name) }}_STRING:
+          if c == "\"" && charbefore != "\\" {
+            self.state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
+            obj. {{= attr.name }} = buf;
+            buf = "";
+          } else {
+            buf.append(c);
+          }
+{{ } else if  attr.attribute_type == "date"
         || attr.attribute_type == "time"
         || attr.attribute_type == "datetime" { }}
         // Strings and other values enclosed by "
@@ -171,7 +187,7 @@ public class  {{= typ.typename }}Util {
         case .IN_ {{= util::to_upper(&attr.name) }}_STRING:
           if c == "\"" && charbefore != "\\" {
             self.state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
-            obj. {{= attr.name }} = buf;
+            obj. {{= attr.name }} = NSDate(string:buf)!; // TODO: prepare for other date types too
             buf = "";
           } else {
             buf.append(c);
@@ -216,30 +232,30 @@ public class  {{= typ.typename }}Util {
   public func serialize(obj: {{= typ.typename }}) -> String {
     var buf = "{";
 {{ for attr in typ.attributes.iter() { }}
-    buf.append("\"");
-    buf.append(" {{= attr.name }}");
-    buf.append("\":");
+    buf += "\"";
+    buf += " {{= attr.name }}";
+    buf += "\":";
 {{   if attr.is_array {  }}
-      buf.append("[");
+      buf += "[";
       for val in obj. {{= attr.name }} {
 {{       if attr.attribute_type == "string" { }}
-        buf.append("\"");
-        buf.append(obj. {{= attr.name }});
-        buf.append("\"");
+        buf += "\"";
+        buf += "\(obj. {{= attr.name }})";
+        buf += "\"";
 {{       } else { }} 
-        buf.append(obj. {{= attr.name }});
+        buf += "\(obj. {{= attr.name }})";
 {{       } }}       
       }
-      buf.append("]");
+      buf += "]";
 {{   } else if attr.attribute_type == "string" {  }}
-    buf.append("\"");
-    buf.append(attr.name);
-    buf.append("\"");
+    buf += "\"";
+    buf += "\(obj. {{= attr.name}})";
+    buf += "\"";
 {{   } else { }}
-    buf.append(obj. {{= attr.name }});
+    buf += "\(obj. {{= attr.name }})";
 {{   } }}
 {{ } }}
-    buf.append("}");
+    buf += "}";
     return buf;
   }
 
