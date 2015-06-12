@@ -38,50 +38,39 @@ public struct  {{= typ.typename }} {
         self. {{= attr.name }} =  {{= get_default_value(&attr.attribute_type) }};
 {{ } }}
     }
-}
 
-//
-// ParserState-Enum for type  {{= typ.typename }}
-//
-enum  {{= typ.typename }}ParserState {
-    case INITIAL
-    case INOBJECT
-    case IN_FIELDNAME
-    case BEHIND_FIELDNAME
-    case BEHIND_FIELDVALUE
-    case FINAL
+    //
+    // ParserState-Enum for type  {{= typ.typename }}
+    //
+    private enum  {{= typ.typename }}ParserState {
+        case INITIAL
+        case INOBJECT
+        case IN_FIELDNAME
+        case BEHIND_FIELDNAME
+        case BEHIND_FIELDVALUE
+        case FINAL
 {{ for attr in typ.attributes.iter() {
   if attr.attribute_type == "string" { 
     if attr.is_array == true { }}
-    case IN_ {{= util::to_upper(&attr.name) }}_ARRAY
+        case IN_ {{= util::to_upper(&attr.name) }}_ARRAY
 {{     } }}
-    case IN_ {{= util::to_upper(&attr.name) }}_VALUE
-    case IN_ {{= util::to_upper(&attr.name) }}_STRING
+        case IN_ {{= util::to_upper(&attr.name) }}_VALUE
+        case IN_ {{= util::to_upper(&attr.name) }}_STRING
 {{ } else if attr.attribute_type == "date" { }}
-    case IN_ {{= util::to_upper(&attr.name) }}_VALUE
-    case IN_ {{= util::to_upper(&attr.name) }}_STRING
+        case IN_ {{= util::to_upper(&attr.name) }}_VALUE
+        case IN_ {{= util::to_upper(&attr.name) }}_STRING
 {{ } else if !model::Type::is_basic_type(&attr.attribute_type) { }}
-    case IN_ {{= util::to_upper(&attr.name) }}_OBJECT
+        case IN_ {{= util::to_upper(&attr.name) }}_OBJECT
 {{ } else { }}
-    case IN_ {{= util::to_upper(&attr.name) }}_VALUE
+        case IN_ {{= util::to_upper(&attr.name) }}_VALUE
 {{   }
 } }}
-}
-
-//
-// Parser and serializer utility class
-//
-public class  {{= typ.typename }}Util {
-  private var state: {{= typ.typename }}ParserState;
-
-  init() {
-    self.state =  {{= typ.typename }}ParserState.INITIAL;
-  }
+    }
 
   //
   // Parsing-Function for type  {{= typ.typename }}
   //
-  public func parse(code:String) ->  {{= typ.typename }} {
+  public static func parse(code:String) ->  {{= typ.typename }} {
     var ptr = indices(code).generate();
     return parse_internal(code, ptr:&ptr);
   }
@@ -90,31 +79,32 @@ public class  {{= typ.typename }}Util {
   // Internal parsing function, directly called by same classes parse function
   // and any other class which has nested objects of this type.
   // 
-  public func parse_internal(code:String, inout ptr:RangeGenerator<String.Index>) ->  {{= typ.typename }} {
+  public static func parse_internal(code:String, inout ptr:RangeGenerator<String.Index>) ->  {{= typ.typename }} {
     var obj: {{= typ.typename }} =  {{= typ.typename }}();
     var c:Character = " ";
     var charbefore:Character = " ";
     var buf = "";
+    var state =  {{= typ.typename }}ParserState.INITIAL;
 
-    while ptr.startIndex < ptr.endIndex && self.state !=  {{= typ.typename }}ParserState.FINAL {
+    while ptr.startIndex < ptr.endIndex && state !=  {{= typ.typename }}ParserState.FINAL {
       c = code[ptr.startIndex];
-      switch self.state {
+      switch state {
         case .INITIAL: 
           if c == "{" {
-            self.state =  {{= typ.typename }}ParserState.INOBJECT;
+            state =  {{= typ.typename }}ParserState.INOBJECT;
           } else if !is_blank(c) {
             // TODO: Handle syntax error
           }
         case .INOBJECT:
           if c == "\"" {
-            self.state =  {{= typ.typename }}ParserState.IN_FIELDNAME;
+            state =  {{= typ.typename }}ParserState.IN_FIELDNAME;
             buf = "";
           } else if !is_blank(c) {
             // TODO: Handle syntax error
           }
         case .IN_FIELDNAME:
           if c == "\"" && charbefore != "\\" {
-            self.state =  {{= typ.typename }}ParserState.BEHIND_FIELDNAME;
+            state =  {{= typ.typename }}ParserState.BEHIND_FIELDNAME;
           } else {
             buf.append(c);
           }
@@ -125,9 +115,9 @@ public class  {{= typ.typename }}Util {
 {{ for attr in typ.attributes.iter() { }}
             } else if buf == " {{= attr.name}}" {
 {{ if !model::Type::is_basic_type(&attr.attribute_type) { }}
-              self.state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_OBJECT;
+              state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_OBJECT;
 {{ } else { }}
-              self.state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_VALUE;
+              state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_VALUE;
 {{ } 
 } }}
             }
@@ -139,9 +129,9 @@ public class  {{= typ.typename }}Util {
           }
         case .BEHIND_FIELDVALUE:
           if c == "," {
-            self.state =  {{= typ.typename }}ParserState.INOBJECT;
+            state =  {{= typ.typename }}ParserState.INOBJECT;
           } else if c == "}" {
-            self.state =  {{= typ.typename }}ParserState.FINAL;
+            state =  {{= typ.typename }}ParserState.FINAL;
           } else if !is_blank(c) {
             // TODO: Handle syntax error
           }
@@ -150,8 +140,7 @@ public class  {{= typ.typename }}Util {
         // Nested objects
         case .IN_ {{= util::to_upper(&attr.name) }}_OBJECT:
           if c == "{" {
-            var childParser =  {{= attr.attribute_type }}Util();
-            obj. {{= attr.name }} = childParser.parse_internal(code, ptr:&ptr);
+            obj. {{= attr.name }} =  {{= attr.attribute_type}}.parse_internal(code, ptr:&ptr);
           } else if !is_blank(c) {
             // TODO: Handle syntax error
           }
@@ -160,14 +149,14 @@ public class  {{= typ.typename }}Util {
         // Strings and other values enclosed by "
         case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
           if c == "\"" {
-            self.state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_STRING;
+            state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_STRING;
             buf = "";
           } else if !is_blank(c) {
             // TODO: Handle syntax error
           }
         case .IN_ {{= util::to_upper(&attr.name) }}_STRING:
           if c == "\"" && charbefore != "\\" {
-            self.state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
+            state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
             obj. {{= attr.name }} = buf;
             buf = "";
           } else {
@@ -179,14 +168,14 @@ public class  {{= typ.typename }}Util {
         // Strings and other values enclosed by "
         case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
           if c == "\"" {
-            self.state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_STRING;
+            state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_STRING;
             buf = "";
           } else if !is_blank(c) {
             // TODO: Handle syntax error
           }
         case .IN_ {{= util::to_upper(&attr.name) }}_STRING:
           if c == "\"" && charbefore != "\\" {
-            self.state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
+            state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
             obj. {{= attr.name }} = NSDate(string:buf)!; // TODO: prepare for other date types too
             buf = "";
           } else {
@@ -199,10 +188,10 @@ public class  {{= typ.typename }}Util {
         // int-type values without "
         case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
           if c == "," { 
-            self.state =  {{= typ.typename }}ParserState.INOBJECT;
+            state =  {{= typ.typename }}ParserState.INOBJECT;
             // TODO: code it out
           } else if c == "}" {
-            self.state =  {{= typ.typename }}ParserState.FINAL;
+            state =  {{= typ.typename }}ParserState.FINAL;
             // TODO: code it out
           } else if c >= "0" && c <= "9" {
             // TODO: also allow - for int and long (not for uint and ulong)
@@ -229,7 +218,7 @@ public class  {{= typ.typename }}Util {
   //
   // Function to serialize objects of type  {{= typ.typename }}
   //
-  public func serialize(obj: {{= typ.typename }}) -> String {
+  public static func serialize(obj: {{= typ.typename }}) -> String {
     var buf = "{";
 {{ for attr in typ.attributes.iter() { }}
     buf += "\"";
