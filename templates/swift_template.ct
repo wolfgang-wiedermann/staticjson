@@ -141,6 +141,7 @@ public struct  {{= typ.typename }} {
         case .IN_ {{= util::to_upper(&attr.name) }}_OBJECT:
           if c == "{" {
             obj. {{= attr.name }} =  {{= attr.attribute_type}}.parse_internal(code, ptr:&ptr);
+            state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
           } else if !is_blank(c) {
             // TODO: Handle syntax error
           }

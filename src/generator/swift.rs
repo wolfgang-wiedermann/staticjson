@@ -127,7 +127,9 @@ for attr in typ.attributes.iter() {
       str.push_str(&attr.name);
       str.push_str(" = ");
       str.push_str(&attr.attribute_type);
-      str.push_str(".parse_internal(code, ptr:&ptr);\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
+      str.push_str(".parse_internal(code, ptr:&ptr);\n            state = ");
+      str.push_str(&typ.typename);
+      str.push_str("ParserState.BEHIND_FIELDVALUE;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
 } else if attr.attribute_type == "string"
         || attr.attribute_type == "char" { 
       str.push_str("\n        // Strings and other values enclosed by \"\n        case .IN_");
