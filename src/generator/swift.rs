@@ -191,13 +191,43 @@ for attr in typ.attributes.iter() {
     } 
       str.push_str("\n          } else if c == \"}\" {\n            state = ");
       str.push_str(&typ.typename);
-      str.push_str("ParserState.FINAL;\n            // TODO: code it out\n          } else if c >= \"0\" && c <= \"9\" {\n            // TODO: also allow - for int and long (not for uint and ulong)\n            buf.append(c);");
+      str.push_str("ParserState.FINAL;");
+    // Make string to int conversion dependent to target type 
+      str.push_str("");
+    if attr.attribute_type == "int" { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(" = Int32(buf.toInt()!);");
+    } else if attr.attribute_type == "uint" { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(" = UInt32(buf.toInt()!);");
+    } else if attr.attribute_type == "long" { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(" = Int64(buf.toInt()!);");
+    } else if attr.attribute_type == "ulong" { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(" = UInt64(buf.toInt()!);");
+    } 
+      str.push_str("            \n          } else if c >= \"0\" && c <= \"9\" {\n            // TODO: also allow - for int and long (not for uint and ulong)\n            buf.append(c);");
     if attr.attribute_type == "int" || attr.attribute_type == "long" { 
         str.push_str("\n          } else if c == \"-\" && buf == \"\" {\n            buf.append(c);");
     } 
       str.push_str("\n          } else {\n            // TODO: Handle syntax error\n          }");
-  } else { 
-      str.push_str("\n        // Other numeric values whithout \"\n        // TODO: code it out !!!");
+  } else if attr.attribute_type == "decimal" { 
+      str.push_str("\n        case .IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_VALUE:\n          // parse decimal values with dot as decimal sign\n          if c == \",\" {\n            state = ");
+      str.push_str(&typ.typename);
+      str.push_str("ParserState.INOBJECT;\n            obj.");
+      str.push_str(&attr.name);
+      str.push_str(" = (buf as NSString).doubleValue;\n          } else if c == \"}\" {\n            state = ");
+      str.push_str(&typ.typename);
+      str.push_str("ParserState.FINAL;\n            obj.");
+      str.push_str(&attr.name);
+      str.push_str(" = (buf as NSString).doubleValue;\n          } else if c >= \"0\" && c <= \"9\" {\n            buf.append(c);\n          } else if c == \".\" || c == \"-\" {\n            buf.append(c);\n          } else {\n            // TODO: Handle syntax error\n          }");
   } 
     str.push_str("");
 } 

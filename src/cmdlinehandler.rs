@@ -57,6 +57,7 @@ pub fn parse_commandline(params:Vec<String>) -> model::CommandlineOptions {
   println!("INPUT_FILE_NAME : {}", input);
   println!("OUTPUT_FOLDER   : {}", output);
   println!("TARGET_LANGUAGE : {}", language_str);
+  println!("DEBUG           : {}", opt.debug);
 
   opt.filename = format!("{}", input);
   opt.target_folder = output;
