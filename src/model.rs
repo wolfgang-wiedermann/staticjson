@@ -38,7 +38,8 @@ pub enum ParserSubState {
 pub struct CommandlineOptions {
   pub filename:String,
   pub target_language:TargetLanguage,
-  pub target_folder:String
+  pub target_folder:String,
+  pub debug:bool
 }
 
 #[derive(Clone, Debug)]

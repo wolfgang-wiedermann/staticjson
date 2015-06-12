@@ -24,8 +24,11 @@ fn main() {
   
   let mut p:staticjson::parser::Parser = staticjson::parser::Parser::new();
   let result = p.parse(&mut model);
-  
-  println!("{:?}", result);
+
+  if model.options.debug {
+    // Print the parsed results for debugging purposes  
+    println!("{:?}", result);
+  }
 
   match opts.target_language {
     model::TargetLanguage::HTMLDOC => staticjson::generator::htmldoc::generate(result, &opts.target_folder),

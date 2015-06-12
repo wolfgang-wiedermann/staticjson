@@ -7,7 +7,7 @@ template:
 	./tools/generate_code.py ./templates/swift_template.ct c > ./src/generator/swift.rs
 
 test:
-	./target/debug/staticjson ./target/debug/test_studenten.sjs -t swift
+	./target/debug/staticjson ./target/debug/test_studenten.sjs -t swift --debug
 	
 copy: 
 	cp output/* ../../Desktop/develop/ParserSample/ParserSample/

@@ -11,17 +11,21 @@ pub fn parse_commandline(params:Vec<String>) -> model::CommandlineOptions {
     filename:"datei.sjs".to_string(), 
     target_language:model::TargetLanguage::SWIFT, 
     target_folder:"".to_string(),
+    debug:false,
   };
 
   let program = params[0].clone();
   let mut opts = getopts::Options::new();
   opts.optopt("t", "target", "target language", "TARGET_LANGUAGE");
   opts.optopt("o", "output", "output folder", "OUTPUT_FOLDER");
+  opts.optflag("d", "debug", "print debug output");
 
   let matches = match opts.parse(&params[1..]) {
     Ok(m) => m,
     Err(f) => panic!(f.to_string()),
   };
+
+  opt.debug = matches.opt_present("d");
 
   let input = if !matches.free.is_empty() {
     matches.free[0].clone()
