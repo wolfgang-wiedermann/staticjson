@@ -228,9 +228,11 @@ public struct  {{= typ.typename }} {
           if c == "," {
             state =  {{= typ.typename }}ParserState.INOBJECT;
             obj. {{= attr.name }} = (buf as NSString).doubleValue;
+            buf = "";
           } else if c == "}" {
             state =  {{= typ.typename }}ParserState.FINAL;
             obj. {{= attr.name }} = (buf as NSString).doubleValue;
+            buf = "";
           } else if c >= "0" && c <= "9" {
             buf.append(c);
           } else if c == "." || c == "-" {

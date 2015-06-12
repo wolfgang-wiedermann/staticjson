@@ -223,11 +223,11 @@ for attr in typ.attributes.iter() {
       str.push_str(&typ.typename);
       str.push_str("ParserState.INOBJECT;\n            obj.");
       str.push_str(&attr.name);
-      str.push_str(" = (buf as NSString).doubleValue;\n          } else if c == \"}\" {\n            state = ");
+      str.push_str(" = (buf as NSString).doubleValue;\n            buf = \"\";\n          } else if c == \"}\" {\n            state = ");
       str.push_str(&typ.typename);
       str.push_str("ParserState.FINAL;\n            obj.");
       str.push_str(&attr.name);
-      str.push_str(" = (buf as NSString).doubleValue;\n          } else if c >= \"0\" && c <= \"9\" {\n            buf.append(c);\n          } else if c == \".\" || c == \"-\" {\n            buf.append(c);\n          } else {\n            // TODO: Handle syntax error\n          }");
+      str.push_str(" = (buf as NSString).doubleValue;\n            buf = \"\";\n          } else if c >= \"0\" && c <= \"9\" {\n            buf.append(c);\n          } else if c == \".\" || c == \"-\" {\n            buf.append(c);\n          } else {\n            // TODO: Handle syntax error\n          }");
   } 
     str.push_str("");
 } 
