@@ -189,13 +189,26 @@ public struct  {{= typ.typename }} {
         case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
           if c == "," { 
             state =  {{= typ.typename }}ParserState.INOBJECT;
-            // TODO: code it out
+{{     // Make string to int conversion dependent to target type }}
+{{     if attr.attribute_type == "int" { }}
+            obj. {{= attr.name }} = Int32(buf.toInt()!);
+{{     } else if attr.attribute_type == "uint" { }}
+            obj. {{= attr.name }} = UInt32(buf.toInt()!);
+{{     } else if attr.attribute_type == "long" { }}
+            obj. {{= attr.name }} = Int64(buf.toInt()!);
+{{     } else if attr.attribute_type == "ulong" { }}
+            obj. {{= attr.name }} = UInt64(buf.toInt()!);
+{{     } }}
           } else if c == "}" {
             state =  {{= typ.typename }}ParserState.FINAL;
             // TODO: code it out
           } else if c >= "0" && c <= "9" {
             // TODO: also allow - for int and long (not for uint and ulong)
             buf.append(c);
+{{     if attr.attribute_type == "int" || attr.attribute_type == "long" { }}
+          } else if c == "-" && buf == "" {
+            buf.append(c);
+{{     } }}
           } else {
             // TODO: Handle syntax error
           }
