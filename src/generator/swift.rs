@@ -28,32 +28,50 @@ fn gen_type(typ:&Box<model::Type>) -> String {
   str.push_str(&typ.typename);
   str.push_str(" {");
 for attr in typ.attributes.iter() { 
-    str.push_str("\n    public var ");
-    str.push_str(&attr.name);
-    str.push_str(":");
-    str.push_str(&translate_basic_type(&attr.attribute_type));
-    str.push_str(";");
+    str.push_str("");
+  if attr.is_array == true { 
+      str.push_str("\n    public var ");
+      str.push_str(&attr.name);
+      str.push_str(":[");
+      str.push_str(&translate_basic_type(&attr.attribute_type));
+      str.push_str("];");
+  } else { 
+      str.push_str("\n    public var ");
+      str.push_str(&attr.name);
+      str.push_str(":");
+      str.push_str(&translate_basic_type(&attr.attribute_type));
+      str.push_str(";");
+  } 
+    str.push_str("");
 } 
   str.push_str("\n\n    public init() {");
 for attr in typ.attributes.iter() { 
-    str.push_str("\n        self.");
-    str.push_str(&attr.name);
-    str.push_str(" = ");
-    str.push_str(&get_default_value(&attr.attribute_type));
-    str.push_str(";");
+    str.push_str("");
+  if attr.is_array == true { 
+      str.push_str("\n        self.");
+      str.push_str(&attr.name);
+      str.push_str(" = [];");
+  } else { 
+      str.push_str("\n        self.");
+      str.push_str(&attr.name);
+      str.push_str(" = ");
+      str.push_str(&get_default_value(&attr.attribute_type));
+      str.push_str(";");
+  } 
+    str.push_str("");
 } 
   str.push_str("\n    }\n\n    //\n    // ParserState-Enum for type ");
   str.push_str(&typ.typename);
   str.push_str("\n    //\n    private enum ");
   str.push_str(&typ.typename);
-  str.push_str("ParserState {\n        case INITIAL\n        case INOBJECT\n        case IN_FIELDNAME\n        case BEHIND_FIELDNAME\n        case BEHIND_FIELDVALUE\n        case FINAL");
+  str.push_str("ParserState {\n        case INITIAL\n        case INOBJECT\n        case IN_FIELDNAME\n        case BEHIND_FIELDNAME\n        case BEHIND_FIELDVALUE\n        case BEHIND_ARRAY\n        case FINAL");
 for attr in typ.attributes.iter() {
-  if attr.attribute_type == "string" { 
     if attr.is_array == true { 
-        str.push_str("\n        case IN_");
-        str.push_str(&util::to_upper(&attr.name));
-        str.push_str("_ARRAY");
-    } 
+      str.push_str("\n        case IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_ARRAY");
+   } 
+    if attr.attribute_type == "string" { 
       str.push_str("\n        case IN_");
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_VALUE\n        case IN_");
@@ -106,6 +124,12 @@ if !model::Type::is_basic_type(&attr.attribute_type) {
       str.push_str("ParserState.IN_");
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_OBJECT;");
+} else if attr.is_array == true { 
+      str.push_str("\n              state = ");
+      str.push_str(&typ.typename);
+      str.push_str("ParserState.IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_ARRAY;");
 } else { 
       str.push_str("\n              state = ");
       str.push_str(&typ.typename);
@@ -118,16 +142,41 @@ if !model::Type::is_basic_type(&attr.attribute_type) {
   str.push_str(&typ.typename);
   str.push_str("ParserState.INOBJECT;\n          } else if c == \"}\" {\n            state = ");
   str.push_str(&typ.typename);
+  str.push_str("ParserState.FINAL;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .BEHIND_ARRAY:\n          if c == \",\" {\n            state = ");
+  str.push_str(&typ.typename);
+  str.push_str("ParserState.INOBJECT;\n          } else if c == \"}\" {\n            state = ");
+  str.push_str(&typ.typename);
   str.push_str("ParserState.FINAL;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
-for attr in typ.attributes.iter() { 
+for attr in typ.attributes.iter() {
+    if attr.is_array == true { 
+      str.push_str("\n        case .IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_ARRAY:\n          if c == \"[\" {\n            state = ");
+      str.push_str(&typ.typename);
+      str.push_str("ParserState.IN_");
+      str.push_str(&util::to_upper(&attr.name));
+      str.push_str("_VALUE;\n          } else if c == \"]\" { \n            state = ");
+      str.push_str(&typ.typename);
+      str.push_str("ParserState.BEHIND_ARRAY; // TODO: Correct state           \n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
+   }  
     if !model::Type::is_basic_type(&attr.attribute_type) { 
       str.push_str("\n        // Nested objects\n        case .IN_");
       str.push_str(&util::to_upper(&attr.name));
-      str.push_str("_OBJECT:\n          if c == \"{\" {\n            obj.");
-      str.push_str(&attr.name);
-      str.push_str(" = ");
-      str.push_str(&attr.attribute_type);
-      str.push_str(".parse_internal(code, ptr:&ptr);\n            state = ");
+      str.push_str("_OBJECT:\n          if c == \"{\" {");
+if attr.is_array == true { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(".append(");
+        str.push_str(&attr.attribute_type);
+        str.push_str(".parse_internal(code, ptr:&ptr));");
+} else { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(" = ");
+        str.push_str(&attr.attribute_type);
+        str.push_str(".parse_internal(code, ptr:&ptr);");
+} 
+      str.push_str("\n            state = ");
       str.push_str(&typ.typename);
       str.push_str("ParserState.BEHIND_FIELDVALUE;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
 } else if attr.attribute_type == "string"
@@ -142,9 +191,17 @@ for attr in typ.attributes.iter() {
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_STRING:\n          if c == \"\\\"\" && charbefore != \"\\\\\" {\n            state = ");
       str.push_str(&typ.typename);
-      str.push_str("ParserState.BEHIND_FIELDVALUE;\n            obj.");
-      str.push_str(&attr.name);
-      str.push_str(" = buf;\n            buf = \"\";\n          } else {\n            buf.append(c);\n          }");
+      str.push_str("ParserState.BEHIND_FIELDVALUE;");
+if attr.is_array == true { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(".append(buf);");
+} else { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(" = buf;");
+} 
+      str.push_str("\n            buf = \"\";\n          } else {\n            buf.append(c);\n          }");
 } else if  attr.attribute_type == "date"
         || attr.attribute_type == "time"
         || attr.attribute_type == "datetime" { 
@@ -167,51 +224,99 @@ for attr in typ.attributes.iter() {
             || attr.attribute_type == "ulong" {  
       str.push_str("\n        // int-type values without \"\n        case .IN_");
       str.push_str(&util::to_upper(&attr.name));
-      str.push_str("_VALUE:\n          if c == \",\" { \n            state = ");
-      str.push_str(&typ.typename);
-      str.push_str("ParserState.INOBJECT;");
+      str.push_str("_VALUE:\n          if c == \",\" {");
+    if attr.is_array == false { 
+        str.push_str(" \n            state = ");
+        str.push_str(&typ.typename);
+        str.push_str("ParserState.INOBJECT;");
+} 
+      str.push_str("");
     // Make string to int conversion dependent to target type 
       str.push_str("");
-    if attr.attribute_type == "int" { 
+    if attr.attribute_type == "int" && attr.is_array == true { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(".append(Int32(buf.toInt()!));");
+    } else if attr.attribute_type == "int" { 
         str.push_str("\n            obj.");
         str.push_str(&attr.name);
         str.push_str(" = Int32(buf.toInt()!);");
+    } else if attr.attribute_type == "uint" && attr.is_array == true { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(".append(UInt32(buf.toInt()!));");
     } else if attr.attribute_type == "uint" { 
         str.push_str("\n            obj.");
         str.push_str(&attr.name);
         str.push_str(" = UInt32(buf.toInt()!);");
+    } else if attr.attribute_type == "long" && attr.is_array == true { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(".append(Int64(buf.toInt()!));");
     } else if attr.attribute_type == "long" { 
         str.push_str("\n            obj.");
         str.push_str(&attr.name);
         str.push_str(" = Int64(buf.toInt()!);");
+    } else if attr.attribute_type == "ulong" && attr.is_array == true { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(".append(UInt64(buf.toInt()!));");
     } else if attr.attribute_type == "ulong" { 
         str.push_str("\n            obj.");
         str.push_str(&attr.name);
         str.push_str(" = UInt64(buf.toInt()!);");
     } 
-      str.push_str("\n          } else if c == \"}\" {\n            state = ");
-      str.push_str(&typ.typename);
-      str.push_str("ParserState.FINAL;");
+      str.push_str("");
+    if attr.is_array == true { 
+        str.push_str("\n            buf = \"\";\n          } else if c == \"]\" {\n            state = ");
+        str.push_str(&typ.typename);
+        str.push_str("ParserState.BEHIND_ARRAY;");
+    } else { 
+        str.push_str("\n          } else if c == \"}\" {\n            state = ");
+        str.push_str(&typ.typename);
+        str.push_str("ParserState.FINAL;");
+    } 
+      str.push_str("");
     // Make string to int conversion dependent to target type 
       str.push_str("");
-    if attr.attribute_type == "int" { 
+    if attr.attribute_type == "int" && attr.is_array == true { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(".append(Int32(buf.toInt()!));");
+    } else if attr.attribute_type == "int" { 
         str.push_str("\n            obj.");
         str.push_str(&attr.name);
         str.push_str(" = Int32(buf.toInt()!);");
+    } else if attr.attribute_type == "uint" && attr.is_array == true { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(".append(UInt32(buf.toInt()!));");
     } else if attr.attribute_type == "uint" { 
         str.push_str("\n            obj.");
         str.push_str(&attr.name);
         str.push_str(" = UInt32(buf.toInt()!);");
+    } else if attr.attribute_type == "long" && attr.is_array == true { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(".append(Int64(buf.toInt()!));");
     } else if attr.attribute_type == "long" { 
         str.push_str("\n            obj.");
         str.push_str(&attr.name);
         str.push_str(" = Int64(buf.toInt()!);");
+    } else if attr.attribute_type == "ulong" && attr.is_array == true { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(".append(UInt64(buf.toInt()!));");
     } else if attr.attribute_type == "ulong" { 
         str.push_str("\n            obj.");
         str.push_str(&attr.name);
         str.push_str(" = UInt64(buf.toInt()!);");
     } 
-      str.push_str("            \n          } else if c >= \"0\" && c <= \"9\" {\n            // TODO: also allow - for int and long (not for uint and ulong)\n            buf.append(c);");
+      str.push_str("");
+    if attr.is_array == true { 
+        str.push_str("\n            buf = \"\";");
+    } 
+      str.push_str("\n          } else if c >= \"0\" && c <= \"9\" {\n            // TODO: also allow - for int and long (not for uint and ulong)\n            buf.append(c);");
     if attr.attribute_type == "int" || attr.attribute_type == "long" { 
         str.push_str("\n          } else if c == \"-\" && buf == \"\" {\n            buf.append(c);");
     } 

@@ -30,12 +30,20 @@ import Foundation
 //
 public struct  {{= typ.typename }} {
 {{ for attr in typ.attributes.iter() { }}
+{{   if attr.is_array == true { }}
+    public var  {{= attr.name }}:[ {{= translate_basic_type(&attr.attribute_type) }}];
+{{   } else { }}
     public var  {{= attr.name }}: {{= translate_basic_type(&attr.attribute_type) }};
+{{   } }}
 {{ } }}
 
     public init() {
 {{ for attr in typ.attributes.iter() { }}
+{{   if attr.is_array == true { }}
+        self. {{= attr.name }} = [];
+{{   } else { }}
         self. {{= attr.name }} =  {{= get_default_value(&attr.attribute_type) }};
+{{   } }}
 {{ } }}
     }
 
@@ -48,12 +56,13 @@ public struct  {{= typ.typename }} {
         case IN_FIELDNAME
         case BEHIND_FIELDNAME
         case BEHIND_FIELDVALUE
+        case BEHIND_ARRAY
         case FINAL
 {{ for attr in typ.attributes.iter() {
-  if attr.attribute_type == "string" { 
     if attr.is_array == true { }}
         case IN_ {{= util::to_upper(&attr.name) }}_ARRAY
-{{     } }}
+{{    } 
+    if attr.attribute_type == "string" { }}
         case IN_ {{= util::to_upper(&attr.name) }}_VALUE
         case IN_ {{= util::to_upper(&attr.name) }}_STRING
 {{ } else if attr.attribute_type == "date" { }}
@@ -116,6 +125,8 @@ public struct  {{= typ.typename }} {
             } else if buf == " {{= attr.name}}" {
 {{ if !model::Type::is_basic_type(&attr.attribute_type) { }}
               state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_OBJECT;
+{{ } else if attr.is_array == true { }}
+              state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_ARRAY;
 {{ } else { }}
               state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_VALUE;
 {{ } 
@@ -135,12 +146,34 @@ public struct  {{= typ.typename }} {
           } else if !is_blank(c) {
             // TODO: Handle syntax error
           }
-{{ for attr in typ.attributes.iter() { 
+        case .BEHIND_ARRAY:
+          if c == "," {
+            state =  {{= typ.typename }}ParserState.INOBJECT;
+          } else if c == "}" {
+            state =  {{= typ.typename }}ParserState.FINAL;
+          } else if !is_blank(c) {
+            // TODO: Handle syntax error
+          }
+{{ for attr in typ.attributes.iter() {
+    if attr.is_array == true { }}
+        case .IN_ {{= util::to_upper(&attr.name) }}_ARRAY:
+          if c == "[" {
+            state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_VALUE;
+          } else if c == "]" { 
+            state =  {{= typ.typename }}ParserState.BEHIND_ARRAY; // TODO: Correct state           
+          } else if !is_blank(c) {
+            // TODO: Handle syntax error
+          }
+{{    }  
     if !model::Type::is_basic_type(&attr.attribute_type) { }}
         // Nested objects
         case .IN_ {{= util::to_upper(&attr.name) }}_OBJECT:
           if c == "{" {
+{{ if attr.is_array == true { }}
+            obj. {{= attr.name }}.append( {{= attr.attribute_type }}.parse_internal(code, ptr:&ptr));
+{{ } else { }}
             obj. {{= attr.name }} =  {{= attr.attribute_type}}.parse_internal(code, ptr:&ptr);
+{{ } }}
             state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
           } else if !is_blank(c) {
             // TODO: Handle syntax error
@@ -158,7 +191,11 @@ public struct  {{= typ.typename }} {
         case .IN_ {{= util::to_upper(&attr.name) }}_STRING:
           if c == "\"" && charbefore != "\\" {
             state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
+{{ if attr.is_array == true { }}
+            obj. {{= attr.name }}.append(buf);
+{{ } else { }}
             obj. {{= attr.name }} = buf;
+{{ } }}
             buf = "";
           } else {
             buf.append(c);
@@ -188,30 +225,57 @@ public struct  {{= typ.typename }} {
             || attr.attribute_type == "ulong" {  }}
         // int-type values without "
         case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
-          if c == "," { 
+          if c == "," {
+{{     if attr.is_array == false { }} 
             state =  {{= typ.typename }}ParserState.INOBJECT;
+{{ } }}
 {{     // Make string to int conversion dependent to target type }}
-{{     if attr.attribute_type == "int" { }}
+{{     if attr.attribute_type == "int" && attr.is_array == true { }}
+            obj. {{= attr.name }}.append(Int32(buf.toInt()!));
+{{     } else if attr.attribute_type == "int" { }}
             obj. {{= attr.name }} = Int32(buf.toInt()!);
+{{     } else if attr.attribute_type == "uint" && attr.is_array == true { }}
+            obj. {{= attr.name }}.append(UInt32(buf.toInt()!));
 {{     } else if attr.attribute_type == "uint" { }}
             obj. {{= attr.name }} = UInt32(buf.toInt()!);
+{{     } else if attr.attribute_type == "long" && attr.is_array == true { }}
+            obj. {{= attr.name }}.append(Int64(buf.toInt()!));
 {{     } else if attr.attribute_type == "long" { }}
             obj. {{= attr.name }} = Int64(buf.toInt()!);
+{{     } else if attr.attribute_type == "ulong" && attr.is_array == true { }}
+            obj. {{= attr.name }}.append(UInt64(buf.toInt()!));
 {{     } else if attr.attribute_type == "ulong" { }}
             obj. {{= attr.name }} = UInt64(buf.toInt()!);
 {{     } }}
+{{     if attr.is_array == true { }}
+            buf = "";
+          } else if c == "]" {
+            state =  {{= typ.typename}}ParserState.BEHIND_ARRAY;
+{{     } else { }}
           } else if c == "}" {
             state =  {{= typ.typename }}ParserState.FINAL;
+{{     } }}
 {{     // Make string to int conversion dependent to target type }}
-{{     if attr.attribute_type == "int" { }}
+{{     if attr.attribute_type == "int" && attr.is_array == true { }}
+            obj. {{= attr.name }}.append(Int32(buf.toInt()!));
+{{     } else if attr.attribute_type == "int" { }}
             obj. {{= attr.name }} = Int32(buf.toInt()!);
+{{     } else if attr.attribute_type == "uint" && attr.is_array == true { }}
+            obj. {{= attr.name }}.append(UInt32(buf.toInt()!));
 {{     } else if attr.attribute_type == "uint" { }}
             obj. {{= attr.name }} = UInt32(buf.toInt()!);
+{{     } else if attr.attribute_type == "long" && attr.is_array == true { }}
+            obj. {{= attr.name }}.append(Int64(buf.toInt()!));
 {{     } else if attr.attribute_type == "long" { }}
             obj. {{= attr.name }} = Int64(buf.toInt()!);
+{{     } else if attr.attribute_type == "ulong" && attr.is_array == true { }}
+            obj. {{= attr.name }}.append(UInt64(buf.toInt()!));
 {{     } else if attr.attribute_type == "ulong" { }}
             obj. {{= attr.name }} = UInt64(buf.toInt()!);
-{{     } }}            
+{{     } }}
+{{     if attr.is_array == true { }}
+            buf = "";
+{{     } }}
           } else if c >= "0" && c <= "9" {
             // TODO: also allow - for int and long (not for uint and ulong)
             buf.append(c);
