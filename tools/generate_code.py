@@ -5,6 +5,7 @@
 #
 
 import sys
+from os.path import dirname, join
 
 #
 # Constants
@@ -23,6 +24,12 @@ PSS_INSTRING = 1
 PSS_INLINECOMMENT = 2
 PSS_INBLOCKCOMMENT = 3
 
+# Preprocessor states
+PRS_INTEXT = 0
+PRS_INBRACKETS = 1
+PRS_ININCLUDE = 2
+
+# Encoding types
 ENC_HTML = "html"
 ENC_C = "c"
 
@@ -58,10 +65,62 @@ def to_assignment(string, indent):
 
 
 #
+# Calculates the parent directory of the given path
+#
+def parent_path(path):
+    return dirname(path)
+
+
+#
+# Preprocessing includes
+# caution: recursive preprocessing without endless recursion checks!
+#
+def preproc(code, path):
+    result = ""
+    buf = ""
+    state = PRS_INTEXT
+    charbefore = ' '
+
+    for c in code:
+        if state == PRS_INTEXT:
+            if c == '{' and charbefore == '{':
+                state = PRS_INBRACKETS
+                buf += c
+            else:
+                buf += c
+        elif state == PRS_INBRACKETS:
+            if c == '+':
+                state = PRS_ININCLUDE
+                result += buf[0:buf.__len__()-2]
+                buf = ""
+            else:
+                state = PRS_INTEXT
+                buf += c
+                result += buf
+                buf = ""
+        elif state == PRS_ININCLUDE:
+            if c == '}' and charbefore == '}':
+                state = PRS_INTEXT
+                filename = buf[0:buf.__len__()-1].strip()
+                filename = join(path, filename)
+                inner = read_file(filename)
+                result += preproc(inner, path)
+                buf = ""
+            else:
+                buf += c
+
+        charbefore = c
+
+    result += buf
+    return result
+
+
+#
 # Parser-Function
 #
 def parse(filename, encodetype):
     code = read_file(filename)
+    code = preproc(code, parent_path(filename))
     state = PS_INTEXT
     substate = PSS_INRUSTCODE
     buffer = ""
