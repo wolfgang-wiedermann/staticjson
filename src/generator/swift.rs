@@ -93,7 +93,7 @@ for attr in typ.attributes.iter() {
       str.push_str("_VALUE");
   }
 } 
-  str.push_str("\n    }\n\n  //\n  // Parsing-Function for type ");
+  str.push_str("\n    }\n\n\n  //\n  // Parsing-Function for type ");
   str.push_str(&typ.typename);
   str.push_str("\n  //\n  public static func parse(code:String) -> ");
   str.push_str(&typ.typename);
@@ -146,7 +146,7 @@ if !model::Type::is_basic_type(&attr.attribute_type) {
   str.push_str(&typ.typename);
   str.push_str("ParserState.INOBJECT;\n          } else if c == \"}\" {\n            state = ");
   str.push_str(&typ.typename);
-  str.push_str("ParserState.FINAL;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
+  str.push_str("ParserState.FINAL;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n");
 for attr in typ.attributes.iter() {
     if attr.is_array == true { 
       str.push_str("\n        case .IN_");

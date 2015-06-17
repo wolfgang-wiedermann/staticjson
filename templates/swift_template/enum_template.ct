@@ -1,0 +1,28 @@
+    //
+    // ParserState-Enum for type  {{= typ.typename }}
+    //
+    private enum  {{= typ.typename }}ParserState {
+        case INITIAL
+        case INOBJECT
+        case IN_FIELDNAME
+        case BEHIND_FIELDNAME
+        case BEHIND_FIELDVALUE
+        case BEHIND_ARRAY
+        case FINAL
+{{ for attr in typ.attributes.iter() {
+    if attr.is_array == true { }}
+        case IN_ {{= util::to_upper(&attr.name) }}_ARRAY
+{{    } 
+    if attr.attribute_type == "string" { }}
+        case IN_ {{= util::to_upper(&attr.name) }}_VALUE
+        case IN_ {{= util::to_upper(&attr.name) }}_STRING
+{{ } else if attr.attribute_type == "date" { }}
+        case IN_ {{= util::to_upper(&attr.name) }}_VALUE
+        case IN_ {{= util::to_upper(&attr.name) }}_STRING
+{{ } else if !model::Type::is_basic_type(&attr.attribute_type) { }}
+        case IN_ {{= util::to_upper(&attr.name) }}_OBJECT
+{{ } else { }}
+        case IN_ {{= util::to_upper(&attr.name) }}_VALUE
+{{   }
+} }}
+    }

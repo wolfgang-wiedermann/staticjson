@@ -29,52 +29,8 @@ import Foundation
 // Datastructure for  {{= typ.typename }}
 //
 public struct  {{= typ.typename }} {
-{{ for attr in typ.attributes.iter() { }}
-{{   if attr.is_array == true { }}
-    public var  {{= attr.name }}:[ {{= translate_basic_type(&attr.attribute_type) }}];
-{{   } else { }}
-    public var  {{= attr.name }}: {{= translate_basic_type(&attr.attribute_type) }};
-{{   } }}
-{{ } }}
-
-    public init() {
-{{ for attr in typ.attributes.iter() { }}
-{{   if attr.is_array == true { }}
-        self. {{= attr.name }} = [];
-{{   } else { }}
-        self. {{= attr.name }} =  {{= get_default_value(&attr.attribute_type) }};
-{{   } }}
-{{ } }}
-    }
-
-    //
-    // ParserState-Enum for type  {{= typ.typename }}
-    //
-    private enum  {{= typ.typename }}ParserState {
-        case INITIAL
-        case INOBJECT
-        case IN_FIELDNAME
-        case BEHIND_FIELDNAME
-        case BEHIND_FIELDVALUE
-        case BEHIND_ARRAY
-        case FINAL
-{{ for attr in typ.attributes.iter() {
-    if attr.is_array == true { }}
-        case IN_ {{= util::to_upper(&attr.name) }}_ARRAY
-{{    } 
-    if attr.attribute_type == "string" { }}
-        case IN_ {{= util::to_upper(&attr.name) }}_VALUE
-        case IN_ {{= util::to_upper(&attr.name) }}_STRING
-{{ } else if attr.attribute_type == "date" { }}
-        case IN_ {{= util::to_upper(&attr.name) }}_VALUE
-        case IN_ {{= util::to_upper(&attr.name) }}_STRING
-{{ } else if !model::Type::is_basic_type(&attr.attribute_type) { }}
-        case IN_ {{= util::to_upper(&attr.name) }}_OBJECT
-{{ } else { }}
-        case IN_ {{= util::to_upper(&attr.name) }}_VALUE
-{{   }
-} }}
-    }
+{{+ ./swift_template/struct_template.ct }}
+{{+ ./swift_template/enum_template.ct }}
 
   //
   // Parsing-Function for type  {{= typ.typename }}
@@ -98,62 +54,7 @@ public struct  {{= typ.typename }} {
     while ptr.startIndex < ptr.endIndex && state !=  {{= typ.typename }}ParserState.FINAL {
       c = code[ptr.startIndex];
       switch state {
-        case .INITIAL: 
-          if c == "{" {
-            state =  {{= typ.typename }}ParserState.INOBJECT;
-          } else if !is_blank(c) {
-            // TODO: Handle syntax error
-          }
-        case .INOBJECT:
-          if c == "\"" {
-            state =  {{= typ.typename }}ParserState.IN_FIELDNAME;
-            buf = "";
-          } else if !is_blank(c) {
-            // TODO: Handle syntax error
-          }
-        case .IN_FIELDNAME:
-          if c == "\"" && charbefore != "\\" {
-            state =  {{= typ.typename }}ParserState.BEHIND_FIELDNAME;
-          } else {
-            buf.append(c);
-          }
-        case .BEHIND_FIELDNAME:
-          if c == ":" {
-            if buf == "" {
-              // TODO: Handle syntax error, empty names are not allowed
-{{ for attr in typ.attributes.iter() { }}
-            } else if buf == " {{= attr.name}}" {
-{{ if !model::Type::is_basic_type(&attr.attribute_type) { }}
-              state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_OBJECT;
-{{ } else if attr.is_array == true { }}
-              state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_ARRAY;
-{{ } else { }}
-              state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_VALUE;
-{{ } 
-} }}
-            }
-            // TODO: if Strict-Mode then else with error output
-            // TODO: if flex-Mode then do something to overjump unknown attributes
-            buf = "";
-          } else if !is_blank(c) {
-            // TODO: Handle syntax error
-          }
-        case .BEHIND_FIELDVALUE:
-          if c == "," {
-            state =  {{= typ.typename }}ParserState.INOBJECT;
-          } else if c == "}" {
-            state =  {{= typ.typename }}ParserState.FINAL;
-          } else if !is_blank(c) {
-            // TODO: Handle syntax error
-          }
-        case .BEHIND_ARRAY:
-          if c == "," {
-            state =  {{= typ.typename }}ParserState.INOBJECT;
-          } else if c == "}" {
-            state =  {{= typ.typename }}ParserState.FINAL;
-          } else if !is_blank(c) {
-            // TODO: Handle syntax error
-          }
+{{+ ./swift_template/parser_default_statehandlers.ct }}
 {{ for attr in typ.attributes.iter() {
     if attr.is_array == true { }}
         case .IN_ {{= util::to_upper(&attr.name) }}_ARRAY:

@@ -1,0 +1,17 @@
+{{ for attr in typ.attributes.iter() { }}
+{{   if attr.is_array == true { }}
+    public var  {{= attr.name }}:[ {{= translate_basic_type(&attr.attribute_type) }}];
+{{   } else { }}
+    public var  {{= attr.name }}: {{= translate_basic_type(&attr.attribute_type) }};
+{{   } }}
+{{ } }}
+
+    public init() {
+{{ for attr in typ.attributes.iter() { }}
+{{   if attr.is_array == true { }}
+        self. {{= attr.name }} = [];
+{{   } else { }}
+        self. {{= attr.name }} =  {{= get_default_value(&attr.attribute_type) }};
+{{   } }}
+{{ } }}
+    }
