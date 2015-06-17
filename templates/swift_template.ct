@@ -130,24 +130,7 @@ public struct  {{= typ.typename }} {
 {{     if attr.is_array == false { }} 
             state =  {{= typ.typename }}ParserState.INOBJECT;
 {{ } }}
-{{     // Make string to int conversion dependent to target type }}
-{{     if attr.attribute_type == "int" && attr.is_array == true { }}
-            obj. {{= attr.name }}.append(Int32(buf.toInt()!));
-{{     } else if attr.attribute_type == "int" { }}
-            obj. {{= attr.name }} = Int32(buf.toInt()!);
-{{     } else if attr.attribute_type == "uint" && attr.is_array == true { }}
-            obj. {{= attr.name }}.append(UInt32(buf.toInt()!));
-{{     } else if attr.attribute_type == "uint" { }}
-            obj. {{= attr.name }} = UInt32(buf.toInt()!);
-{{     } else if attr.attribute_type == "long" && attr.is_array == true { }}
-            obj. {{= attr.name }}.append(Int64(buf.toInt()!));
-{{     } else if attr.attribute_type == "long" { }}
-            obj. {{= attr.name }} = Int64(buf.toInt()!);
-{{     } else if attr.attribute_type == "ulong" && attr.is_array == true { }}
-            obj. {{= attr.name }}.append(UInt64(buf.toInt()!));
-{{     } else if attr.attribute_type == "ulong" { }}
-            obj. {{= attr.name }} = UInt64(buf.toInt()!);
-{{     } }}
+{{+ ./swift_template/parser_string_to_int_conversion.ct }}
 {{     if attr.is_array == true { }}
             buf = "";
           } else if c == "]" {
@@ -156,24 +139,7 @@ public struct  {{= typ.typename }} {
           } else if c == "}" {
             state =  {{= typ.typename }}ParserState.FINAL;
 {{     } }}
-{{     // Make string to int conversion dependent to target type }}
-{{     if attr.attribute_type == "int" && attr.is_array == true { }}
-            obj. {{= attr.name }}.append(Int32(buf.toInt()!));
-{{     } else if attr.attribute_type == "int" { }}
-            obj. {{= attr.name }} = Int32(buf.toInt()!);
-{{     } else if attr.attribute_type == "uint" && attr.is_array == true { }}
-            obj. {{= attr.name }}.append(UInt32(buf.toInt()!));
-{{     } else if attr.attribute_type == "uint" { }}
-            obj. {{= attr.name }} = UInt32(buf.toInt()!);
-{{     } else if attr.attribute_type == "long" && attr.is_array == true { }}
-            obj. {{= attr.name }}.append(Int64(buf.toInt()!));
-{{     } else if attr.attribute_type == "long" { }}
-            obj. {{= attr.name }} = Int64(buf.toInt()!);
-{{     } else if attr.attribute_type == "ulong" && attr.is_array == true { }}
-            obj. {{= attr.name }}.append(UInt64(buf.toInt()!));
-{{     } else if attr.attribute_type == "ulong" { }}
-            obj. {{= attr.name }} = UInt64(buf.toInt()!);
-{{     } }}
+{{+ ./swift_template/parser_string_to_int_conversion.ct }}
 {{     if attr.is_array == true { }}
             buf = "";
 {{     } }}
@@ -218,101 +184,13 @@ public struct  {{= typ.typename }} {
     return obj;
   }
 
-  //
-  // Function to serialize objects of type  {{= typ.typename }}
-  //
-  public static func serialize(obj: {{= typ.typename }}) -> String {
-    var buf = "{";
-{{ for attr in typ.attributes.iter() { }}
-    buf += "\"";
-    buf += " {{= attr.name }}";
-    buf += "\":";
-{{   if attr.is_array {  }}
-      buf += "[";
-      for val in obj. {{= attr.name }} {
-{{       if attr.attribute_type == "string" { }}
-        buf += "\"";
-        buf += "\(obj. {{= attr.name }})";
-        buf += "\"";
-{{       } else { }} 
-        buf += "\(obj. {{= attr.name }})";
-{{       } }}       
-      }
-      buf += "]";
-{{   } else if attr.attribute_type == "string" {  }}
-    buf += "\"";
-    buf += "\(obj. {{= attr.name}})";
-    buf += "\"";
-{{   } else { }}
-    buf += "\(obj. {{= attr.name }})";
-{{   } }}
-{{ } }}
-    buf += "}";
-    return buf;
-  }
-
+{{+ ./swift_template/serialize_function.ct }}
 }
 
 {{   return str;
 } 
 
-// Translate staticjsons basic types into swift types
-fn translate_basic_type(tname:&str) -> String {
-  let mut result = String::new();
-  if !model::Type::is_basic_type(tname) {
-    result.push_str(tname);
-  } else if tname == "string" {
-    result.push_str("String");
-  } else if tname == "int" {
-    result.push_str("Int32");
-  } else if tname == "uint" {
-    result.push_str("UInt32");
-  } else if tname == "decimal" {
-    result.push_str("Double");
-  } else if tname == "byte" {
-    result.push_str("UInt8");
-  } else if tname == "char" {
-    result.push_str("Character");
-  } else if tname == "long" {
-    result.push_str("Int64");
-  } else if tname == "ulong" {
-    result.push_str("UInt64");
-  } else if tname == "date" {
-    result.push_str("NSDate");
-  } else {
-    result.push_str("XXXXXXXX");
-  }
-  return result;
-}
-
-// Offer swift initial values for staticjson basic types
-fn get_default_value(tname:&str) -> String {
-  let mut result = String::new();
-  if !model::Type::is_basic_type(tname) {
-    result.push_str(tname);
-    result.push_str("()");
-  } else if tname == "string" {
-    result.push_str("\"\"");
-  } else if tname == "int" {
-    result.push_str("0");
-  } else if tname == "uint" {
-    result.push_str("0");
-  } else if tname == "decimal" {
-    result.push_str("0.0");
-  } else if tname == "byte" {
-    result.push_str("0");
-  } else if tname == "char" {
-    result.push_str("' '");
-  } else if tname == "long" {
-    result.push_str("0");
-  } else if tname == "ulong" {
-    result.push_str("0");
-  } else if tname == "date" {
-    result.push_str("NSDate()");
-  } else {
-    result.push_str("XXXXXXXX");
-  }
-  return result;
-}
+{{+ ./swift_template/translate_basic_type_function.ct }}
+{{+ ./swift_template/init_basic_type_function.ct }}
 
 }}

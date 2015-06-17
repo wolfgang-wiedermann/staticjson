@@ -1,0 +1,29 @@
+// Translate staticjsons basic types into swift types
+fn translate_basic_type(tname:&str) -> String {
+  let mut result = String::new();
+  if !model::Type::is_basic_type(tname) {
+    result.push_str(tname);
+  } else if tname == "string" {
+    result.push_str("String");
+  } else if tname == "int" {
+    result.push_str("Int32");
+  } else if tname == "uint" {
+    result.push_str("UInt32");
+  } else if tname == "decimal" {
+    result.push_str("Double");
+  } else if tname == "byte" {
+    result.push_str("UInt8");
+  } else if tname == "char" {
+    result.push_str("Character");
+  } else if tname == "long" {
+    result.push_str("Int64");
+  } else if tname == "ulong" {
+    result.push_str("UInt64");
+  } else if tname == "date" {
+    result.push_str("NSDate");
+  } else {
+    result.push_str("XXXXXXXX");
+  }
+  return result;
+}
+

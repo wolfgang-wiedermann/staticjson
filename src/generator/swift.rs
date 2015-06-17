@@ -266,7 +266,7 @@ if attr.is_array == true {
         str.push_str(&attr.name);
         str.push_str(" = UInt64(buf.toInt()!);");
     } 
-      str.push_str("");
+      str.push_str("\n");
     if attr.is_array == true { 
         str.push_str("\n            buf = \"\";\n          } else if c == \"]\" {\n            state = ");
         str.push_str(&typ.typename);
@@ -312,7 +312,7 @@ if attr.is_array == true {
         str.push_str(&attr.name);
         str.push_str(" = UInt64(buf.toInt()!);");
     } 
-      str.push_str("");
+      str.push_str("\n");
     if attr.is_array == true { 
         str.push_str("\n            buf = \"\";");
     } 
@@ -403,6 +403,7 @@ fn translate_basic_type(tname:&str) -> String {
   return result;
 }
 
+
 // Offer swift initial values for staticjson basic types
 fn get_default_value(tname:&str) -> String {
   let mut result = String::new();
@@ -432,5 +433,6 @@ fn get_default_value(tname:&str) -> String {
   }
   return result;
 }
+
 
 
