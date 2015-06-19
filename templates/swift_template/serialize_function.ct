@@ -5,7 +5,10 @@
     var idx = 0;
     var max_idx = 0;
     var buf = "{";
-{{ for attr in typ.attributes.iter() { }}
+{{ let mut r_idx = 0;
+let mut r_max_idx = typ.attributes.len();
+for attr in typ.attributes.iter() {
+  r_idx += 1; }}
     buf += "\"";
     buf += " {{= attr.name }}";
     buf += "\":";
@@ -19,6 +22,8 @@
         buf += "\"";
         buf += "\(val)";
         buf += "\"";
+{{       } else if !model::Type::is_basic_type(&attr.attribute_type) { }}
+        buf +=  {{= attr.attribute_type }}.serialize(obj. {{= attr.name }});
 {{       } else { }} 
         buf += "\(val)";
 {{       } }}
@@ -31,10 +36,15 @@
     buf += "\"";
     buf += "\(obj. {{= attr.name}})";
     buf += "\"";
+{{   } else if !model::Type::is_basic_type(&attr.attribute_type) { }}
+    buf +=  {{= attr.attribute_type }}.serialize(obj. {{= attr.name }});
 {{   } else { }}
     buf += "\(obj. {{= attr.name }})";
-{{   } }}
-{{ } }}
+{{   }
+if r_idx < r_max_idx { }}
+    buf += ", ";
+{{  }
+} }}
     buf += "}";
     return buf;
   }

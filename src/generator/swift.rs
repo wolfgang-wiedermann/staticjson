@@ -341,7 +341,10 @@ if attr.is_array == true {
   str.push_str("\n  //\n  public static func serialize(obj:");
   str.push_str(&typ.typename);
   str.push_str(") -> String {\n    var idx = 0;\n    var max_idx = 0;\n    var buf = \"{\";");
-for attr in typ.attributes.iter() { 
+let mut r_idx = 0;
+let mut r_max_idx = typ.attributes.len();
+for attr in typ.attributes.iter() {
+  r_idx += 1; 
     str.push_str("\n    buf += \"\\\"\";\n    buf += \"");
     str.push_str(&attr.name);
     str.push_str("\";\n    buf += \"\\\":\";");
@@ -353,6 +356,12 @@ for attr in typ.attributes.iter() {
       str.push_str(" {\n        idx++;");
       if attr.attribute_type == "string" { 
         str.push_str("\n        buf += \"\\\"\";\n        buf += \"\\(val)\";\n        buf += \"\\\"\";");
+      } else if !model::Type::is_basic_type(&attr.attribute_type) { 
+        str.push_str("\n        buf += ");
+        str.push_str(&attr.attribute_type);
+        str.push_str(".serialize(obj.");
+        str.push_str(&attr.name);
+        str.push_str(");");
       } else { 
         str.push_str(" \n        buf += \"\\(val)\";");
       } 
@@ -361,12 +370,20 @@ for attr in typ.attributes.iter() {
       str.push_str("\n    buf += \"\\\"\";\n    buf += \"\\(obj.");
       str.push_str(&attr.name);
       str.push_str(")\";\n    buf += \"\\\"\";");
+  } else if !model::Type::is_basic_type(&attr.attribute_type) { 
+      str.push_str("\n    buf += ");
+      str.push_str(&attr.attribute_type);
+      str.push_str(".serialize(obj.");
+      str.push_str(&attr.name);
+      str.push_str(");");
   } else { 
       str.push_str("\n    buf += \"\\(obj.");
       str.push_str(&attr.name);
       str.push_str(")\";");
-  } 
-    str.push_str("");
+  }
+if r_idx < r_max_idx { 
+      str.push_str("\n    buf += \", \";");
+ }
 } 
   str.push_str("\n    buf += \"}\";\n    return buf;\n  }\n\n}\n");
   return str;
