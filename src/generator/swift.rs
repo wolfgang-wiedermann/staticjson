@@ -362,7 +362,7 @@ if attr.is_array == true {
     if attr.is_array == true { 
         str.push_str("\n            buf = \"\";");
     } 
-      str.push_str("\n          } else if c >= \"0\" && c <= \"9\" {\n            // TODO: also allow - for int and long (not for uint and ulong)\n            buf.append(c);");
+      str.push_str("\n          } else if c >= \"0\" && c <= \"9\" {\n            buf.append(c);");
     if attr.attribute_type == "int" || attr.attribute_type == "long" { 
         str.push_str("\n          } else if c == \"-\" && buf == \"\" {\n            buf.append(c);");
     } 
