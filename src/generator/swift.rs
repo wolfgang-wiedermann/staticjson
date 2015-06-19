@@ -354,7 +354,10 @@ for attr in typ.attributes.iter() {
       str.push_str(".count;\n      for val in obj.");
       str.push_str(&attr.name);
       str.push_str(" {\n        idx++;");
-      if attr.attribute_type == "string" { 
+      if attr.attribute_type == "string"
+         || attr.attribute_type == "date"
+         || attr.attribute_type == "datetime"
+         || attr.attribute_type == "time"  { 
         str.push_str("\n        buf += \"\\\"\";\n        buf += \"\\(val)\";\n        buf += \"\\\"\";");
       } else if !model::Type::is_basic_type(&attr.attribute_type) { 
         str.push_str("\n        buf += ");
@@ -366,7 +369,10 @@ for attr in typ.attributes.iter() {
         str.push_str(" \n        buf += \"\\(val)\";");
       } 
       str.push_str("\n        if idx < max_idx {\n          buf += \", \";\n        }\n      }\n      buf += \"]\";");
-  } else if attr.attribute_type == "string" {  
+  } else if attr.attribute_type == "string"
+     || attr.attribute_type == "date"
+     || attr.attribute_type == "datetime"
+     || attr.attribute_type == "time" {  
       str.push_str("\n    buf += \"\\\"\";\n    buf += \"\\(obj.");
       str.push_str(&attr.name);
       str.push_str(")\";\n    buf += \"\\\"\";");

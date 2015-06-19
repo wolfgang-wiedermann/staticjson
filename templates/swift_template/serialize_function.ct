@@ -18,7 +18,10 @@ for attr in typ.attributes.iter() {
       max_idx = obj. {{= attr.name }}.count;
       for val in obj. {{= attr.name }} {
         idx++;
-{{       if attr.attribute_type == "string" { }}
+{{       if attr.attribute_type == "string"
+         || attr.attribute_type == "date"
+         || attr.attribute_type == "datetime"
+         || attr.attribute_type == "time"  { }}
         buf += "\"";
         buf += "\(val)";
         buf += "\"";
@@ -32,7 +35,10 @@ for attr in typ.attributes.iter() {
         }
       }
       buf += "]";
-{{   } else if attr.attribute_type == "string" {  }}
+{{   } else if attr.attribute_type == "string"
+     || attr.attribute_type == "date"
+     || attr.attribute_type == "datetime"
+     || attr.attribute_type == "time" {  }}
     buf += "\"";
     buf += "\(obj. {{= attr.name}})";
     buf += "\"";
