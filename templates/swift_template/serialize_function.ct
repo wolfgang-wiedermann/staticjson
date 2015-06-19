@@ -26,7 +26,7 @@ for attr in typ.attributes.iter() {
         buf += "\(val)";
         buf += "\"";
 {{       } else if !model::Type::is_basic_type(&attr.attribute_type) { }}
-        buf +=  {{= attr.attribute_type }}.serialize(obj. {{= attr.name }});
+        buf +=  {{= attr.attribute_type }}.serialize(val);
 {{       } else { }} 
         buf += "\(val)";
 {{       } }}

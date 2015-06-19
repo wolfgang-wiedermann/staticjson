@@ -11,6 +11,7 @@ type StudentEntity (type_param="1234") {
   nachname:string(mandatory="true");
   geburstdatum:date;
   geburtsort:OrtEntity;
+  wohnorte:OrtEntity[];
   ganzzahl:int; 
   custom_order_id:decimal;
 }

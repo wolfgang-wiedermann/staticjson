@@ -151,11 +151,25 @@ for attr in typ.attributes.iter() {
     if attr.is_array == true { 
       str.push_str("\n        case .IN_");
       str.push_str(&util::to_upper(&attr.name));
-      str.push_str("_ARRAY:\n          if c == \"[\" {\n            state = ");
-      str.push_str(&typ.typename);
-      str.push_str("ParserState.IN_");
-      str.push_str(&util::to_upper(&attr.name));
-      str.push_str("_VALUE;\n          } else if c == \"]\" {\n            state = ");
+      str.push_str("_ARRAY:\n          if c == \"[\" {");
+  if !model::Type::is_basic_type(&attr.attribute_type) { 
+        str.push_str("\n            state = ");
+        str.push_str(&typ.typename);
+        str.push_str("ParserState.IN_");
+        str.push_str(&util::to_upper(&attr.name));
+        str.push_str("_OBJECT;\n          } else if c == \",\" {\n            state = ");
+        str.push_str(&typ.typename);
+        str.push_str("ParserState.IN_");
+        str.push_str(&util::to_upper(&attr.name));
+        str.push_str("_OBJECT;");
+  } else { 
+        str.push_str("\n            state = ");
+        str.push_str(&typ.typename);
+        str.push_str("ParserState.IN_");
+        str.push_str(&util::to_upper(&attr.name));
+        str.push_str("_VALUE;");
+  } 
+      str.push_str("\n          } else if c == \"]\" {\n            state = ");
       str.push_str(&typ.typename);
       str.push_str("ParserState.BEHIND_ARRAY;");
 // special case: array with elements in "
@@ -181,17 +195,21 @@ if attr.is_array == true {
         str.push_str(&attr.name);
         str.push_str(".append(");
         str.push_str(&attr.attribute_type);
-        str.push_str(".parse_internal(code, ptr:&ptr));");
+        str.push_str(".parse_internal(code, ptr:&ptr));\n            state = ");
+        str.push_str(&typ.typename);
+        str.push_str("ParserState.IN_");
+        str.push_str(&util::to_upper(&attr.name));
+        str.push_str("_ARRAY;");
 } else { 
         str.push_str("\n            obj.");
         str.push_str(&attr.name);
         str.push_str(" = ");
         str.push_str(&attr.attribute_type);
-        str.push_str(".parse_internal(code, ptr:&ptr);");
+        str.push_str(".parse_internal(code, ptr:&ptr);\n            state = ");
+        str.push_str(&typ.typename);
+        str.push_str("ParserState.BEHIND_FIELDVALUE;");
 } 
-      str.push_str("\n            state = ");
-      str.push_str(&typ.typename);
-      str.push_str("ParserState.BEHIND_FIELDVALUE;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
+      str.push_str("\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
 } else if attr.attribute_type == "string"
         || attr.attribute_type == "char" { 
       str.push_str("\n        // Strings and other values enclosed by \"\n        case .IN_");
@@ -390,9 +408,7 @@ for attr in typ.attributes.iter() {
       } else if !model::Type::is_basic_type(&attr.attribute_type) { 
         str.push_str("\n        buf += ");
         str.push_str(&attr.attribute_type);
-        str.push_str(".serialize(obj.");
-        str.push_str(&attr.name);
-        str.push_str(");");
+        str.push_str(".serialize(val);");
       } else { 
         str.push_str(" \n        buf += \"\\(val)\";");
       } 

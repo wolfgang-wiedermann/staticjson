@@ -2,7 +2,13 @@
     if attr.is_array == true { }}
         case .IN_ {{= util::to_upper(&attr.name) }}_ARRAY:
           if c == "[" {
+{{   if !model::Type::is_basic_type(&attr.attribute_type) { }}
+            state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_OBJECT;
+          } else if c == "," {
+            state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_OBJECT;
+{{   } else { }}
             state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_VALUE;
+{{   } }}
           } else if c == "]" {
             state =  {{= typ.typename }}ParserState.BEHIND_ARRAY;
 {{ // special case: array with elements in "
@@ -24,10 +30,11 @@
           if c == "{" {
 {{ if attr.is_array == true { }}
             obj. {{= attr.name }}.append( {{= attr.attribute_type }}.parse_internal(code, ptr:&ptr));
+            state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_ARRAY;
 {{ } else { }}
             obj. {{= attr.name }} =  {{= attr.attribute_type}}.parse_internal(code, ptr:&ptr);
-{{ } }}
             state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
+{{ } }}
           } else if !is_blank(c) {
             // TODO: Handle syntax error
           }
