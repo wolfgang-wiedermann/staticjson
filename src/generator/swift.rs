@@ -160,6 +160,7 @@ for attr in typ.attributes.iter() {
       str.push_str("ParserState.BEHIND_ARRAY;");
 // special case: array with elements in "
     if attr.attribute_type == "string"
+      || attr.attribute_type == "char"
       || attr.attribute_type == "date"
       || attr.attribute_type == "time"
       || attr.attribute_type == "datetime" { 
