@@ -157,7 +157,19 @@ for attr in typ.attributes.iter() {
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_VALUE;\n          } else if c == \"]\" {\n            state = ");
       str.push_str(&typ.typename);
-      str.push_str("ParserState.BEHIND_ARRAY; // TODO: Correct state\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
+      str.push_str("ParserState.BEHIND_ARRAY;");
+// special case: array with elements in "
+    if attr.attribute_type == "string"
+      || attr.attribute_type == "date"
+      || attr.attribute_type == "time"
+      || attr.attribute_type == "datetime" { 
+        str.push_str("\n          } else if c == \",\" {\n            state = ");
+        str.push_str(&typ.typename);
+        str.push_str("ParserState.IN_");
+        str.push_str(&util::to_upper(&attr.name));
+        str.push_str("_VALUE;");
+} 
+      str.push_str("\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
    }
     if !model::Type::is_basic_type(&attr.attribute_type) { 
       str.push_str("\n        // Nested objects\n        case .IN_");
@@ -189,9 +201,24 @@ if attr.is_array == true {
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_STRING;\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .IN_");
       str.push_str(&util::to_upper(&attr.name));
-      str.push_str("_STRING:\n          if c == \"\\\"\" && charbefore != \"\\\\\" {\n            state = ");
-      str.push_str(&typ.typename);
-      str.push_str("ParserState.BEHIND_FIELDVALUE;");
+      str.push_str("_STRING:\n          if c == \"\\\"\" && charbefore != \"\\\\\" {");
+if attr.is_array == true && (
+      attr.attribute_type == "string"
+      || attr.attribute_type == "char"
+      || attr.attribute_type == "date"
+      || attr.attribute_type == "time"
+      || attr.attribute_type == "datetime") { 
+        str.push_str("\n            state = ");
+        str.push_str(&typ.typename);
+        str.push_str("ParserState.IN_");
+        str.push_str(&util::to_upper(&attr.name));
+        str.push_str("_ARRAY;");
+} else { 
+        str.push_str("\n            state = ");
+        str.push_str(&typ.typename);
+        str.push_str("ParserState.BEHIND_FIELDVALUE;");
+} 
+      str.push_str("");
 if attr.is_array == true { 
         str.push_str("\n            obj.");
         str.push_str(&attr.name);
