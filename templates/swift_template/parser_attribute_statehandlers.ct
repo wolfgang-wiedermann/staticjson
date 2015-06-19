@@ -1,0 +1,118 @@
+{{ for attr in typ.attributes.iter() {
+    if attr.is_array == true { }}
+        case .IN_ {{= util::to_upper(&attr.name) }}_ARRAY:
+          if c == "[" {
+            state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_VALUE;
+          } else if c == "]" {
+            state =  {{= typ.typename }}ParserState.BEHIND_ARRAY; // TODO: Correct state
+          } else if !is_blank(c) {
+            // TODO: Handle syntax error
+          }
+{{    }
+    if !model::Type::is_basic_type(&attr.attribute_type) { }}
+        // Nested objects
+        case .IN_ {{= util::to_upper(&attr.name) }}_OBJECT:
+          if c == "{" {
+{{ if attr.is_array == true { }}
+            obj. {{= attr.name }}.append( {{= attr.attribute_type }}.parse_internal(code, ptr:&ptr));
+{{ } else { }}
+            obj. {{= attr.name }} =  {{= attr.attribute_type}}.parse_internal(code, ptr:&ptr);
+{{ } }}
+            state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
+          } else if !is_blank(c) {
+            // TODO: Handle syntax error
+          }
+{{ } else if attr.attribute_type == "string"
+        || attr.attribute_type == "char" { }}
+        // Strings and other values enclosed by "
+        case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
+          if c == "\"" {
+            state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_STRING;
+            buf = "";
+          } else if !is_blank(c) {
+            // TODO: Handle syntax error
+          }
+        case .IN_ {{= util::to_upper(&attr.name) }}_STRING:
+          if c == "\"" && charbefore != "\\" {
+            state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
+{{ if attr.is_array == true { }}
+            obj. {{= attr.name }}.append(buf);
+{{ } else { }}
+            obj. {{= attr.name }} = buf;
+{{ } }}
+            buf = "";
+          } else {
+            buf.append(c);
+          }
+{{ } else if  attr.attribute_type == "date"
+        || attr.attribute_type == "time"
+        || attr.attribute_type == "datetime" { }}
+        // Strings and other values enclosed by "
+        case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
+          if c == "\"" {
+            state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_STRING;
+            buf = "";
+          } else if !is_blank(c) {
+            // TODO: Handle syntax error
+          }
+        case .IN_ {{= util::to_upper(&attr.name) }}_STRING:
+          if c == "\"" && charbefore != "\\" {
+            state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
+            obj. {{= attr.name }} = NSDate(string:buf)!; // TODO: prepare for other date types too
+            buf = "";
+          } else {
+            buf.append(c);
+          }
+{{   } else if attr.attribute_type == "int"
+            || attr.attribute_type == "uint"
+            || attr.attribute_type == "long"
+            || attr.attribute_type == "ulong" {  }}
+        // int-type values without "
+        case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
+          if c == "," {
+{{     if attr.is_array == false { }}
+            state =  {{= typ.typename }}ParserState.INOBJECT;
+{{ } }}
+{{+ ./swift_template/parser_string_to_int_conversion.ct }}
+{{     if attr.is_array == true { }}
+            buf = "";
+          } else if c == "]" {
+            state =  {{= typ.typename}}ParserState.BEHIND_ARRAY;
+{{     } else { }}
+          } else if c == "}" {
+            state =  {{= typ.typename }}ParserState.FINAL;
+{{     } }}
+{{+ ./swift_template/parser_string_to_int_conversion.ct }}
+{{     if attr.is_array == true { }}
+            buf = "";
+{{     } }}
+          } else if c >= "0" && c <= "9" {
+            // TODO: also allow - for int and long (not for uint and ulong)
+            buf.append(c);
+{{     if attr.attribute_type == "int" || attr.attribute_type == "long" { }}
+          } else if c == "-" && buf == "" {
+            buf.append(c);
+{{     } }}
+          } else {
+            // TODO: Handle syntax error
+          }
+{{   } else if attr.attribute_type == "decimal" { }}
+        case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
+          // parse decimal values with dot as decimal sign
+          if c == "," {
+            state =  {{= typ.typename }}ParserState.INOBJECT;
+            obj. {{= attr.name }} = (buf as NSString).doubleValue;
+            buf = "";
+          } else if c == "}" {
+            state =  {{= typ.typename }}ParserState.FINAL;
+            obj. {{= attr.name }} = (buf as NSString).doubleValue;
+            buf = "";
+          } else if c >= "0" && c <= "9" {
+            buf.append(c);
+          } else if c == "." || c == "-" {
+            buf.append(c);
+          } else {
+            // TODO: Handle syntax error
+          }
+{{   } }}
+{{ } }}

@@ -107,7 +107,7 @@ for attr in typ.attributes.iter() {
   str.push_str(&typ.typename);
   str.push_str("ParserState.INITIAL;\n\n    while ptr.startIndex < ptr.endIndex && state != ");
   str.push_str(&typ.typename);
-  str.push_str("ParserState.FINAL {\n      c = code[ptr.startIndex];\n      switch state {\n        case .INITIAL: \n          if c == \"{\" {\n            state = ");
+  str.push_str("ParserState.FINAL {\n      c = code[ptr.startIndex];\n      switch state {\n        // static part of parsers automaton\n        case .INITIAL: \n          if c == \"{\" {\n            state = ");
   str.push_str(&typ.typename);
   str.push_str("ParserState.INOBJECT;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .INOBJECT:\n          if c == \"\\\"\" {\n            state = ");
   str.push_str(&typ.typename);
@@ -146,7 +146,7 @@ if !model::Type::is_basic_type(&attr.attribute_type) {
   str.push_str(&typ.typename);
   str.push_str("ParserState.INOBJECT;\n          } else if c == \"}\" {\n            state = ");
   str.push_str(&typ.typename);
-  str.push_str("ParserState.FINAL;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n");
+  str.push_str("ParserState.FINAL;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n\n        // attribute dependent part of parsers automaton");
 for attr in typ.attributes.iter() {
     if attr.is_array == true { 
       str.push_str("\n        case .IN_");
@@ -155,10 +155,10 @@ for attr in typ.attributes.iter() {
       str.push_str(&typ.typename);
       str.push_str("ParserState.IN_");
       str.push_str(&util::to_upper(&attr.name));
-      str.push_str("_VALUE;\n          } else if c == \"]\" { \n            state = ");
+      str.push_str("_VALUE;\n          } else if c == \"]\" {\n            state = ");
       str.push_str(&typ.typename);
-      str.push_str("ParserState.BEHIND_ARRAY; // TODO: Correct state           \n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
-   }  
+      str.push_str("ParserState.BEHIND_ARRAY; // TODO: Correct state\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
+   }
     if !model::Type::is_basic_type(&attr.attribute_type) { 
       str.push_str("\n        // Nested objects\n        case .IN_");
       str.push_str(&util::to_upper(&attr.name));
@@ -226,7 +226,7 @@ if attr.is_array == true {
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_VALUE:\n          if c == \",\" {");
     if attr.is_array == false { 
-        str.push_str(" \n            state = ");
+        str.push_str("\n            state = ");
         str.push_str(&typ.typename);
         str.push_str("ParserState.INOBJECT;");
 } 
@@ -336,29 +336,27 @@ if attr.is_array == true {
   } 
     str.push_str("");
 } 
-  str.push_str("\n        default:\n          // This state is not allwoed to be reached\n          println(\"ERROR: ENCOUNTERED INVALID STATE\");\n      }\n      charbefore = c;\n      ptr.next();\n    }\n \n    return obj;\n  }\n\n  //\n  // Function to serialize objects of type ");
+  str.push_str("\n\n        default:\n          // This state is not allwoed to be reached\n          println(\"ERROR: ENCOUNTERED INVALID STATE\");\n      }\n      charbefore = c;\n      ptr.next();\n    }\n\n    return obj;\n  }\n\n  //\n  // Function to serialize objects of type ");
   str.push_str(&typ.typename);
   str.push_str("\n  //\n  public static func serialize(obj:");
   str.push_str(&typ.typename);
-  str.push_str(") -> String {\n    var buf = \"{\";");
+  str.push_str(") -> String {\n    var idx = 0;\n    var max_idx = 0;\n    var buf = \"{\";");
 for attr in typ.attributes.iter() { 
     str.push_str("\n    buf += \"\\\"\";\n    buf += \"");
     str.push_str(&attr.name);
     str.push_str("\";\n    buf += \"\\\":\";");
   if attr.is_array {  
-      str.push_str("\n      buf += \"[\";\n      for val in obj.");
+      str.push_str("\n      buf += \"[\";\n      idx = 0;\n      max_idx = obj.");
       str.push_str(&attr.name);
-      str.push_str(" {");
+      str.push_str(".count;\n      for val in obj.");
+      str.push_str(&attr.name);
+      str.push_str(" {\n        idx++;");
       if attr.attribute_type == "string" { 
-        str.push_str("\n        buf += \"\\\"\";\n        buf += \"\\(obj.");
-        str.push_str(&attr.name);
-        str.push_str(")\";\n        buf += \"\\\"\";");
+        str.push_str("\n        buf += \"\\\"\";\n        buf += \"\\(val)\";\n        buf += \"\\\"\";");
       } else { 
-        str.push_str(" \n        buf += \"\\(obj.");
-        str.push_str(&attr.name);
-        str.push_str(")\";");
+        str.push_str(" \n        buf += \"\\(val)\";");
       } 
-      str.push_str("       \n      }\n      buf += \"]\";");
+      str.push_str("\n        if idx < max_idx {\n          buf += \", \";\n        }\n      }\n      buf += \"]\";");
   } else if attr.attribute_type == "string" {  
       str.push_str("\n    buf += \"\\\"\";\n    buf += \"\\(obj.");
       str.push_str(&attr.name);

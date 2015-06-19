@@ -2,6 +2,8 @@
   // Function to serialize objects of type  {{= typ.typename }}
   //
   public static func serialize(obj: {{= typ.typename }}) -> String {
+    var idx = 0;
+    var max_idx = 0;
     var buf = "{";
 {{ for attr in typ.attributes.iter() { }}
     buf += "\"";
@@ -9,14 +11,20 @@
     buf += "\":";
 {{   if attr.is_array {  }}
       buf += "[";
+      idx = 0;
+      max_idx = obj. {{= attr.name }}.count;
       for val in obj. {{= attr.name }} {
+        idx++;
 {{       if attr.attribute_type == "string" { }}
         buf += "\"";
-        buf += "\(obj. {{= attr.name }})";
+        buf += "\(val)";
         buf += "\"";
 {{       } else { }} 
-        buf += "\(obj. {{= attr.name }})";
-{{       } }}       
+        buf += "\(val)";
+{{       } }}
+        if idx < max_idx {
+          buf += ", ";
+        }
       }
       buf += "]";
 {{   } else if attr.attribute_type == "string" {  }}
