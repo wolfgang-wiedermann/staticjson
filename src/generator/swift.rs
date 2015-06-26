@@ -147,8 +147,9 @@ if !model::Type::is_basic_type(&attr.attribute_type) {
   str.push_str("ParserState.INOBJECT;\n          } else if c == \"}\" {\n            state = ");
   str.push_str(&typ.typename);
   str.push_str("ParserState.FINAL;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n\n        // attribute dependent part of parsers automaton");
-for attr in typ.attributes.iter() {
-    if attr.is_array == true { 
+for attr in typ.attributes.iter() { 
+    str.push_str("");
+   if attr.is_array == true { 
       str.push_str("\n        case .IN_");
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_ARRAY:\n          if c == \"[\" {");
@@ -185,8 +186,9 @@ for attr in typ.attributes.iter() {
         str.push_str("_VALUE;");
 } 
       str.push_str("\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
-   }
-    if !model::Type::is_basic_type(&attr.attribute_type) { 
+   } 
+    str.push_str("");
+   if !model::Type::is_basic_type(&attr.attribute_type) { 
       str.push_str("\n        // Nested objects\n        case .IN_");
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_OBJECT:\n          if c == \"{\" {");

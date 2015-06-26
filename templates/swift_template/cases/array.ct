@@ -1,0 +1,25 @@
+{{    if attr.is_array == true { }}
+        case .IN_ {{= util::to_upper(&attr.name) }}_ARRAY:
+          if c == "[" {
+{{   if !model::Type::is_basic_type(&attr.attribute_type) { }}
+            state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_OBJECT;
+          } else if c == "," {
+            state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_OBJECT;
+{{   } else { }}
+            state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_VALUE;
+{{   } }}
+          } else if c == "]" {
+            state =  {{= typ.typename }}ParserState.BEHIND_ARRAY;
+{{ // special case: array with elements in "
+    if attr.attribute_type == "string"
+      || attr.attribute_type == "char"
+      || attr.attribute_type == "date"
+      || attr.attribute_type == "time"
+      || attr.attribute_type == "datetime" { }}
+          } else if c == "," {
+            state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_VALUE;
+{{ } }}
+          } else if !is_blank(c) {
+            // TODO: Handle syntax error
+          }
+{{    } }}
