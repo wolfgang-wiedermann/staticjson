@@ -66,8 +66,12 @@ public struct  {{= typ.typename }} {
       ptr.next();
     }
 
+    validate_mandatory(obj);
+
     return obj;
   }
+
+{{+ ./swift_template/validate_mandatory.ct }}
 
 {{+ ./swift_template/serialize_function.ct }}
 }

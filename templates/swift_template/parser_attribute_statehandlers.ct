@@ -1,3 +1,6 @@
+{{   //
+  // Cases per attribute of the json object
+  // }}
 {{ for attr in typ.attributes.iter() { }}
 {{+ ./swift_template/cases/array.ct }}
 {{+ ./swift_template/cases/nested_object.ct }}

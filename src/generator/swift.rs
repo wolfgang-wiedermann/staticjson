@@ -147,6 +147,10 @@ if !model::Type::is_basic_type(&attr.attribute_type) {
   str.push_str("ParserState.INOBJECT;\n          } else if c == \"}\" {\n            state = ");
   str.push_str(&typ.typename);
   str.push_str("ParserState.FINAL;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n\n        // attribute dependent part of parsers automaton");
+  //
+  // Cases per attribute of the json object
+  // 
+  str.push_str("");
 for attr in typ.attributes.iter() { 
     str.push_str("");
    if attr.is_array == true { 
@@ -384,7 +388,21 @@ if attr.is_array == true {
   } 
     str.push_str("");
 } 
-  str.push_str("\n\n        default:\n          // This state is not allwoed to be reached\n          println(\"ERROR: ENCOUNTERED INVALID STATE\");\n      }\n      charbefore = c;\n      ptr.next();\n    }\n\n    return obj;\n  }\n\n  //\n  // Function to serialize objects of type ");
+  str.push_str("\n        default:\n          // This state is not allwoed to be reached\n          println(\"ERROR: ENCOUNTERED INVALID STATE\");\n      }\n      charbefore = c;\n      ptr.next();\n    }\n\n    validate_mandatory(obj);\n\n    return obj;\n  }\n\n  // Validation of mandatory attributes\n  private static func validate_mandatory(obj:");
+  str.push_str(&typ.typename);
+  str.push_str(") -> String {\n    var is_valid = true;\n    var message = \"\";\n    // TODO: Implement validation for mandatory fields");
+for attr in typ.attributes.iter() {
+    if attr.is_param_value_present("mandatory", "true") { 
+      str.push_str("\n    if obj.");
+      str.push_str(&attr.name);
+      str.push_str(" == ");
+      str.push_str(&get_default_value(&attr.attribute_type));
+      str.push_str(" {\n      is_valid = is_valid && false;\n      message += \"ERROR: ");
+      str.push_str(&attr.name);
+      str.push_str(" is mandatory, but has empty value\\n\"; \n    } else {\n      is_valid = is_valid && true;\n    }");
+  } 
+} 
+  str.push_str("\n    return message;\n  }\n\n  //\n  // Function to serialize objects of type ");
   str.push_str(&typ.typename);
   str.push_str("\n  //\n  public static func serialize(obj:");
   str.push_str(&typ.typename);
