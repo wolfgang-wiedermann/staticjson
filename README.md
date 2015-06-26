@@ -24,7 +24,7 @@ Currently staticjson is in its very early development state. It can not be used 
 ## call the code generation
 
 ```bash
- # staticjson model.sjs -t swift
+ staticjson model.sjs -t swift
 ```
 
 ## Usage of generated swift code
