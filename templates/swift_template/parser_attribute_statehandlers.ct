@@ -3,55 +3,6 @@
 {{+ ./swift_template/cases/nested_object.ct }}
 {{+ ./swift_template/cases/string.ct }}
 {{+ ./swift_template/cases/datetime.ct }}
-{{   } else if attr.attribute_type == "int"
-            || attr.attribute_type == "uint"
-            || attr.attribute_type == "long"
-            || attr.attribute_type == "ulong" {  }}
-        // int-type values without "
-        case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
-          if c == "," {
-{{     if attr.is_array == false { }}
-            state =  {{= typ.typename }}ParserState.INOBJECT;
-{{ } }}
-{{+ ./swift_template/parser_string_to_int_conversion.ct }}
-{{     if attr.is_array == true { }}
-            buf = "";
-          } else if c == "]" {
-            state =  {{= typ.typename}}ParserState.BEHIND_ARRAY;
-{{     } else { }}
-          } else if c == "}" {
-            state =  {{= typ.typename }}ParserState.FINAL;
-{{     } }}
-{{+ ./swift_template/parser_string_to_int_conversion.ct }}
-{{     if attr.is_array == true { }}
-            buf = "";
-{{     } }}
-          } else if c >= "0" && c <= "9" {
-            buf.append(c);
-{{     if attr.attribute_type == "int" || attr.attribute_type == "long" { }}
-          } else if c == "-" && buf == "" {
-            buf.append(c);
-{{     } }}
-          } else {
-            // TODO: Handle syntax error
-          }
-{{   } else if attr.attribute_type == "decimal" { }}
-        case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
-          // parse decimal values with dot as decimal sign
-          if c == "," {
-            state =  {{= typ.typename }}ParserState.INOBJECT;
-            obj. {{= attr.name }} = (buf as NSString).doubleValue;
-            buf = "";
-          } else if c == "}" {
-            state =  {{= typ.typename }}ParserState.FINAL;
-            obj. {{= attr.name }} = (buf as NSString).doubleValue;
-            buf = "";
-          } else if c >= "0" && c <= "9" {
-            buf.append(c);
-          } else if c == "." || c == "-" {
-            buf.append(c);
-          } else {
-            // TODO: Handle syntax error
-          }
-{{   } }}
+{{+ ./swift_template/cases/integer.ct }}
+{{+ ./swift_template/cases/decimal.ct }}
 {{ } }}

@@ -1,0 +1,32 @@
+{{   } else if attr.attribute_type == "int"
+            || attr.attribute_type == "uint"
+            || attr.attribute_type == "long"
+            || attr.attribute_type == "ulong" {  }}
+        // int-type values without "
+        case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
+          if c == "," {
+{{     if attr.is_array == false { }}
+            state =  {{= typ.typename }}ParserState.INOBJECT;
+{{ } }}
+{{+ ./swift_template/parser_string_to_int_conversion.ct }}
+{{     if attr.is_array == true { }}
+            buf = "";
+          } else if c == "]" {
+            state =  {{= typ.typename}}ParserState.BEHIND_ARRAY;
+{{     } else { }}
+          } else if c == "}" {
+            state =  {{= typ.typename }}ParserState.FINAL;
+{{     } }}
+{{+ ./swift_template/parser_string_to_int_conversion.ct }}
+{{     if attr.is_array == true { }}
+            buf = "";
+{{     } }}
+          } else if c >= "0" && c <= "9" {
+            buf.append(c);
+{{     if attr.attribute_type == "int" || attr.attribute_type == "long" { }}
+          } else if c == "-" && buf == "" {
+            buf.append(c);
+{{     } }}
+          } else {
+            // TODO: Handle syntax error
+          }

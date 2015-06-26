@@ -1,0 +1,19 @@
+{{   } else if attr.attribute_type == "decimal" { }}
+        case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
+          // parse decimal values with dot as decimal sign
+          if c == "," {
+            state =  {{= typ.typename }}ParserState.INOBJECT;
+            obj. {{= attr.name }} = (buf as NSString).doubleValue;
+            buf = "";
+          } else if c == "}" {
+            state =  {{= typ.typename }}ParserState.FINAL;
+            obj. {{= attr.name }} = (buf as NSString).doubleValue;
+            buf = "";
+          } else if c >= "0" && c <= "9" {
+            buf.append(c);
+          } else if c == "." || c == "-" {
+            buf.append(c);
+          } else {
+            // TODO: Handle syntax error
+          }
+{{   } }}
