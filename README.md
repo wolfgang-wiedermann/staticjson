@@ -12,9 +12,9 @@ Currently staticjson is in its very early development state. It can not be used 
 
 ```
  type KundeEntity {
-   kundennummer:uint(primary_key="true");
-   name:string;
-   vorname:string;
+   kundennummer:uint(primary_key="true", mandatory="true");
+   name:string(mandatory="true");
+   vorname:string(mandatory="true");
    strasse:string;
    postleitzahl:string;
    ort:string;
