@@ -12,6 +12,7 @@ fn test_parse_demofile() {
     filename: currentWD.clone(),
     target_language:model::TargetLanguage::SWIFT,
     target_folder:"".to_string(),
+    debug:false,
   };
 
   let mut model = model::GeneralModel {

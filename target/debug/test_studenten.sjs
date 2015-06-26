@@ -9,6 +9,7 @@ type StudentEntity (type_param="1234") {
   string_array:string[];
   vorname:string(mandatory="true");
   nachname:string(mandatory="true");
+  testdings:string(mandatory="false");
   geburstdatum:date;
   geburtsort:OrtEntity;
   wohnorte:OrtEntity[];
