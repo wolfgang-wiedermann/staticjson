@@ -2,7 +2,6 @@
   private static func validate_mandatory(obj: {{= typ.typename }}) -> String {
     var is_valid = true;
     var message = "";
-    // TODO: Implement validation for mandatory fields
 {{ for attr in typ.attributes.iter() {
     if attr.is_param_value_present("mandatory", "true") { }}
     if obj. {{= attr.name }} ==  {{= get_default_value(&attr.attribute_type) }} {

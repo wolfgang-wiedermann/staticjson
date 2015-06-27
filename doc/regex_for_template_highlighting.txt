@@ -1,0 +1,4 @@
+With the following javascript regex it should be possible to detect the
+rust code areas of code templates
+
+({{=(.|\n)*?}}|{{ (.|\n)*?}}|{{\+(.|\n)*?}})
