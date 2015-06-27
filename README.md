@@ -38,4 +38,4 @@ var kunde = KundeEntity.parse(kundeJSON);
 kunde.name = "Mustermeier";
 println("\nBeispiel: Kunde");
 println(KundeEntity.serialize(kunde));
-``
+```
