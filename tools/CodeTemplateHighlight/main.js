@@ -52,10 +52,18 @@ define(function (require, exports, module) {
     
     // Register CodeMirror-Mode for ct-Files
     LanguageManager.defineLanguage("codetemplate", {
-    name: "Code Template",
-    mode: "strings",
-    fileExtensions: ["ct"]
-}); 
+      name: "Code Template",
+      mode: "strings",
+      fileExtensions: ["ct"]
+    });
+    
+    LanguageManager.defineLanguage('rust', {
+      name: 'Rust',
+      mode: 'rust',
+      fileExtensions: ['rs'],
+      blockComment: ['/*', '*/'],
+      lineComment: ['//']
+    });
 
     // First, register a command - a UI-less object associating an id to a handler
     var MY_COMMAND_ID = "helloworld.sayhello";   // package-style naming to avoid collisions
