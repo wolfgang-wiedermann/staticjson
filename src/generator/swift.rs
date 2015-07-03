@@ -29,30 +29,52 @@ fn gen_type(typ:&Box<model::Type>) -> String {
   str.push_str(" {");
 for attr in typ.attributes.iter() { 
     str.push_str("");
-  if attr.is_array == true { 
+  if attr.is_array == true && attr.is_param_value_present("mandatory", "true") { 
       str.push_str("\n    public var ");
       str.push_str(&attr.name);
       str.push_str(":[");
       str.push_str(&translate_basic_type(&attr.attribute_type));
       str.push_str("];");
-  } else { 
+  } else if attr.is_array == true { 
+      str.push_str("\n    public var ");
+      str.push_str(&attr.name);
+      str.push_str(":[");
+      str.push_str(&translate_basic_type(&attr.attribute_type));
+      str.push_str("]?;");
+  } else if attr.is_param_value_present("mandatory", "true") { 
       str.push_str("\n    public var ");
       str.push_str(&attr.name);
       str.push_str(":");
       str.push_str(&translate_basic_type(&attr.attribute_type));
       str.push_str(";");
+  } else { 
+      str.push_str("\n    public var ");
+      str.push_str(&attr.name);
+      str.push_str(":");
+      str.push_str(&translate_basic_type(&attr.attribute_type));
+      str.push_str("?;");
   } 
     str.push_str("");
 } 
   str.push_str("\n\n    public init() {");
 for attr in typ.attributes.iter() { 
     str.push_str("");
-  if attr.is_array == true { 
+  if attr.is_array == true && attr.is_param_value_present("mandatory", "true") { 
       str.push_str("\n        self.");
       str.push_str(&attr.name);
       str.push_str(" = [];");
-  } else { 
+  } else if attr.is_array == true { 
+      str.push_str("\n        //self.");
+      str.push_str(&attr.name);
+      str.push_str(" = [];");
+  } else if attr.is_param_value_present("mandatory", "true") { 
       str.push_str("\n        self.");
+      str.push_str(&attr.name);
+      str.push_str(" = ");
+      str.push_str(&get_default_value(&attr.attribute_type));
+      str.push_str(";");
+  } else { 
+      str.push_str("\n        //self.");
       str.push_str(&attr.name);
       str.push_str(" = ");
       str.push_str(&get_default_value(&attr.attribute_type));
@@ -157,6 +179,12 @@ for attr in typ.attributes.iter() {
       str.push_str("\n        case .IN_");
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_ARRAY:\n          if c == \"[\" {");
+  if !attr.is_param_value_present("mandatory", "true") { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(" = [];");
+  } 
+      str.push_str("");
   if !model::Type::is_basic_type(&attr.attribute_type) { 
         str.push_str("\n            state = ");
         str.push_str(&typ.typename);
@@ -196,10 +224,20 @@ for attr in typ.attributes.iter() {
       str.push_str("\n        // Nested objects\n        case .IN_");
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_OBJECT:\n          if c == \"{\" {");
-if attr.is_array == true { 
+if attr.is_array == true && attr.is_param_value_present("mandatory", "true") { 
         str.push_str("\n            obj.");
         str.push_str(&attr.name);
         str.push_str(".append(");
+        str.push_str(&attr.attribute_type);
+        str.push_str(".parse_internal(code, ptr:&ptr));\n            state = ");
+        str.push_str(&typ.typename);
+        str.push_str("ParserState.IN_");
+        str.push_str(&util::to_upper(&attr.name));
+        str.push_str("_ARRAY;");
+} else if attr.is_array == true { 
+        str.push_str("\n            obj.");
+        str.push_str(&attr.name);
+        str.push_str("!.append(");
         str.push_str(&attr.attribute_type);
         str.push_str(".parse_internal(code, ptr:&ptr));\n            state = ");
         str.push_str(&typ.typename);
@@ -244,10 +282,22 @@ if attr.is_array == true && (
         str.push_str("ParserState.BEHIND_FIELDVALUE;");
 } 
       str.push_str("");
-if attr.is_array == true { 
+if attr.is_array == true && attr.is_param_value_present("mandatory", "true") { 
         str.push_str("\n            obj.");
         str.push_str(&attr.name);
         str.push_str(".append(buf);");
+} else if attr.is_array == true { 
+        str.push_str("\n            if let x = obj.");
+        str.push_str(&attr.name);
+        str.push_str(" {\n                obj.");
+        str.push_str(&attr.name);
+        str.push_str("!.append(buf);\n            } else {\n                if obj.");
+        str.push_str(&attr.name);
+        str.push_str(" != nil { \n                    obj.");
+        str.push_str(&attr.name);
+        str.push_str(" = [];\n                }\n                obj.");
+        str.push_str(&attr.name);
+        str.push_str("!.append(buf);\n            }");
 } else { 
         str.push_str("\n            obj.");
         str.push_str(&attr.name);
@@ -276,49 +326,99 @@ if attr.is_array == true {
             || attr.attribute_type == "ulong" {  
       str.push_str("\n        // int-type values without \"\n        case .IN_");
       str.push_str(&util::to_upper(&attr.name));
-      str.push_str("_VALUE:\n          if c == \",\" {");
+      str.push_str("_VALUE:");
+    if attr.is_array == true { 
+        str.push_str("\n          if obj.");
+        str.push_str(&attr.name);
+        str.push_str(" != nil {  \n            obj.");
+        str.push_str(&attr.name);
+        str.push_str(" = [];\n          }");
+    } 
+      str.push_str("\n          if c == \",\" {");
     if attr.is_array == false { 
         str.push_str("\n            state = ");
         str.push_str(&typ.typename);
         str.push_str("ParserState.INOBJECT;");
-} 
-      str.push_str("");
-    // Make string to int conversion dependent to target type 
-      str.push_str("");
-    if attr.attribute_type == "int" && attr.is_array == true { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(".append(Int32(buf.toInt()!));");
-    } else if attr.attribute_type == "int" { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(" = Int32(buf.toInt()!);");
-    } else if attr.attribute_type == "uint" && attr.is_array == true { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(".append(UInt32(buf.toInt()!));");
-    } else if attr.attribute_type == "uint" { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(" = UInt32(buf.toInt()!);");
-    } else if attr.attribute_type == "long" && attr.is_array == true { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(".append(Int64(buf.toInt()!));");
-    } else if attr.attribute_type == "long" { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(" = Int64(buf.toInt()!);");
-    } else if attr.attribute_type == "ulong" && attr.is_array == true { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(".append(UInt64(buf.toInt()!));");
-    } else if attr.attribute_type == "ulong" { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(" = UInt64(buf.toInt()!);");
     } 
-      str.push_str("\n");
+      str.push_str(" ");
+    if !attr.is_param_value_present("mandatory", "true") { 
+        str.push_str("");
+    // Make string to int conversion dependent to target type 
+        str.push_str("");
+    if attr.attribute_type == "int" && attr.is_array == true { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str("!.append(Int32(buf.toInt()!));");
+    } else if attr.attribute_type == "int" { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = Int32(buf.toInt()!);");
+    } else if attr.attribute_type == "uint" && attr.is_array == true { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str("!.append(UInt32(buf.toInt()!));");
+    } else if attr.attribute_type == "uint" { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = UInt32(buf.toInt()!);");
+    } else if attr.attribute_type == "long" && attr.is_array == true { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str("!.append(Int64(buf.toInt()!));");
+    } else if attr.attribute_type == "long" { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = Int64(buf.toInt()!);");
+    } else if attr.attribute_type == "ulong" && attr.is_array == true { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str("!.append(UInt64(buf.toInt()!));");
+    } else if attr.attribute_type == "ulong" { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = UInt64(buf.toInt()!);");
+    } 
+        str.push_str("\n");
+    } else { 
+        str.push_str("");
+    // Make string to int conversion dependent to target type 
+        str.push_str("");
+    if attr.attribute_type == "int" && attr.is_array == true { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(".append(Int32(buf.toInt()!));");
+    } else if attr.attribute_type == "int" { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = Int32(buf.toInt()!);");
+    } else if attr.attribute_type == "uint" && attr.is_array == true { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(".append(UInt32(buf.toInt()!));");
+    } else if attr.attribute_type == "uint" { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = UInt32(buf.toInt()!);");
+    } else if attr.attribute_type == "long" && attr.is_array == true { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(".append(Int64(buf.toInt()!));");
+    } else if attr.attribute_type == "long" { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = Int64(buf.toInt()!);");
+    } else if attr.attribute_type == "ulong" && attr.is_array == true { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(".append(UInt64(buf.toInt()!));");
+    } else if attr.attribute_type == "ulong" { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = UInt64(buf.toInt()!);");
+    } 
+        str.push_str("\n");
+    } 
+      str.push_str("");
     if attr.is_array == true { 
         str.push_str("\n            buf = \"\";\n          } else if c == \"]\" {\n            state = ");
         str.push_str(&typ.typename);
@@ -329,42 +429,84 @@ if attr.is_array == true {
         str.push_str("ParserState.FINAL;");
     } 
       str.push_str("");
+    if !attr.is_param_value_present("mandatory", "true") { 
+        str.push_str("");
     // Make string to int conversion dependent to target type 
-      str.push_str("");
+        str.push_str("");
     if attr.attribute_type == "int" && attr.is_array == true { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(".append(Int32(buf.toInt()!));");
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str("!.append(Int32(buf.toInt()!));");
     } else if attr.attribute_type == "int" { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(" = Int32(buf.toInt()!);");
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = Int32(buf.toInt()!);");
     } else if attr.attribute_type == "uint" && attr.is_array == true { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(".append(UInt32(buf.toInt()!));");
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str("!.append(UInt32(buf.toInt()!));");
     } else if attr.attribute_type == "uint" { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(" = UInt32(buf.toInt()!);");
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = UInt32(buf.toInt()!);");
     } else if attr.attribute_type == "long" && attr.is_array == true { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(".append(Int64(buf.toInt()!));");
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str("!.append(Int64(buf.toInt()!));");
     } else if attr.attribute_type == "long" { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(" = Int64(buf.toInt()!);");
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = Int64(buf.toInt()!);");
     } else if attr.attribute_type == "ulong" && attr.is_array == true { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(".append(UInt64(buf.toInt()!));");
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str("!.append(UInt64(buf.toInt()!));");
     } else if attr.attribute_type == "ulong" { 
-        str.push_str("\n            obj.");
-        str.push_str(&attr.name);
-        str.push_str(" = UInt64(buf.toInt()!);");
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = UInt64(buf.toInt()!);");
     } 
-      str.push_str("\n");
+        str.push_str("\n");
+    } else { 
+        str.push_str("");
+    // Make string to int conversion dependent to target type 
+        str.push_str("");
+    if attr.attribute_type == "int" && attr.is_array == true { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(".append(Int32(buf.toInt()!));");
+    } else if attr.attribute_type == "int" { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = Int32(buf.toInt()!);");
+    } else if attr.attribute_type == "uint" && attr.is_array == true { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(".append(UInt32(buf.toInt()!));");
+    } else if attr.attribute_type == "uint" { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = UInt32(buf.toInt()!);");
+    } else if attr.attribute_type == "long" && attr.is_array == true { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(".append(Int64(buf.toInt()!));");
+    } else if attr.attribute_type == "long" { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = Int64(buf.toInt()!);");
+    } else if attr.attribute_type == "ulong" && attr.is_array == true { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(".append(UInt64(buf.toInt()!));");
+    } else if attr.attribute_type == "ulong" { 
+          str.push_str("\n            obj.");
+          str.push_str(&attr.name);
+          str.push_str(" = UInt64(buf.toInt()!);");
+    } 
+        str.push_str("\n");
+    } 
+      str.push_str("");
     if attr.is_array == true { 
         str.push_str("\n            buf = \"\";");
     } 
@@ -390,7 +532,7 @@ if attr.is_array == true {
 } 
   str.push_str("\n        default:\n          // This state is not allwoed to be reached\n          println(\"ERROR: ENCOUNTERED INVALID STATE\");\n      }\n      charbefore = c;\n      ptr.next();\n    }\n\n    validate_mandatory(obj);\n\n    return obj;\n  }\n\n  // Validation of mandatory attributes\n  private static func validate_mandatory(obj:");
   str.push_str(&typ.typename);
-  str.push_str(") -> String {\n    var is_valid = true;\n    var message = \"\";\n    // TODO: Implement validation for mandatory fields");
+  str.push_str(") -> String {\n    var is_valid = true;\n    var message = \"\";");
 for attr in typ.attributes.iter() {
     if attr.is_param_value_present("mandatory", "true") { 
       str.push_str("\n    if obj.");
@@ -411,6 +553,12 @@ let mut r_idx = 0;
 let mut r_max_idx = typ.attributes.len();
 for attr in typ.attributes.iter() {
   r_idx += 1; 
+    str.push_str("");
+if !attr.is_param_value_present("mandatory", "true") { 
+      str.push_str("\n    if obj.");
+      str.push_str(&attr.name);
+      str.push_str(" != nil {");
+} 
     str.push_str("\n    buf += \"\\\"\";\n    buf += \"");
     str.push_str(&attr.name);
     str.push_str("\";\n    buf += \"\\\":\";");
@@ -450,10 +598,15 @@ for attr in typ.attributes.iter() {
       str.push_str("\n    buf += \"\\(obj.");
       str.push_str(&attr.name);
       str.push_str(")\";");
-  }
+  } 
+    str.push_str("");
 if r_idx < r_max_idx { 
       str.push_str("\n    buf += \", \";");
- }
+ } 
+    str.push_str("");
+if !attr.is_param_value_present("mandatory", "true") { 
+      str.push_str("\n     }");
+} 
 } 
   str.push_str("\n    buf += \"}\";\n    return buf;\n  }\n\n}\n");
   return str;

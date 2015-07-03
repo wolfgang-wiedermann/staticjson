@@ -20,8 +20,17 @@
 {{ } else { }}
             state =  {{= typ.typename }}ParserState.BEHIND_FIELDVALUE;
 {{ } }}
-{{ if attr.is_array == true { }}
+{{ if attr.is_array == true && attr.is_param_value_present("mandatory", "true") { }}
             obj. {{= attr.name }}.append(buf);
+{{ } else if attr.is_array == true { }}
+            if let x = obj. {{= attr.name }} {
+                obj. {{= attr.name }}!.append(buf);
+            } else {
+                if obj. {{= attr.name }} != nil { 
+                    obj. {{= attr.name }} = [];
+                }
+                obj. {{= attr.name }}!.append(buf);
+            }
 {{ } else { }}
             obj. {{= attr.name }} = buf;
 {{ } }}

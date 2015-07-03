@@ -1,6 +1,9 @@
 {{    if attr.is_array == true { }}
         case .IN_ {{= util::to_upper(&attr.name) }}_ARRAY:
           if c == "[" {
+{{   if !attr.is_param_value_present("mandatory", "true") { }}
+            obj. {{= attr.name }} = [];
+{{   } }}
 {{   if !model::Type::is_basic_type(&attr.attribute_type) { }}
             state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_OBJECT;
           } else if c == "," {

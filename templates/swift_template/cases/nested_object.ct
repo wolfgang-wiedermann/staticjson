@@ -2,8 +2,11 @@
         // Nested objects
         case .IN_ {{= util::to_upper(&attr.name) }}_OBJECT:
           if c == "{" {
-{{ if attr.is_array == true { }}
+{{ if attr.is_array == true && attr.is_param_value_present("mandatory", "true") { }}
             obj. {{= attr.name }}.append( {{= attr.attribute_type }}.parse_internal(code, ptr:&ptr));
+            state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_ARRAY;
+{{ } else if attr.is_array == true { }}
+            obj. {{= attr.name }}!.append( {{= attr.attribute_type }}.parse_internal(code, ptr:&ptr));
             state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_ARRAY;
 {{ } else { }}
             obj. {{= attr.name }} =  {{= attr.attribute_type}}.parse_internal(code, ptr:&ptr);

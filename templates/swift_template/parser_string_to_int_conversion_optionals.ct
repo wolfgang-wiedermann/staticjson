@@ -1,0 +1,18 @@
+{{     // Make string to int conversion dependent to target type }}
+{{     if attr.attribute_type == "int" && attr.is_array == true { }}
+            obj. {{= attr.name }}!.append(Int32(buf.toInt()!));
+{{     } else if attr.attribute_type == "int" { }}
+            obj. {{= attr.name }} = Int32(buf.toInt()!);
+{{     } else if attr.attribute_type == "uint" && attr.is_array == true { }}
+            obj. {{= attr.name }}!.append(UInt32(buf.toInt()!));
+{{     } else if attr.attribute_type == "uint" { }}
+            obj. {{= attr.name }} = UInt32(buf.toInt()!);
+{{     } else if attr.attribute_type == "long" && attr.is_array == true { }}
+            obj. {{= attr.name }}!.append(Int64(buf.toInt()!));
+{{     } else if attr.attribute_type == "long" { }}
+            obj. {{= attr.name }} = Int64(buf.toInt()!);
+{{     } else if attr.attribute_type == "ulong" && attr.is_array == true { }}
+            obj. {{= attr.name }}!.append(UInt64(buf.toInt()!));
+{{     } else if attr.attribute_type == "ulong" { }}
+            obj. {{= attr.name }} = UInt64(buf.toInt()!);
+{{     } }}

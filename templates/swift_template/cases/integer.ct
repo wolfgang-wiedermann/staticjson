@@ -4,11 +4,20 @@
             || attr.attribute_type == "ulong" {  }}
         // int-type values without "
         case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
+{{     if attr.is_array == true { }}
+          if obj. {{= attr.name }} != nil {  
+            obj. {{= attr.name }} = [];
+          }
+{{     } }}
           if c == "," {
 {{     if attr.is_array == false { }}
             state =  {{= typ.typename }}ParserState.INOBJECT;
-{{ } }}
+{{     } }} 
+{{     if !attr.is_param_value_present("mandatory", "true") { }}
+{{+ ./swift_template/parser_string_to_int_conversion_optionals.ct }}
+{{     } else { }}
 {{+ ./swift_template/parser_string_to_int_conversion.ct }}
+{{     } }}
 {{     if attr.is_array == true { }}
             buf = "";
           } else if c == "]" {
@@ -17,7 +26,11 @@
           } else if c == "}" {
             state =  {{= typ.typename }}ParserState.FINAL;
 {{     } }}
+{{     if !attr.is_param_value_present("mandatory", "true") { }}
+{{+ ./swift_template/parser_string_to_int_conversion_optionals.ct }}
+{{     } else { }}
 {{+ ./swift_template/parser_string_to_int_conversion.ct }}
+{{     } }}
 {{     if attr.is_array == true { }}
             buf = "";
 {{     } }}

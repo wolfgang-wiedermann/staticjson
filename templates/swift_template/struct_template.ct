@@ -1,17 +1,25 @@
 {{ for attr in typ.attributes.iter() { }}
-{{   if attr.is_array == true { }}
+{{   if attr.is_array == true && attr.is_param_value_present("mandatory", "true") { }}
     public var  {{= attr.name }}:[ {{= translate_basic_type(&attr.attribute_type) }}];
-{{   } else { }}
+{{   } else if attr.is_array == true { }}
+    public var  {{= attr.name }}:[ {{= translate_basic_type(&attr.attribute_type) }}]?;
+{{   } else if attr.is_param_value_present("mandatory", "true") { }}
     public var  {{= attr.name }}: {{= translate_basic_type(&attr.attribute_type) }};
+{{   } else { }}
+    public var  {{= attr.name }}: {{= translate_basic_type(&attr.attribute_type) }}?;
 {{   } }}
 {{ } }}
 
     public init() {
 {{ for attr in typ.attributes.iter() { }}
-{{   if attr.is_array == true { }}
+{{   if attr.is_array == true && attr.is_param_value_present("mandatory", "true") { }}
         self. {{= attr.name }} = [];
-{{   } else { }}
+{{   } else if attr.is_array == true { }}
+        //self. {{= attr.name }} = [];
+{{   } else if attr.is_param_value_present("mandatory", "true") { }}
         self. {{= attr.name }} =  {{= get_default_value(&attr.attribute_type) }};
+{{   } else { }}
+        //self. {{= attr.name }} =  {{= get_default_value(&attr.attribute_type) }};
 {{   } }}
 {{ } }}
     }
