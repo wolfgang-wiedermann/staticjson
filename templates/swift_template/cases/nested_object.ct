@@ -6,6 +6,9 @@
             obj. {{= attr.name }}.append( {{= attr.attribute_type }}.parse_internal(code, ptr:&ptr));
             state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_ARRAY;
 {{ } else if attr.is_array == true { }}
+            if obj. {{= attr.name }} == nil {
+                obj. {{= attr.name }} = [];
+            }
             obj. {{= attr.name }}!.append( {{= attr.attribute_type }}.parse_internal(code, ptr:&ptr));
             state =  {{= typ.typename }}ParserState.IN_ {{= util::to_upper(&attr.name) }}_ARRAY;
 {{ } else { }}

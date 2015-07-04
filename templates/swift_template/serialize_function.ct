@@ -10,8 +10,55 @@ let mut r_max_idx = typ.attributes.len();
 for attr in typ.attributes.iter() {
   r_idx += 1; }}
 {{ if !attr.is_param_value_present("mandatory", "true") { }}
+// ------ Attribute:  {{= attr.name }}
     if obj. {{= attr.name }} != nil {
-{{ } }}
+// ------
+    buf += "\"";
+    buf += " {{= attr.name }}";
+    buf += "\":";
+{{   if attr.is_array {  }}
+      buf += "[";
+      idx = 0;
+      max_idx = obj. {{= attr.name }}!.count;
+      for val in obj. {{= attr.name }}! {
+        idx++;
+{{       if attr.attribute_type == "string"
+         || attr.attribute_type == "date"
+         || attr.attribute_type == "datetime"
+         || attr.attribute_type == "time"  { }}
+        buf += "\"";
+        buf += "\(val)";
+        buf += "\"";
+{{       } else if !model::Type::is_basic_type(&attr.attribute_type) { }}
+        buf +=  {{= attr.attribute_type }}.serialize(val);
+{{       } else { }} 
+        buf += "\(val)";
+{{       } }}
+        if idx < max_idx {
+          buf += ", ";
+        }
+      }
+      buf += "]";
+{{   } else if attr.attribute_type == "string"
+     || attr.attribute_type == "date"
+     || attr.attribute_type == "datetime"
+     || attr.attribute_type == "time" {  }}
+    buf += "\"";
+    buf += "\(obj. {{= attr.name}}!)";
+    buf += "\"";
+{{   } else if !model::Type::is_basic_type(&attr.attribute_type) { }}
+    buf +=  {{= attr.attribute_type }}.serialize(obj. {{= attr.name }}!);
+{{   } else { }}
+    buf += "\(obj. {{= attr.name }}!)";
+{{   } }}
+{{ if r_idx < r_max_idx { }}
+    buf += ", ";
+{{  } }}
+// ------
+     }
+// ------
+{{ } else { }}
+// ------ Attribute:  {{= attr.name }}
     buf += "\"";
     buf += " {{= attr.name }}";
     buf += "\":";
@@ -53,9 +100,7 @@ for attr in typ.attributes.iter() {
 {{ if r_idx < r_max_idx { }}
     buf += ", ";
 {{  } }}
-{{ if !attr.is_param_value_present("mandatory", "true") { }}
-     }
-{{ } 
+{{ }
 } }}
     buf += "}";
     return buf;

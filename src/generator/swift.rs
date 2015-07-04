@@ -235,7 +235,11 @@ if attr.is_array == true && attr.is_param_value_present("mandatory", "true") {
         str.push_str(&util::to_upper(&attr.name));
         str.push_str("_ARRAY;");
 } else if attr.is_array == true { 
-        str.push_str("\n            obj.");
+        str.push_str("\n            if obj.");
+        str.push_str(&attr.name);
+        str.push_str(" == nil {\n                obj.");
+        str.push_str(&attr.name);
+        str.push_str(" = [];\n            }\n            obj.");
         str.push_str(&attr.name);
         str.push_str("!.append(");
         str.push_str(&attr.attribute_type);
@@ -555,58 +559,104 @@ for attr in typ.attributes.iter() {
   r_idx += 1; 
     str.push_str("");
 if !attr.is_param_value_present("mandatory", "true") { 
+      str.push_str("\n// ------ Attribute: ");
+      str.push_str(&attr.name);
       str.push_str("\n    if obj.");
       str.push_str(&attr.name);
-      str.push_str(" != nil {");
-} 
-    str.push_str("\n    buf += \"\\\"\";\n    buf += \"");
-    str.push_str(&attr.name);
-    str.push_str("\";\n    buf += \"\\\":\";");
+      str.push_str(" != nil {\n// ------\n    buf += \"\\\"\";\n    buf += \"");
+      str.push_str(&attr.name);
+      str.push_str("\";\n    buf += \"\\\":\";");
   if attr.is_array {  
-      str.push_str("\n      buf += \"[\";\n      idx = 0;\n      max_idx = obj.");
-      str.push_str(&attr.name);
-      str.push_str(".count;\n      for val in obj.");
-      str.push_str(&attr.name);
-      str.push_str(" {\n        idx++;");
+        str.push_str("\n      buf += \"[\";\n      idx = 0;\n      max_idx = obj.");
+        str.push_str(&attr.name);
+        str.push_str("!.count;\n      for val in obj.");
+        str.push_str(&attr.name);
+        str.push_str("! {\n        idx++;");
       if attr.attribute_type == "string"
          || attr.attribute_type == "date"
          || attr.attribute_type == "datetime"
          || attr.attribute_type == "time"  { 
-        str.push_str("\n        buf += \"\\\"\";\n        buf += \"\\(val)\";\n        buf += \"\\\"\";");
+          str.push_str("\n        buf += \"\\\"\";\n        buf += \"\\(val)\";\n        buf += \"\\\"\";");
       } else if !model::Type::is_basic_type(&attr.attribute_type) { 
-        str.push_str("\n        buf += ");
-        str.push_str(&attr.attribute_type);
-        str.push_str(".serialize(val);");
+          str.push_str("\n        buf += ");
+          str.push_str(&attr.attribute_type);
+          str.push_str(".serialize(val);");
       } else { 
-        str.push_str(" \n        buf += \"\\(val)\";");
+          str.push_str(" \n        buf += \"\\(val)\";");
       } 
-      str.push_str("\n        if idx < max_idx {\n          buf += \", \";\n        }\n      }\n      buf += \"]\";");
+        str.push_str("\n        if idx < max_idx {\n          buf += \", \";\n        }\n      }\n      buf += \"]\";");
   } else if attr.attribute_type == "string"
      || attr.attribute_type == "date"
      || attr.attribute_type == "datetime"
      || attr.attribute_type == "time" {  
-      str.push_str("\n    buf += \"\\\"\";\n    buf += \"\\(obj.");
-      str.push_str(&attr.name);
-      str.push_str(")\";\n    buf += \"\\\"\";");
+        str.push_str("\n    buf += \"\\\"\";\n    buf += \"\\(obj.");
+        str.push_str(&attr.name);
+        str.push_str("!)\";\n    buf += \"\\\"\";");
   } else if !model::Type::is_basic_type(&attr.attribute_type) { 
-      str.push_str("\n    buf += ");
-      str.push_str(&attr.attribute_type);
-      str.push_str(".serialize(obj.");
-      str.push_str(&attr.name);
-      str.push_str(");");
+        str.push_str("\n    buf += ");
+        str.push_str(&attr.attribute_type);
+        str.push_str(".serialize(obj.");
+        str.push_str(&attr.name);
+        str.push_str("!);");
   } else { 
-      str.push_str("\n    buf += \"\\(obj.");
-      str.push_str(&attr.name);
-      str.push_str(")\";");
+        str.push_str("\n    buf += \"\\(obj.");
+        str.push_str(&attr.name);
+        str.push_str("!)\";");
   } 
-    str.push_str("");
+      str.push_str("");
 if r_idx < r_max_idx { 
-      str.push_str("\n    buf += \", \";");
+        str.push_str("\n    buf += \", \";");
  } 
-    str.push_str("");
-if !attr.is_param_value_present("mandatory", "true") { 
-      str.push_str("\n     }");
-} 
+      str.push_str("\n// ------\n     }\n// ------");
+} else { 
+      str.push_str("\n// ------ Attribute: ");
+      str.push_str(&attr.name);
+      str.push_str("\n    buf += \"\\\"\";\n    buf += \"");
+      str.push_str(&attr.name);
+      str.push_str("\";\n    buf += \"\\\":\";");
+  if attr.is_array {  
+        str.push_str("\n      buf += \"[\";\n      idx = 0;\n      max_idx = obj.");
+        str.push_str(&attr.name);
+        str.push_str(".count;\n      for val in obj.");
+        str.push_str(&attr.name);
+        str.push_str(" {\n        idx++;");
+      if attr.attribute_type == "string"
+         || attr.attribute_type == "date"
+         || attr.attribute_type == "datetime"
+         || attr.attribute_type == "time"  { 
+          str.push_str("\n        buf += \"\\\"\";\n        buf += \"\\(val)\";\n        buf += \"\\\"\";");
+      } else if !model::Type::is_basic_type(&attr.attribute_type) { 
+          str.push_str("\n        buf += ");
+          str.push_str(&attr.attribute_type);
+          str.push_str(".serialize(val);");
+      } else { 
+          str.push_str(" \n        buf += \"\\(val)\";");
+      } 
+        str.push_str("\n        if idx < max_idx {\n          buf += \", \";\n        }\n      }\n      buf += \"]\";");
+  } else if attr.attribute_type == "string"
+     || attr.attribute_type == "date"
+     || attr.attribute_type == "datetime"
+     || attr.attribute_type == "time" {  
+        str.push_str("\n    buf += \"\\\"\";\n    buf += \"\\(obj.");
+        str.push_str(&attr.name);
+        str.push_str(")\";\n    buf += \"\\\"\";");
+  } else if !model::Type::is_basic_type(&attr.attribute_type) { 
+        str.push_str("\n    buf += ");
+        str.push_str(&attr.attribute_type);
+        str.push_str(".serialize(obj.");
+        str.push_str(&attr.name);
+        str.push_str(");");
+  } else { 
+        str.push_str("\n    buf += \"\\(obj.");
+        str.push_str(&attr.name);
+        str.push_str(")\";");
+  } 
+      str.push_str("");
+if r_idx < r_max_idx { 
+        str.push_str("\n    buf += \", \";");
+ } 
+      str.push_str("");
+}
 } 
   str.push_str("\n    buf += \"}\";\n    return buf;\n  }\n\n}\n");
   return str;
