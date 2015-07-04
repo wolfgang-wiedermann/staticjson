@@ -1,0 +1,7 @@
+  // Raise parser errors
+  private static func raise_error(message:String, c:Character) {
+    var debugMsg = "ERROR: "+message+" ";
+    debugMsg.append(c);
+    println(debugMsg);
+    NSException(name: "Syntax-Error", reason: "Invalid character found at ...", userInfo: nil).raise()
+  }
