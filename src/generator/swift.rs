@@ -131,9 +131,9 @@ for attr in typ.attributes.iter() {
   str.push_str(&typ.typename);
   str.push_str("ParserState.FINAL {\n      c = code[ptr.startIndex];\n      switch state {\n        // static part of parsers automaton\n        case .INITIAL: \n          if c == \"{\" {\n            state = ");
   str.push_str(&typ.typename);
-  str.push_str("ParserState.INOBJECT;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .INOBJECT:\n          if c == \"\\\"\" {\n            state = ");
+  str.push_str("ParserState.INOBJECT;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n            raise_error(\"Invalid character found at ...\", c:c);\n          }\n        case .INOBJECT:\n          if c == \"\\\"\" {\n            state = ");
   str.push_str(&typ.typename);
-  str.push_str("ParserState.IN_FIELDNAME;\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .IN_FIELDNAME:\n          if c == \"\\\"\" && charbefore != \"\\\\\" {\n            state = ");
+  str.push_str("ParserState.IN_FIELDNAME;\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n            raise_error(\"Invalid character found at ...\", c:c);\n          }\n        case .IN_FIELDNAME:\n          if c == \"\\\"\" && charbefore != \"\\\\\" {\n            state = ");
   str.push_str(&typ.typename);
   str.push_str("ParserState.BEHIND_FIELDNAME;\n          } else {\n            buf.append(c);\n          }\n        case .BEHIND_FIELDNAME:\n          if c == \":\" {\n            if buf == \"\" {\n              // TODO: Handle syntax error, empty names are not allowed");
 for attr in typ.attributes.iter() { 
@@ -160,15 +160,15 @@ if !model::Type::is_basic_type(&attr.attribute_type) {
       str.push_str("_VALUE;");
 } 
 } 
-  str.push_str("\n            }\n            // TODO: if Strict-Mode then else with error output\n            // TODO: if flex-Mode then do something to overjump unknown attributes\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .BEHIND_FIELDVALUE:\n          if c == \",\" {\n            state = ");
+  str.push_str("\n            }\n            // TODO: if Strict-Mode then else with error output\n            // TODO: if flex-Mode then do something to overjump unknown attributes\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n            raise_error(\"Invalid character found at ...\", c:c);\n          }\n        case .BEHIND_FIELDVALUE:\n          if c == \",\" {\n            state = ");
   str.push_str(&typ.typename);
   str.push_str("ParserState.INOBJECT;\n          } else if c == \"}\" {\n            state = ");
   str.push_str(&typ.typename);
-  str.push_str("ParserState.FINAL;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .BEHIND_ARRAY:\n          if c == \",\" {\n            state = ");
+  str.push_str("ParserState.FINAL;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n            raise_error(\"Invalid character found at ...\", c:c);\n          }\n        case .BEHIND_ARRAY:\n          if c == \",\" {\n            state = ");
   str.push_str(&typ.typename);
   str.push_str("ParserState.INOBJECT;\n          } else if c == \"}\" {\n            state = ");
   str.push_str(&typ.typename);
-  str.push_str("ParserState.FINAL;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n\n        // attribute dependent part of parsers automaton");
+  str.push_str("ParserState.FINAL;\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n            raise_error(\"Invalid character found at ...\", c:c);\n          }\n\n        // attribute dependent part of parsers automaton");
   //
   // Cases per attribute of the json object
   // 
@@ -217,7 +217,7 @@ for attr in typ.attributes.iter() {
         str.push_str(&util::to_upper(&attr.name));
         str.push_str("_VALUE;");
 } 
-      str.push_str("\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
+      str.push_str("\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n            raise_error(\"Invalid character found at ...\", c:c);\n          }");
    } 
     str.push_str("");
    if !model::Type::is_basic_type(&attr.attribute_type) { 
@@ -257,7 +257,7 @@ if attr.is_array == true && attr.is_param_value_present("mandatory", "true") {
         str.push_str(&typ.typename);
         str.push_str("ParserState.BEHIND_FIELDVALUE;");
 } 
-      str.push_str("\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }");
+      str.push_str("\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n            raise_error(\"Invalid character found at ...\", c:c);\n          }");
 } else if attr.attribute_type == "string"
         || attr.attribute_type == "char" { 
       str.push_str("\n        // Strings and other values enclosed by \"\n        case .IN_");
@@ -266,7 +266,7 @@ if attr.is_array == true && attr.is_param_value_present("mandatory", "true") {
       str.push_str(&typ.typename);
       str.push_str("ParserState.IN_");
       str.push_str(&util::to_upper(&attr.name));
-      str.push_str("_STRING;\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .IN_");
+      str.push_str("_STRING;\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n            raise_error(\"Invalid character found at ...\", c:c);\n          }\n        case .IN_");
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_STRING:\n          if c == \"\\\"\" && charbefore != \"\\\\\" {");
 if attr.is_array == true && (
@@ -317,7 +317,7 @@ if attr.is_array == true && attr.is_param_value_present("mandatory", "true") {
       str.push_str(&typ.typename);
       str.push_str("ParserState.IN_");
       str.push_str(&util::to_upper(&attr.name));
-      str.push_str("_STRING;\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n          }\n        case .IN_");
+      str.push_str("_STRING;\n            buf = \"\";\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n            raise_error(\"Invalid character found at ...\", c:c);\n          }\n        case .IN_");
       str.push_str(&util::to_upper(&attr.name));
       str.push_str("_STRING:\n          if c == \"\\\"\" && charbefore != \"\\\\\" {\n            state = ");
       str.push_str(&typ.typename);
@@ -334,7 +334,7 @@ if attr.is_array == true && attr.is_param_value_present("mandatory", "true") {
     if attr.is_array == true { 
         str.push_str("\n          if obj.");
         str.push_str(&attr.name);
-        str.push_str(" != nil {  \n            obj.");
+        str.push_str(" == nil {  \n            obj.");
         str.push_str(&attr.name);
         str.push_str(" = [];\n          }");
     } 
@@ -518,7 +518,7 @@ if attr.is_array == true && attr.is_param_value_present("mandatory", "true") {
     if attr.attribute_type == "int" || attr.attribute_type == "long" { 
         str.push_str("\n          } else if c == \"-\" && buf == \"\" {\n            buf.append(c);");
     } 
-      str.push_str("\n          } else {\n            // TODO: Handle syntax error\n          }");
+      str.push_str("\n          } else if c == \" \" && buf == \"\" {\n            // ignore if first char is blank\n          } else {\n            // TODO: Handle syntax error\n            raise_error(\"Invalid character found at ...\", c:c);\n          }");
   } else if attr.attribute_type == "decimal" { 
       str.push_str("\n        case .IN_");
       str.push_str(&util::to_upper(&attr.name));
@@ -530,7 +530,7 @@ if attr.is_array == true && attr.is_param_value_present("mandatory", "true") {
       str.push_str(&typ.typename);
       str.push_str("ParserState.FINAL;\n            obj.");
       str.push_str(&attr.name);
-      str.push_str(" = (buf as NSString).doubleValue;\n            buf = \"\";\n          } else if c >= \"0\" && c <= \"9\" {\n            buf.append(c);\n          } else if c == \".\" || c == \"-\" {\n            buf.append(c);\n          } else {\n            // TODO: Handle syntax error\n          }");
+      str.push_str(" = (buf as NSString).doubleValue;\n            buf = \"\";\n          } else if c >= \"0\" && c <= \"9\" {\n            buf.append(c);\n          } else if c == \".\" || c == \"-\" {\n            buf.append(c);\n          } else {\n            // TODO: Handle syntax error\n            raise_error(\"Invalid character found at ...\", c:c);\n          }");
   } 
     str.push_str("");
 } 
@@ -548,7 +548,7 @@ for attr in typ.attributes.iter() {
       str.push_str(" is mandatory, but has empty value\\n\"; \n    } else {\n      is_valid = is_valid && true;\n    }");
   } 
 } 
-  str.push_str("\n    return message;\n  }\n\n  //\n  // Function to serialize objects of type ");
+  str.push_str("\n    return message;\n  }\n\n  // Raise parser errors\n  private static func raise_error(message:String, c:Character) {\n    var debugMsg = \"ERROR: \"+message+\" \";\n    debugMsg.append(c);\n    println(debugMsg);\n    NSException(name: \"Syntax-Error\", reason: \"Invalid character found at ...\", userInfo: nil).raise()\n  }\n\n  //\n  // Function to serialize objects of type ");
   str.push_str(&typ.typename);
   str.push_str("\n  //\n  public static func serialize(obj:");
   str.push_str(&typ.typename);

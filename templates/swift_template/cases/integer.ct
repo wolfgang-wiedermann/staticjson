@@ -5,7 +5,7 @@
         // int-type values without "
         case .IN_ {{= util::to_upper(&attr.name) }}_VALUE:
 {{     if attr.is_array == true { }}
-          if obj. {{= attr.name }} != nil {  
+          if obj. {{= attr.name }} == nil {  
             obj. {{= attr.name }} = [];
           }
 {{     } }}
@@ -40,6 +40,9 @@
           } else if c == "-" && buf == "" {
             buf.append(c);
 {{     } }}
+          } else if c == " " && buf == "" {
+            // ignore if first char is blank
           } else {
             // TODO: Handle syntax error
+            raise_error("Invalid character found at ...", c:c);
           }

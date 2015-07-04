@@ -73,6 +73,8 @@ public struct  {{= typ.typename }} {
 
 {{+ ./swift_template/validate_mandatory.ct }}
 
+{{+ ./swift_template/raise_error.ct }}
+
 {{+ ./swift_template/serialize_function.ct }}
 }
 

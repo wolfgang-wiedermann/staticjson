@@ -8,6 +8,7 @@
             buf = "";
           } else if !is_blank(c) {
             // TODO: Handle syntax error
+            raise_error("Invalid character found at ...", c:c);
           }
         case .IN_ {{= util::to_upper(&attr.name) }}_STRING:
           if c == "\"" && charbefore != "\\" {

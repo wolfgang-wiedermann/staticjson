@@ -17,4 +17,5 @@
 {{ } }}
           } else if !is_blank(c) {
             // TODO: Handle syntax error
+            raise_error("Invalid character found at ...", c:c);
           }

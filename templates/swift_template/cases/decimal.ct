@@ -15,5 +15,6 @@
             buf.append(c);
           } else {
             // TODO: Handle syntax error
+            raise_error("Invalid character found at ...", c:c);
           }
 {{   } }}
