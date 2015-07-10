@@ -747,11 +747,15 @@ for attr in typ.attributes.iter() {
     str.push_str("\\\"\";\n        json += \":\";");
 if attr.is_array { 
       str.push_str("\n        json += \"[\";");
-} 
-    str.push_str("\n        json += \"");
-    str.push_str(&get_test_value(&attr.attribute_type));
-    str.push_str("\";");
-if attr.is_array { 
+} if model::Type::is_basic_type(&attr.attribute_type) { 
+      str.push_str("\n        json += \"");
+      str.push_str(&get_test_value(&attr.attribute_type));
+      str.push_str("\";");
+} else { 
+      str.push_str("\n        json += Test");
+      str.push_str(&attr.attribute_type);
+      str.push_str(".GetPositiveStr();");
+} if attr.is_array { 
       str.push_str("\n        json += \"]\";");
 } 
     str.push_str("");

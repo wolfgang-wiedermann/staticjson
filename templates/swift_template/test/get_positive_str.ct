@@ -8,9 +8,11 @@ for attr in typ.attributes.iter() { }}
         json += ":";
 {{ if attr.is_array { }}
         json += "[";
-{{ } }}
+{{ } if model::Type::is_basic_type(&attr.attribute_type) { }}
         json += " {{= get_test_value(&attr.attribute_type) }}";
-{{ if attr.is_array { }}
+{{ } else { }}
+        json += Test {{= attr.attribute_type }}.GetPositiveStr();
+{{ } if attr.is_array { }}
         json += "]";
 {{ } }}
 {{   r_idx += 1;
