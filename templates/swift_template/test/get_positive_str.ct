@@ -1,0 +1,23 @@
+    // Generate a json string for successful parsing unittests
+    public static func GetPositiveStr() -> String {
+        var json = "{";
+{{ let mut r_idx = 0;
+let mut r_max_idx = typ.attributes.len(); 
+for attr in typ.attributes.iter() { }}
+        json += "\" {{= attr.name }}\"";
+        json += ":";
+{{ if attr.is_array { }}
+        json += "[";
+{{ } }}
+        json += " {{= get_test_value(&attr.attribute_type) }}";
+{{ if attr.is_array { }}
+        json += "]";
+{{ } }}
+{{   r_idx += 1;
+  if r_idx < r_max_idx { }}
+        json += ",";
+{{   }
+} }}
+        json += "}";
+        return json;
+    }

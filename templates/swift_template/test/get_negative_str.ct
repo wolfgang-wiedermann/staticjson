@@ -1,0 +1,17 @@
+    // Generate a json string to produce errors parsing unittests
+    public static func GetNegativeStr() -> String {
+        var json = "{";
+{{ let mut r_idx = 0;
+let mut r_max_idx = typ.attributes.len(); 
+for attr in typ.attributes.iter() { }}
+        json += "\" {{= attr.name }}\"";
+        json += ":";
+        json += " {{= get_wrong_value(&attr.attribute_type) }}";
+{{   r_idx += 1;
+  if r_idx < r_max_idx { }}
+        json += ",";
+{{   }
+} }}
+        json += "}";
+        return json;
+    }

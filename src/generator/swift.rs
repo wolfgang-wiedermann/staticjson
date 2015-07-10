@@ -12,6 +12,10 @@ pub fn generate(types:&Box<Vec<Box<model::Type>>>, folder:&str) {
     let result = gen_type(typ);
     let filename = format!("{}/{}.swift", folder, typ.typename);
     filehandler::write_file(filename, result);
+    
+    let test = gen_test(typ);
+    let test_filename = format!("{}/Test{}.swift", folder, typ.typename);
+    filehandler::write_file(test_filename, test);
   }
   // generate Parser and Stringifier
 }
@@ -217,7 +221,7 @@ for attr in typ.attributes.iter() {
         str.push_str(&util::to_upper(&attr.name));
         str.push_str("_VALUE;");
 } 
-      str.push_str("\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n            raise_error(\"Invalid character found at ...\", c:c);\n          }");
+      str.push_str("\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n            // raise_error(\"Invalid character found at ...\", c:c);\n          }");
    } 
     str.push_str("");
    if !model::Type::is_basic_type(&attr.attribute_type) { 
@@ -257,7 +261,7 @@ if attr.is_array == true && attr.is_param_value_present("mandatory", "true") {
         str.push_str(&typ.typename);
         str.push_str("ParserState.BEHIND_FIELDVALUE;");
 } 
-      str.push_str("\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n            raise_error(\"Invalid character found at ...\", c:c);\n          }");
+      str.push_str("\n          } else if !is_blank(c) {\n            // TODO: Handle syntax error\n            // raise_error(\"Invalid character found at ...\", c:c);\n          }");
 } else if attr.attribute_type == "string"
         || attr.attribute_type == "char" { 
       str.push_str("\n        // Strings and other values enclosed by \"\n        case .IN_");
@@ -723,4 +727,119 @@ fn get_default_value(tname:&str) -> String {
 }
 
 
+
+// Generate single types of the data model
+fn gen_test(typ:&Box<model::Type>) -> String {
+  let mut str:String = String::new(); 
+
+  str.push_str("//\n//  Tes");
+  str.push_str(&typ.typename);
+  str.push_str(".swift\n// \n\nimport Foundation\n// import XCTest\n\n// TODO: prepare it for XCTest\n// public class Test");
+  str.push_str(&typ.typename);
+  str.push_str(" : XCTestCase {\n\npublic class Test");
+  str.push_str(&typ.typename);
+  str.push_str(" {\n    // Generate a json string for successful parsing unittests\n    public static func GetPositiveStr() -> String {\n        var json = \"{\";");
+let mut r_idx = 0;
+let mut r_max_idx = typ.attributes.len(); 
+for attr in typ.attributes.iter() { 
+    str.push_str("\n        json += \"\\\"");
+    str.push_str(&attr.name);
+    str.push_str("\\\"\";\n        json += \":\";");
+if attr.is_array { 
+      str.push_str("\n        json += \"[\";");
+} 
+    str.push_str("\n        json += \"");
+    str.push_str(&get_test_value(&attr.attribute_type));
+    str.push_str("\";");
+if attr.is_array { 
+      str.push_str("\n        json += \"]\";");
+} 
+    str.push_str("");
+  r_idx += 1;
+  if r_idx < r_max_idx { 
+      str.push_str("\n        json += \",\";");
+  }
+} 
+  str.push_str("\n        json += \"}\";\n        return json;\n    }\n\n    // Generate a json string to produce errors parsing unittests\n    public static func GetNegativeStr() -> String {\n        var json = \"{\";");
+let mut r_idx = 0;
+let mut r_max_idx = typ.attributes.len(); 
+for attr in typ.attributes.iter() { 
+    str.push_str("\n        json += \"\\\"");
+    str.push_str(&attr.name);
+    str.push_str("\\\"\";\n        json += \":\";\n        json += \"");
+    str.push_str(&get_wrong_value(&attr.attribute_type));
+    str.push_str("\";");
+  r_idx += 1;
+  if r_idx < r_max_idx { 
+      str.push_str("\n        json += \",\";");
+  }
+} 
+  str.push_str("\n        json += \"}\";\n        return json;\n    }\n}");
+  
+
+  // Offer correct json values for staticjson basic types
+fn get_test_value(tname:&str) -> String {
+  let mut result = String::new();
+  if !model::Type::is_basic_type(tname) {
+    //result.push_str(tname);
+    result.push_str("null");
+    // TODO: correct it here, call the function of subtype
+  } else if tname == "string" {
+    result.push_str("\\\"abcd\\\"");
+  } else if tname == "int" {
+    result.push_str("-123");
+  } else if tname == "uint" {
+    result.push_str("123");
+  } else if tname == "decimal" {
+    result.push_str("123.32");
+  } else if tname == "byte" {
+    result.push_str("127");
+  } else if tname == "char" {
+    result.push_str("\"a\"");
+  } else if tname == "long" {
+    result.push_str("-1234567891230");
+  } else if tname == "ulong" {
+    result.push_str("1023219832123");
+  } else if tname == "date" {
+    result.push_str("\\\"2012-12-21\\\"");
+  } else {
+    result.push_str("XXXXXXXX");
+  }
+  return result;
+}
+
+
+// Offer invalid json values for staticjson basic types
+fn get_wrong_value(tname:&str) -> String {
+  let mut result = String::new();
+  if !model::Type::is_basic_type(tname) {
+    //result.push_str(tname);
+    result.push_str("%%%");
+    // TODO: correct it here, call the function of subtype
+  } else if tname == "string" {
+    result.push_str("!sE4$");
+  } else if tname == "int" {
+    result.push_str("-*123ua");
+  } else if tname == "uint" {
+    result.push_str("-123");
+  } else if tname == "decimal" {
+    result.push_str("123,32");
+  } else if tname == "byte" {
+    result.push_str("1+27");
+  } else if tname == "char" {
+    result.push_str("\"abc\"");
+  } else if tname == "long" {
+    result.push_str("-1234c567891230");
+  } else if tname == "ulong" {
+    result.push_str("102321c9832123");
+  } else if tname == "date" {
+    result.push_str("\\\"2012-12+21\\\"");
+  } else {
+    result.push_str("XXXXXXXX");
+  }
+  return result;
+}
+  
+  return str;
+} 
 

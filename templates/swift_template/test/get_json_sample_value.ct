@@ -1,0 +1,62 @@
+// Offer correct json values for staticjson basic types
+fn get_test_value(tname:&str) -> String {
+  let mut result = String::new();
+  if !model::Type::is_basic_type(tname) {
+    //result.push_str(tname);
+    result.push_str("null");
+    // TODO: correct it here, call the function of subtype
+  } else if tname == "string" {
+    result.push_str("\\\"abcd\\\"");
+  } else if tname == "int" {
+    result.push_str("-123");
+  } else if tname == "uint" {
+    result.push_str("123");
+  } else if tname == "decimal" {
+    result.push_str("123.32");
+  } else if tname == "byte" {
+    result.push_str("127");
+  } else if tname == "char" {
+    result.push_str("\"a\"");
+  } else if tname == "long" {
+    result.push_str("-1234567891230");
+  } else if tname == "ulong" {
+    result.push_str("1023219832123");
+  } else if tname == "date" {
+    result.push_str("\\\"2012-12-21\\\"");
+  } else {
+    result.push_str("XXXXXXXX");
+  }
+  return result;
+}
+
+
+// Offer invalid json values for staticjson basic types
+fn get_wrong_value(tname:&str) -> String {
+  let mut result = String::new();
+  if !model::Type::is_basic_type(tname) {
+    //result.push_str(tname);
+    result.push_str("%%%");
+    // TODO: correct it here, call the function of subtype
+  } else if tname == "string" {
+    result.push_str("!sE4$");
+  } else if tname == "int" {
+    result.push_str("-*123ua");
+  } else if tname == "uint" {
+    result.push_str("-123");
+  } else if tname == "decimal" {
+    result.push_str("123,32");
+  } else if tname == "byte" {
+    result.push_str("1+27");
+  } else if tname == "char" {
+    result.push_str("\"abc\"");
+  } else if tname == "long" {
+    result.push_str("-1234c567891230");
+  } else if tname == "ulong" {
+    result.push_str("102321c9832123");
+  } else if tname == "date" {
+    result.push_str("\\\"2012-12+21\\\"");
+  } else {
+    result.push_str("XXXXXXXX");
+  }
+  return result;
+}
