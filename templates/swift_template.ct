@@ -88,25 +88,11 @@ public struct  {{= typ.typename }} {
 {{+ ./swift_template/translate_basic_type_function.ct }}
 {{+ ./swift_template/init_basic_type_function.ct }}
 
-
 // Generate single types of the data model
 fn gen_test(typ:&Box<model::Type>) -> String {
   let mut str:String = String::new(); 
-}}//
-//  Test{{= typ.typename }}.swift
-// 
-
-import Foundation
-// import XCTest
-
-// TODO: prepare it for XCTest
-// public class Test {{= typ.typename }} : XCTestCase {
-
-public class Test {{= typ.typename }} {
-{{+ ./swift_template/test/get_positive_str.ct }}
-
-{{+ ./swift_template/test/get_negative_str.ct }}
-}
+}}
+{{+ ./swift_template/test/testcase.ct }}
 {{   
 
   {{+ ./swift_template/test/get_json_sample_value.ct }}

@@ -1,5 +1,5 @@
     // Generate a json string for successful parsing unittests
-    public static func GetPositiveStr() -> String {
+    public static func getPositiveStr() -> String {
         var json = "{";
 {{ let mut r_idx = 0;
 let mut r_max_idx = typ.attributes.len(); 
@@ -11,7 +11,7 @@ for attr in typ.attributes.iter() { }}
 {{ } if model::Type::is_basic_type(&attr.attribute_type) { }}
         json += " {{= get_test_value(&attr.attribute_type) }}";
 {{ } else { }}
-        json += Test {{= attr.attribute_type }}.GetPositiveStr();
+        json += Test {{= attr.attribute_type }}.getPositiveStr();
 {{ } if attr.is_array { }}
         json += "]";
 {{ } }}
