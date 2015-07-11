@@ -8,17 +8,16 @@ import XCTest
 
 public class Test {{= typ.typename }} : XCTestCase {
 
-    private var correctJson:String
-    private var wrongJson:String
+    private let correctJson = self.getPositiveStr()
+    private let wrongJson = self.getNegativeStr()
 
     override func setUp() {
         super.setUp()
-        correctJson = self.getPositiveStr()
-        wrongJson = self.getNegativeStr()
+        // nothing to set up
     }
     
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        // nothing to tear down
         super.tearDown()
     }
     
