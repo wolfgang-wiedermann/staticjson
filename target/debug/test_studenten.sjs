@@ -27,3 +27,45 @@ type OrtEntity {
   ortsname:string;
   landkreis_id:int;
 }
+
+//
+// First simple interface sample
+//
+interface StudentRepository {
+
+  // Get-Method for Students
+  // "method" is a mandatory param per function 
+  //   it definies the HTTP-Method to use for service call
+  getStudentById(id:int) -> StudentEntity {
+    method="GET";
+    path-params="id";
+    path="/repos/student/{id}";
+  }
+  
+  // Find-Method for Students
+  // "method" is a mandatory param per function 
+  //   it definies the HTTP-Method to use for service call
+  // "path" is mandatory if no Interface-Parameter path is available
+  findStudent(name:string, vorname:string) -> StudentEntity[] {
+    method="GET";
+    query-params="name,vorname";
+    path="/repos/student";
+  }
+}
+
+//
+// Second simple interface sample with interface parameters
+//
+interface OrtRepository(
+    pattern="Repository", 
+    path="/repos/ort") {
+    
+  // Get-Method for Ort-Objects
+  // method is a mandatory param per function 
+  // it definies the HTTP-Method to use for service call
+  getOrtById(id:int) -> OrtEntity {
+    method="GET";
+    path-params="id";
+    path="{id}";
+  }
+}

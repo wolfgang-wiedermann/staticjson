@@ -159,7 +159,7 @@ impl Parser {
     } else if c == '(' && self.buffer.len() > 0 {
       self.current_type.typename = self.buffer.clone();
       self.buffer.truncate(0);
-      self.state = model::ParserState::INTYPEPARAMNAME;
+      self.state = model::ParserState::ININTERFACEPARAMNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
     } else if Parser::is_valid_name_character(&c) {
       match self.substate {
@@ -171,7 +171,7 @@ impl Parser {
           self.buffer.push(c);
         }
         model::ParserSubState::TRAILINGBLANKS => {
-          self.raise_syntax_error("blanks are not allowed within type names");
+          self.raise_syntax_error("blanks are not allowed within interface names");
         }
       }
     } else if Parser::is_whitespace_or_newline(&c) {
@@ -184,7 +184,7 @@ impl Parser {
         }
       }
     } else {
-      self.raise_syntax_error("Invalid character in type name");
+      self.raise_syntax_error("Invalid character in interface name");
     }    
   }
 
@@ -493,7 +493,8 @@ impl Parser {
   }
 
   fn raise_syntax_error(&mut self, txt:&str) {
-    panic!("SYNTAX-ERROR: {} in line {}:{}", txt, self.line+1, self.column-1);
+    //panic!("SYNTAX-ERROR: {} in line {}:{}", txt, self.line+1, self.column-1);
+      panic!("SYNTAX-ERROR: {} : {:?}", txt, self.state);
   }
   // #end_region helper functions
 }
