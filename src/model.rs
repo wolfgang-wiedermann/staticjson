@@ -25,6 +25,18 @@ pub enum ParserState {
   
   INOUTERCMT, // in comment outside of typedefinition
   ININNERCMT, // in comment inside of typedefinition
+    
+  // Special States for Interface-Definitions
+  ININTERFACENAME, ININTERFACE,
+  ININTERFACEPARAMNAME,
+  ININTERFACEPARAMVALUE,
+  INNTERFACEPARAMSTRING,
+  OUTOFINTERFACEPARAMLIST,
+    
+  INFUNCTIONNAME, INFUNCTIONRETURNTYPE, 
+  INFUNCTIONPARAMLIST, INFUNCTIONPARAMNAME,
+  INFUNCTIONPARAMVALUE, INFUNCTIONPARAMSTRING,
+  // End of special States for Interface Definitions
 }
 
 #[derive(Clone, Debug)]
@@ -106,6 +118,76 @@ impl Type {
         || name == "date"
         || name == "time"
         || name == "datetime";
+  }
+
+  /// Checks if a param with the given name is present in
+  /// params attribute
+  pub fn is_param_present(&self, param_name:&str) -> bool {
+    for p in self.params.iter() {
+      if p.name == param_name {
+        return true;
+      }
+    }
+    return false;
+  }
+  // Checks if a param with the given name has the given value
+  pub fn is_param_value_present(&self, param_name:&str, param_value:&str) -> bool {
+    for p in self.params.iter() {
+      if p.name == param_name {
+        return p.value == param_value;
+      } 
+    }
+    return false;
+  }
+}
+
+pub struct Interface {
+  pub name:String,
+  pub functions:Vec<Box<Function>>,
+  pub params:Vec<Box<Parameter>>
+}
+
+impl Interface {
+  pub fn new() -> Interface {
+    Interface {
+      name:String::new(),
+      functions:Vec::new(),
+      params:Vec::new()
+    }
+  }
+
+  /// Checks if a param with the given name is present in
+  /// params attribute
+  pub fn is_param_present(&self, param_name:&str) -> bool {
+    for p in self.params.iter() {
+      if p.name == param_name {
+        return true;
+      }
+    }
+    return false;
+  }
+  // Checks if a param with the given name has the given value
+  pub fn is_param_value_present(&self, param_name:&str, param_value:&str) -> bool {
+    for p in self.params.iter() {
+      if p.name == param_name {
+        return p.value == param_value;
+      } 
+    }
+    return false;
+  }
+}
+
+pub struct Function {
+  pub name:String,
+  pub params:Vec<Box<Parameter>>
+}
+
+impl Function {
+  pub fn new() -> Function {
+    Function {
+      name:String::new(),
+      params:Vec::new()
+    }
   }
 
   /// Checks if a param with the given name is present in

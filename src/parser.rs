@@ -3,7 +3,9 @@ use model;
 pub struct Parser {
   buffer: String,
   types: Box<Vec<Box<model::Type>>>,
+  interfaces: Box<Vec<Box<model::Interface>>>,
   current_type: Box<model::Type>,
+  current_interface: Box<model::Interface>,
   current_attribute: Box<model::Attribute>,
   current_param: Box<model::Parameter>,
   state: model::ParserState,
@@ -19,8 +21,12 @@ impl Parser {
     Parser {
       buffer:String::new(),
       types:Box::new(Vec::new()),
+      interfaces:Box::new(Vec::new()),
       current_type: Box::new(model::Type { typename: String::new(), 
                                            attributes: Vec::new(),
+                                           params: Vec::new() }),
+      current_interface: Box::new(model::Interface { name: String::new(), 
+                                           functions: Vec::new(),
                                            params: Vec::new() }),
       current_attribute: Box::new(model::Attribute { name: String::new(), 
                                                      attribute_type: String::new(),
@@ -45,6 +51,7 @@ impl Parser {
       match self.state {
         model::ParserState::INITIAL => self.do_initial(c),
         model::ParserState::INOUTERCMT => self.do_inoutercomment(c),
+        // Automaton parts for parsing types
         model::ParserState::INTYPENAME => self.do_intypename(c),
         model::ParserState::INATTRIBUTENAME => self.do_inattributename(c),
         model::ParserState::INATTRIBUTETYPE => self.do_inattributetype(c),
@@ -59,7 +66,10 @@ impl Parser {
         model::ParserState::OUTOFFTYPEPARAMLIST => self.do_outofftypeparamlist(c),
         model::ParserState::INTYPEPARAMVALUE => self.do_intypeparamvalue(c),
         model::ParserState::INTYPEPARAMSTRING => self.do_intypeparamstring(c),
-        //_  => self.raise_syntax_error("\nERROR: Invalid State\n"),
+        // Automaton parts for parsing interfaces
+        model::ParserState::ININTERFACENAME => self.do_ininterfacename(c),
+        // This has to be here until all parts of the automaton for parsing interfaces are coded
+        _  => self.raise_syntax_error("\nERROR: Invalid State\n"),
       }
       self.cminus1 = c;
     } 
@@ -72,6 +82,9 @@ impl Parser {
     if c == ' ' && self.buffer == "type".to_string() {
       self.buffer.truncate(0);
       self.state = model::ParserState::INTYPENAME;
+    } else if(c == ' ' && self.buffer == "interface".to_string()) {
+      self.buffer.truncate(0);
+      self.state = model::ParserState::ININTERFACENAME;
     } else if Parser::is_whitespace_or_newline(&c) && self.buffer.len() == 0 {
       // ignorieren und puffer leeren
       self.buffer.truncate(0);
@@ -135,6 +148,44 @@ impl Parser {
     } else {
       self.raise_syntax_error("Invalid character in type name");
     }
+  }
+      
+  fn do_ininterfacename(&mut self, c:char) {
+    if c == '{' && self.buffer.len() > 0 {
+      self.current_interface.name = self.buffer.clone();
+      self.buffer.truncate(0);
+      self.state = model::ParserState::INFUNCTIONNAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+    } else if c == '(' && self.buffer.len() > 0 {
+      self.current_type.typename = self.buffer.clone();
+      self.buffer.truncate(0);
+      self.state = model::ParserState::INTYPEPARAMNAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+    } else if Parser::is_valid_name_character(&c) {
+      match self.substate {
+        model::ParserSubState::LEADINGBLANKS => {
+          self.buffer.push(c);
+          self.substate = model::ParserSubState::VALUE;
+        }
+        model::ParserSubState::VALUE => {
+          self.buffer.push(c);
+        }
+        model::ParserSubState::TRAILINGBLANKS => {
+          self.raise_syntax_error("blanks are not allowed within type names");
+        }
+      }
+    } else if Parser::is_whitespace_or_newline(&c) {
+      match self.substate {
+        model::ParserSubState::VALUE => {
+          self.substate = model::ParserSubState::TRAILINGBLANKS;
+        }
+        _ => {
+          // Nix machen
+        }
+      }
+    } else {
+      self.raise_syntax_error("Invalid character in type name");
+    }    
   }
 
   fn do_inattributename(&mut self, c:char) {
