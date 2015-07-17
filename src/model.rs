@@ -27,6 +27,8 @@ pub enum ParserState {
   ININNERCMT, // in comment inside of typedefinition
     
   // Special States for Interface-Definitions
+  ININTERFACECMT,
+    
   ININTERFACENAME, ININTERFACE,
   ININTERFACEPARAMNAME,
   ININTERFACEPARAMVALUE,
@@ -35,7 +37,11 @@ pub enum ParserState {
     
   INFUNCTIONNAME, INFUNCTIONRETURNTYPE, 
   INFUNCTIONPARAMLIST, INFUNCTIONPARAMNAME,
-  INFUNCTIONPARAMVALUE, INFUNCTIONPARAMSTRING,
+  INFUNCTIONPARAMTYPE, INFUNCTION,
+
+  INFUNCTIONATTRIBUTENAME,
+  INFUNCTIONATTRIBUTEVALUE,
+  INFUNCTIONATTRIBUTESTRING,
   // End of special States for Interface Definitions
 }
 
@@ -179,14 +185,16 @@ impl Interface {
 
 pub struct Function {
   pub name:String,
-  pub params:Vec<Box<Parameter>>
+  pub params:Vec<Box<Parameter>>,
+  pub attributes:Vec<Box<Parameter>>
 }
 
 impl Function {
   pub fn new() -> Function {
     Function {
       name:String::new(),
-      params:Vec::new()
+      params:Vec::new(),
+      attributes:Vec::new()
     }
   }
 
