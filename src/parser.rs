@@ -360,8 +360,17 @@ impl Parser {
     if c == '{' {
       self.state = model::ParserState::INFUNCTIONATTRIBUTENAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
+    } else if c == '-' && self.cminus1 != '-' {
+      // Maybee if next is
+    } else if c == '>' && self.cminus1 == '-' { 
+      self.state = model::ParserState::INFUNCTIONRETURNTYPE;
+      self.substate = model::ParserSubState::LEADINGBLANKS;    
     } else if !Parser::is_whitespace_or_newline(&c) {
-      self.raise_syntax_error("Invalid character in interface name");
+      // DEBUG:
+      println!("CHAR: {}", c);
+      println!("BUFF: {}", self.buffer);
+      // ----
+      self.raise_syntax_error("Invalid character in behind function parameter list");
     }
   }
 
