@@ -745,7 +745,9 @@ for attr in typ.attributes.iter() {
     str.push_str(&get_test_value(&attr.attribute_type));
     str.push_str("\", \"Field: ");
     str.push_str(&attr.name);
-    str.push_str("\")");
+    str.push_str(" - \\(obj.");
+    str.push_str(&attr.name);
+    str.push_str(")\")");
 } 
   str.push_str("\n    }\n    \n    // TODO: insert a negative Test-Case\n\n    // Helper Functions\n    // Generate a json string for successful parsing unittests\n    public static func getPositiveStr() -> String {\n        var json = \"{\";");
 let mut r_idx = 0;

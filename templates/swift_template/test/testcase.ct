@@ -25,7 +25,7 @@ public class Test {{= typ.typename }} : XCTestCase {
     func testParsing_Success() {
         var obj =  {{= typ.typename }}.parse(self.correctJson);
 {{ for attr in typ.attributes.iter() { }}
-        XCTAssert("\(obj. {{= attr.name }})" == " {{= get_test_value(&attr.attribute_type) }}", "Field:  {{= attr.name }}")
+        XCTAssert("\(obj. {{= attr.name }})" == " {{= get_test_value(&attr.attribute_type) }}", "Field:  {{= attr.name }} - \(obj. {{= attr.name }})")
 {{ } }}
     }
     
