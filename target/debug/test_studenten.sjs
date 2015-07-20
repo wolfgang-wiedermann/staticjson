@@ -37,9 +37,9 @@ interface StudentRepository {
   // "method" is a mandatory param per function 
   //   it definies the HTTP-Method to use for service call
   getStudentById(id:int) -> StudentEntity {
-    method="GET";
-    path-params="id";
-    path="/repos/student/{id}";
+    method="GET",
+    path-params="id",
+    path="/repos/student/{id}"
   }
   
   // Find-Method for Students
@@ -47,9 +47,9 @@ interface StudentRepository {
   //   it definies the HTTP-Method to use for service call
   // "path" is mandatory if no Interface-Parameter path is available
   findStudent(name:string, vorname:string) -> StudentEntity[] {
-    method="GET";
-    query-params="name,vorname";
-    path="/repos/student";
+    method="GET",
+    query-params="name,vorname",
+    path="/repos/student"
   }
 }
 
@@ -64,8 +64,8 @@ interface OrtRepository(
   // method is a mandatory param per function 
   // it definies the HTTP-Method to use for service call
   getOrtById(id:int) -> OrtEntity {
-    method="GET";
-    path-params="id";
-    path="{id}";
+    method="GET",
+    path-params="id",
+    path="{id}"
   }
 }

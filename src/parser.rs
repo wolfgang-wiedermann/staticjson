@@ -78,6 +78,7 @@ impl Parser {
         model::ParserState::INFUNCTIONPARAMTYPE => self.do_infunctionparametertype(c),
         model::ParserState::INFUNCTION => self.do_infunction(c),
         model::ParserState::INFUNCTIONRETURNTYPE => self.do_infunctionreturntype(c),
+        model::ParserState::INFUNCTIONATTRIBUTENAME => self.do_infunctionattributename(c),
         // This has to be here until all parts of the automaton for parsing interfaces are coded
         _  => self.raise_syntax_error("\nERROR: Invalid State\n"),
       }
@@ -412,6 +413,53 @@ impl Parser {
       println!("BUFF: {}", self.buffer);      
       // ----
       self.raise_syntax_error("Invalid character in function return type");
+    }
+  }
+  
+  fn do_infunctionattributename(&mut self, c:char) {
+    if c == '=' && self.buffer.len() > 0 {
+      self.current_attribute.name = self.buffer.clone();
+      // DEBUG:
+      println!("FunctionAttributeName: {}", self.buffer);
+      // END DEBUG
+      self.buffer.truncate(0);
+      self.state = model::ParserState::INFUNCTIONATTRIBUTEVALUE; // TODO: Find out state
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+    } else if c == '}' && self.buffer.len() == 0 {
+      self.state = model::ParserState::INFUNCTIONNAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      self.store_current_type();
+    } else if c == '/' && self.cminus1 == '/' {
+      self.state = model::ParserState::ININTERFACECMT;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      self.buffer.truncate(0);
+    } else if Parser::is_valid_name_character(&c) {
+      match self.substate {
+        model::ParserSubState::LEADINGBLANKS => {
+          self.buffer.push(c);
+          self.substate = model::ParserSubState::VALUE;
+        }
+        model::ParserSubState::VALUE => {
+          self.buffer.push(c);
+        }
+        model::ParserSubState::TRAILINGBLANKS => {
+          self.raise_syntax_error("blanks are not allwoed within attribute names");
+        }
+      }
+    } else if Parser::is_whitespace_or_newline(&c) {
+      match self.substate {
+        model::ParserSubState::VALUE => {
+          self.substate = model::ParserSubState::TRAILINGBLANKS;
+        }
+        _ => {
+          // Nix machen
+        }
+      }
+    } else if c != '/' {
+      // DEBUG:
+      println!("CHAR: {}", c);
+      // END DEBUG
+      self.raise_syntax_error("Invalid character in attribute name");
     }
   }
 
