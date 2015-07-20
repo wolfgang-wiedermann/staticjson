@@ -77,6 +77,7 @@ impl Parser {
         model::ParserState::INFUNCTIONPARAMNAME => self.do_infunctionparametername(c),
         model::ParserState::INFUNCTIONPARAMTYPE => self.do_infunctionparametertype(c),
         model::ParserState::INFUNCTION => self.do_infunction(c),
+        model::ParserState::INFUNCTIONRETURNTYPE => self.do_infunctionreturntype(c),
         // This has to be here until all parts of the automaton for parsing interfaces are coded
         _  => self.raise_syntax_error("\nERROR: Invalid State\n"),
       }
@@ -371,6 +372,46 @@ impl Parser {
       println!("BUFF: {}", self.buffer);
       // ----
       self.raise_syntax_error("Invalid character in behind function parameter list");
+    }
+  }
+  
+  fn do_infunctionreturntype(&mut self, c:char) {
+    if c == '{' && self.buffer.len() > 0 {
+      // self.current_function.returntype = self.buffer.clone();
+      // DEBUG:
+      println!("FunctionReturnType: {}", self.buffer);
+      // ------
+      self.buffer.truncate(0);
+      self.state = model::ParserState::INFUNCTIONATTRIBUTENAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+    } else if Parser::is_valid_name_character(&c) {
+      match self.substate {
+        model::ParserSubState::LEADINGBLANKS => {
+          self.buffer.push(c);
+          self.substate = model::ParserSubState::VALUE;
+        }
+        model::ParserSubState::VALUE => {
+          self.buffer.push(c);
+        }
+        model::ParserSubState::TRAILINGBLANKS => {
+          self.raise_syntax_error("blanks are not allowed within function parameter types");
+        }
+      }
+    } else if Parser::is_whitespace_or_newline(&c) {
+      match self.substate {
+        model::ParserSubState::VALUE => {
+          self.substate = model::ParserSubState::TRAILINGBLANKS;
+        }
+        _ => {
+          // Nix machen
+        }
+      }
+    } else {
+      // DEBUG:
+      println!("CHAR: {}", c);
+      println!("BUFF: {}", self.buffer);      
+      // ----
+      self.raise_syntax_error("Invalid character in function return type");
     }
   }
 
