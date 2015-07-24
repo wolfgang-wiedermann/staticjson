@@ -78,6 +78,8 @@ impl Parser {
         model::ParserState::INFUNCTIONPARAMTYPE => self.do_infunctionparametertype(c),
         model::ParserState::INFUNCTION => self.do_infunction(c),
         model::ParserState::INFUNCTIONRETURNTYPE => self.do_infunctionreturntype(c),
+        model::ParserState::INFUNCTIONRETURNTYPEARRAY => self.do_infunctionreturntypearray(c),
+        model::ParserState::BEHINDFUNCTIONRETURNTYPEARRAY => self.do_behindfunctionreturntypearray(c),
         model::ParserState::INFUNCTIONATTRIBUTENAME => self.do_infunctionattributename(c),
         model::ParserState::INFUNCTIONATTRIBUTEVALUE => self.do_infunctionattributevalue(c),
         model::ParserState::INFUNCTIONATTRIBUTESTRING => self.do_infunctionattributestring(c),
@@ -222,6 +224,9 @@ impl Parser {
       // ------
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTIONPARAMNAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+    } else if c == '}' && self.buffer.len() == 0 {
+      self.state = model::ParserState::INITIAL;
       self.substate = model::ParserSubState::LEADINGBLANKS;
     } else if Parser::is_valid_name_character(&c) {
       match self.substate {
@@ -394,7 +399,7 @@ impl Parser {
       println!("FunctionReturnType is array");
       // ------
       self.buffer.truncate(0);
-      self.state = model::ParserState::INFUNCTIONATTRIBUTENAME;
+      self.state = model::ParserState::INFUNCTIONRETURNTYPEARRAY;
       self.substate = model::ParserSubState::LEADINGBLANKS;
     } else if Parser::is_valid_name_character(&c) {
       match self.substate {
@@ -424,6 +429,24 @@ impl Parser {
       println!("BUFF: {}", self.buffer);      
       // ----
       self.raise_syntax_error("Invalid character in function return type");
+    }
+  }
+
+  fn do_infunctionreturntypearray(&mut self, c:char) {
+    if c == ']' {
+      self.state = model::ParserState::BEHINDFUNCTIONRETURNTYPEARRAY;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+    } else {
+      self.raise_syntax_error("[ must be followed by ] directly");
+    }
+  }
+
+  fn do_behindfunctionreturntypearray(&mut self, c:char) {
+    if c == '{' {
+      self.state = model::ParserState::INFUNCTIONATTRIBUTENAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+    } else if !Parser::is_whitespace_or_newline(&c) {
+      self.raise_syntax_error("invalid character behind functionreturntype array");
     }
   }
   
