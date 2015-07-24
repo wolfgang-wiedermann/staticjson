@@ -72,6 +72,10 @@ impl Parser {
         model::ParserState::INTYPEPARAMSTRING => self.do_intypeparamstring(c),
         // Automaton parts for parsing interfaces
         model::ParserState::ININTERFACENAME => self.do_ininterfacename(c),
+        model::ParserState::ININTERFACEPARAMNAME => self.do_ininterfaceparamname(c),
+        model::ParserState::ININTERFACEPARAMVALUE => self.do_ininterfaceparamvalue(c),
+        model::ParserState::ININTERFACEPARAMSTRING => self.do_ininterfaceparamstring(c),
+      
         model::ParserState::INFUNCTIONNAME => self.do_infunctionname(c),
         model::ParserState::ININTERFACECMT => self.do_ininterfacecomment(c),
         model::ParserState::INFUNCTIONPARAMNAME => self.do_infunctionparametername(c),
@@ -214,6 +218,79 @@ impl Parser {
     } else {
       self.raise_syntax_error("Invalid character in interface name");
     }    
+  }
+
+  fn do_ininterfaceparamname(&mut self, c:char) {
+    if c == '=' && self.buffer.len() > 0 {
+      self.current_attribute.name = self.buffer.clone();
+      // DEBUG:
+      println!("InterfaceParamName: {}", self.buffer);
+      // END DEBUG
+      self.buffer.truncate(0);
+      self.state = model::ParserState::ININTERFACEPARAMVALUE; // TODO: Find out state
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+    } else if c == ')' && self.buffer.len() == 0 {
+      self.state = model::ParserState::OUTOFINTERFACEPARAMLIST;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      //self.store_current_interface_param();
+    } else if Parser::is_valid_name_character(&c) {
+      match self.substate {
+        model::ParserSubState::LEADINGBLANKS => {
+          self.buffer.push(c);
+          self.substate = model::ParserSubState::VALUE;
+        }
+        model::ParserSubState::VALUE => {
+          self.buffer.push(c);
+        }
+        model::ParserSubState::TRAILINGBLANKS => {
+          self.raise_syntax_error("blanks are not allwoed within interface param names");
+        }
+      }
+    } else if Parser::is_whitespace_or_newline(&c) {
+      match self.substate {
+        model::ParserSubState::VALUE => {
+          self.substate = model::ParserSubState::TRAILINGBLANKS;
+        }
+        _ => {
+          // Nix machen
+        }
+      }
+    } else {
+      // DEBUG:
+      println!("CHAR: {}", c);
+      // END DEBUG
+      self.raise_syntax_error("Invalid character in interface param name");
+    }
+  }
+
+  fn do_ininterfaceparamvalue(&mut self, c:char) {
+    if c == '"' {
+      self.state = model::ParserState::ININTERFACEPARAMSTRING;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      // TODO: save buffer content in current... object
+    } else if c == ',' {
+      self.state = model::ParserState::ININTERFACEPARAMNAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      // TODO: save buffer content in current... object
+    } else if c == ')' {
+      self.state = model::ParserState::OUTOFINTERFACEPARAMLIST;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      // TODO: save buffer content in current... object
+    } else if !Parser::is_whitespace_or_newline(&c) {
+      self.raise_syntax_error("invalid character between = and \" in INTERFACEPARAMVALUE");
+    }
+  }
+
+  fn do_ininterfaceparamstring(&mut self, c:char) {
+    if c == '"' && self.cminus1 != '\\' {
+      self.state = model::ParserState::ININTERFACEPARAMVALUE;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      //self.current_attribute.value = self.buffer.clone();
+      println!("InterfaceParamString: {}", self.buffer);
+      self.buffer.truncate(0);
+    } else {
+      self.buffer.push(c);
+    }
   }
 
   fn do_infunctionname(&mut self, c:char) {
