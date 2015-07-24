@@ -79,6 +79,8 @@ impl Parser {
         model::ParserState::INFUNCTION => self.do_infunction(c),
         model::ParserState::INFUNCTIONRETURNTYPE => self.do_infunctionreturntype(c),
         model::ParserState::INFUNCTIONATTRIBUTENAME => self.do_infunctionattributename(c),
+        model::ParserState::INFUNCTIONATTRIBUTEVALUE => self.do_infunctionattributevalue(c),
+        model::ParserState::INFUNCTIONATTRIBUTESTRING => self.do_infunctionattributestring(c),
         // This has to be here until all parts of the automaton for parsing interfaces are coded
         _  => self.raise_syntax_error("\nERROR: Invalid State\n"),
       }
@@ -385,6 +387,15 @@ impl Parser {
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTIONATTRIBUTENAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
+    } else if c == '[' && self.buffer.len() > 0 {
+      // self.current_function.returntype = self.buffer.clone();
+      // DEBUG:
+      println!("FunctionReturnType: {}", self.buffer);
+      println!("FunctionReturnType is array");
+      // ------
+      self.buffer.truncate(0);
+      self.state = model::ParserState::INFUNCTIONATTRIBUTENAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
     } else if Parser::is_valid_name_character(&c) {
       match self.substate {
         model::ParserSubState::LEADINGBLANKS => {
@@ -461,6 +472,36 @@ impl Parser {
       // END DEBUG
       self.raise_syntax_error("Invalid character in attribute name");
     }
+  }
+
+  fn do_infunctionattributevalue(&mut self, c:char) {
+    if c == '"' {
+      self.state = model::ParserState::INFUNCTIONATTRIBUTESTRING;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      // TODO: save buffer content in current... object
+    } else if c == ',' {
+      self.state = model::ParserState::INFUNCTIONATTRIBUTENAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      // TODO: save buffer content in current... object
+    } else if c == '}' {
+      self.state = model::ParserState::INFUNCTIONNAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      // TODO: save buffer content in current... object
+    } else if !Parser::is_whitespace_or_newline(&c) {
+      self.raise_syntax_error("invalid character between = and \" in FUNCTIONATTRIBUTEVALUE");
+    }
+  }
+
+  fn do_infunctionattributestring(&mut self, c:char) {
+      if c == '"' && self.cminus1 != '\\' {
+        self.state = model::ParserState::INFUNCTIONATTRIBUTEVALUE;
+        self.substate = model::ParserSubState::LEADINGBLANKS;
+        //self.current_attribute.value = self.buffer.clone();
+        println!("FunctionAttributeValue: {}", self.buffer);
+        self.buffer.truncate(0);
+      } else {
+        self.buffer.push(c);
+      }
   }
 
   fn do_inattributename(&mut self, c:char) {
