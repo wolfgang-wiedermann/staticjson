@@ -75,7 +75,7 @@ impl Parser {
         model::ParserState::ININTERFACEPARAMNAME => self.do_ininterfaceparamname(c),
         model::ParserState::ININTERFACEPARAMVALUE => self.do_ininterfaceparamvalue(c),
         model::ParserState::ININTERFACEPARAMSTRING => self.do_ininterfaceparamstring(c),
-      
+        model::ParserState::OUTOFINTERFACEPARAMLIST => self.do_outofinterfaceparamlist(c),
         model::ParserState::INFUNCTIONNAME => self.do_infunctionname(c),
         model::ParserState::ININTERFACECMT => self.do_ininterfacecomment(c),
         model::ParserState::INFUNCTIONPARAMNAME => self.do_infunctionparametername(c),
@@ -285,11 +285,21 @@ impl Parser {
     if c == '"' && self.cminus1 != '\\' {
       self.state = model::ParserState::ININTERFACEPARAMVALUE;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      //self.current_attribute.value = self.buffer.clone();
+      //self.current_param.value = self.buffer.clone();
+      //TODO: self.store_interface_param();
       println!("InterfaceParamString: {}", self.buffer);
       self.buffer.truncate(0);
     } else {
       self.buffer.push(c);
+    }
+  }
+
+  fn do_outofinterfaceparamlist(&mut self, c:char) {
+    if c == '{' {
+      self.state = model::ParserState::INFUNCTIONNAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+    } else if !Parser::is_whitespace_or_newline(&c) {
+      self.raise_syntax_error("invalid character between interface param list and { ");
     }
   }
 
