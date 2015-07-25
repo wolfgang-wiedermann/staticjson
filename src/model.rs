@@ -148,6 +148,7 @@ impl Type {
   }
 }
 
+#[derive(Clone, Debug)]
 pub struct Interface {
   pub name:String,
   pub functions:Vec<Box<Function>>,
@@ -184,6 +185,7 @@ impl Interface {
   }
 }
 
+#[derive(Clone, Debug)]
 pub struct Function {
   pub name:String,
   pub params:Vec<Box<Parameter>>,

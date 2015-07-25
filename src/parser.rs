@@ -93,6 +93,9 @@ impl Parser {
       self.cminus1 = c;
     } 
 
+    // Debug-Output 
+      println!("\n{:?}\n", self.interfaces);
+    // Interfaces must also be returned in future!
     return &self.types;
   }
 
@@ -180,7 +183,7 @@ impl Parser {
     if c == '{' && self.buffer.len() > 0 {
       self.current_interface.name = self.buffer.clone();
       // DEBUG:
-      println!("{}", self.buffer);
+      println!("Interface: {}", self.buffer);
       // ------
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTIONNAME;
@@ -188,7 +191,7 @@ impl Parser {
     } else if c == '(' && self.buffer.len() > 0 {
       self.current_interface.name = self.buffer.clone();
       // DEBUG:
-      println!("{}", self.buffer);
+      println!("Interface: {}", self.buffer);
       // ------
       self.buffer.truncate(0);
       self.state = model::ParserState::ININTERFACEPARAMNAME;
@@ -222,7 +225,7 @@ impl Parser {
 
   fn do_ininterfaceparamname(&mut self, c:char) {
     if c == '=' && self.buffer.len() > 0 {
-      self.current_attribute.name = self.buffer.clone();
+      self.current_param.name = self.buffer.clone();
       // DEBUG:
       println!("InterfaceParamName: {}", self.buffer);
       // END DEBUG
@@ -232,7 +235,6 @@ impl Parser {
     } else if c == ')' && self.buffer.len() == 0 {
       self.state = model::ParserState::OUTOFINTERFACEPARAMLIST;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      //self.store_current_interface_param();
     } else if Parser::is_valid_name_character(&c) {
       match self.substate {
         model::ParserSubState::LEADINGBLANKS => {
@@ -267,15 +269,14 @@ impl Parser {
     if c == '"' {
       self.state = model::ParserState::ININTERFACEPARAMSTRING;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      // TODO: save buffer content in current... object
     } else if c == ',' {
       self.state = model::ParserState::ININTERFACEPARAMNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      // TODO: save buffer content in current... object
+      self.store_current_interface_param();
     } else if c == ')' {
       self.state = model::ParserState::OUTOFINTERFACEPARAMLIST;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      // TODO: save buffer content in current... object
+      self.store_current_interface_param();
     } else if !Parser::is_whitespace_or_newline(&c) {
       self.raise_syntax_error("invalid character between = and \" in INTERFACEPARAMVALUE");
     }
@@ -285,8 +286,7 @@ impl Parser {
     if c == '"' && self.cminus1 != '\\' {
       self.state = model::ParserState::ININTERFACEPARAMVALUE;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      //self.current_param.value = self.buffer.clone();
-      //TODO: self.store_interface_param();
+      self.current_param.value = self.buffer.clone();
       println!("InterfaceParamString: {}", self.buffer);
       self.buffer.truncate(0);
     } else {
@@ -315,6 +315,7 @@ impl Parser {
     } else if c == '}' && self.buffer.len() == 0 {
       self.state = model::ParserState::INITIAL;
       self.substate = model::ParserSubState::LEADINGBLANKS;
+      self.store_current_interface();
     } else if Parser::is_valid_name_character(&c) {
       match self.substate {
         model::ParserSubState::LEADINGBLANKS => {
@@ -877,6 +878,12 @@ impl Parser {
     self.current_param.value.truncate(0);
   }
 
+  fn store_current_interface_param(&mut self) {
+    self.current_interface.params.push(self.current_param.clone());
+    self.current_param.name.truncate(0);
+    self.current_param.value.truncate(0);
+  }
+
   fn store_current_attribute(&mut self) {
     self.current_type.attributes.push(self.current_attribute.clone());
     self.current_attribute.name.truncate(0);
@@ -890,6 +897,13 @@ impl Parser {
     self.current_type.typename.truncate(0);
     self.current_type.attributes.truncate(0);
     self.current_type.params.truncate(0);
+  }
+
+  fn store_current_interface(&mut self) {
+    self.interfaces.push(self.current_interface.clone());
+    self.current_interface.name.truncate(0);
+    self.current_interface.functions.truncate(0);
+    self.current_interface.params.truncate(0);
   }
 
   pub fn is_whitespace_or_newline(c:&char) -> bool {
