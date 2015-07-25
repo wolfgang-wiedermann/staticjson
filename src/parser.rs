@@ -7,6 +7,7 @@ pub struct Parser {
   current_type: Box<model::Type>,
   current_interface: Box<model::Interface>,
   current_function: Box<model::Function>,
+  current_function_param: Box<model::FunctionParameter>,
   current_attribute: Box<model::Attribute>,
   current_param: Box<model::Parameter>,
   state: model::ParserState,
@@ -30,8 +31,13 @@ impl Parser {
                                            functions: Vec::new(),
                                            params: Vec::new() }),
       current_function: Box::new(model::Function { name: String::new(),
+                                           returntype: String::new(),
                                            params: Vec::new(),
                                            attributes: Vec::new()}),
+      current_function_param: Box::new(model::FunctionParameter { name: String::new(), 
+                                           typename: String::new(),
+                                           is_array: false, 
+                                           params: Vec::new() }),
       current_attribute: Box::new(model::Attribute { name: String::new(), 
                                                      attribute_type: String::new(),
                                                      is_array: false, 
@@ -473,7 +479,7 @@ impl Parser {
   
   fn do_infunctionreturntype(&mut self, c:char) {
     if c == '{' && self.buffer.len() > 0 {
-      // self.current_function.returntype = self.buffer.clone();
+      self.current_function.returntype = self.buffer.clone();
       // DEBUG:
       println!("FunctionReturnType: {}", self.buffer);
       // ------
@@ -481,7 +487,7 @@ impl Parser {
       self.state = model::ParserState::INFUNCTIONATTRIBUTENAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
     } else if c == '[' && self.buffer.len() > 0 {
-      // self.current_function.returntype = self.buffer.clone();
+      self.current_function.returntype = self.buffer.clone();
       // DEBUG:
       println!("FunctionReturnType: {}", self.buffer);
       println!("FunctionReturnType is array");
@@ -540,7 +546,7 @@ impl Parser {
   
   fn do_infunctionattributename(&mut self, c:char) {
     if c == '=' && self.buffer.len() > 0 {
-      self.current_attribute.name = self.buffer.clone();
+      self.current_param.name = self.buffer.clone();
       // DEBUG:
       println!("FunctionAttributeName: {}", self.buffer);
       // END DEBUG
@@ -550,7 +556,7 @@ impl Parser {
     } else if c == '}' && self.buffer.len() == 0 {
       self.state = model::ParserState::INFUNCTIONNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      self.store_current_type();
+      self.store_current_function();
     } else if c == '/' && self.cminus1 == '/' {
       self.state = model::ParserState::ININTERFACECMT;
       self.substate = model::ParserSubState::LEADINGBLANKS;
@@ -589,15 +595,15 @@ impl Parser {
     if c == '"' {
       self.state = model::ParserState::INFUNCTIONATTRIBUTESTRING;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      // TODO: save buffer content in current... object
     } else if c == ',' {
       self.state = model::ParserState::INFUNCTIONATTRIBUTENAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      // TODO: save buffer content in current... object
+      self.store_current_function_attribute();
     } else if c == '}' {
       self.state = model::ParserState::INFUNCTIONNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      // TODO: save buffer content in current... object
+      self.store_current_function_attribute();
+      self.store_current_function();
     } else if !Parser::is_whitespace_or_newline(&c) {
       self.raise_syntax_error("invalid character between = and \" in FUNCTIONATTRIBUTEVALUE");
     }
@@ -607,7 +613,7 @@ impl Parser {
       if c == '"' && self.cminus1 != '\\' {
         self.state = model::ParserState::INFUNCTIONATTRIBUTEVALUE;
         self.substate = model::ParserSubState::LEADINGBLANKS;
-        //self.current_attribute.value = self.buffer.clone();
+        self.current_param.value = self.buffer.clone();
         println!("FunctionAttributeValue: {}", self.buffer);
         self.buffer.truncate(0);
       } else {
@@ -904,6 +910,20 @@ impl Parser {
     self.current_interface.name.truncate(0);
     self.current_interface.functions.truncate(0);
     self.current_interface.params.truncate(0);
+  }
+
+  fn store_current_function(&mut self) {
+    self.current_interface.functions.push(self.current_function.clone());
+    self.current_function.name.truncate(0);
+    self.current_function.params.truncate(0);
+    self.current_function.attributes.truncate(0);
+    //self.current_function.return_type_is_array = false;
+  }
+
+  fn store_current_function_attribute(&mut self) {
+    self.current_function.attributes.push(self.current_param.clone());
+    self.current_param.name.truncate(0);
+    self.current_param.value.truncate(0);
   }
 
   pub fn is_whitespace_or_newline(c:&char) -> bool {

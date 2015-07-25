@@ -188,6 +188,8 @@ impl Interface {
 #[derive(Clone, Debug)]
 pub struct Function {
   pub name:String,
+  pub returntype:String,
+  //TODO: returntype_is_array:bool,
   pub params:Vec<Box<Parameter>>,
   pub attributes:Vec<Box<Parameter>>
 }
@@ -196,11 +198,42 @@ impl Function {
   pub fn new() -> Function {
     Function {
       name:String::new(),
+      returntype:String::new(),
       params:Vec::new(),
       attributes:Vec::new()
     }
   }
 
+  /// Checks if a param with the given name is present in
+  /// params attribute
+  pub fn is_param_present(&self, param_name:&str) -> bool {
+    for p in self.params.iter() {
+      if p.name == param_name {
+        return true;
+      }
+    }
+    return false;
+  }
+  // Checks if a param with the given name has the given value
+  pub fn is_param_value_present(&self, param_name:&str, param_value:&str) -> bool {
+    for p in self.params.iter() {
+      if p.name == param_name {
+        return p.value == param_value;
+      } 
+    }
+    return false;
+  }
+}
+
+#[derive(Clone, Debug)]
+pub struct FunctionParameter {
+  pub name:String,
+  pub typename:String,
+  pub is_array:bool,
+  pub params:Vec<Box<Parameter>>
+}
+
+impl FunctionParameter {
   /// Checks if a param with the given name is present in
   /// params attribute
   pub fn is_param_present(&self, param_name:&str) -> bool {
