@@ -51,7 +51,7 @@ impl Parser {
     }
   }
 
-  pub fn parse(&mut self, m: &model::GeneralModel) -> &Box<Vec<Box<model::Type>>> {
+  pub fn parse(&mut self, m: &model::GeneralModel) -> model::ParserResult {
     self.types  = Box::new(Vec::new());
     self.buffer = String::new();
     let iter = m.code.chars();
@@ -101,8 +101,11 @@ impl Parser {
 
     // Debug-Output 
       println!("\n{:?}\n", self.interfaces);
-    // Interfaces must also be returned in future!
-    return &self.types;
+    
+    return model::ParserResult {
+      types: self.types.clone(),
+      interfaces: self.interfaces.clone()
+    }
   }
 
   // #region parser functions

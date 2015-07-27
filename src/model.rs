@@ -62,6 +62,12 @@ pub struct CommandlineOptions {
 }
 
 #[derive(Clone, Debug)]
+pub struct ParserResult {
+  pub types: Box<Vec<Box<Type>>>,
+  pub interfaces: Box<Vec<Box<Interface>>>
+}
+
+#[derive(Clone, Debug)]
 pub struct Parameter {
   pub name:String,
   pub value:String
