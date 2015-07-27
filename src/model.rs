@@ -190,7 +190,7 @@ pub struct Function {
   pub name:String,
   pub returntype:String,
   //TODO: returntype_is_array:bool,
-  pub params:Vec<Box<Parameter>>,
+  pub params:Vec<Box<FunctionParameter>>,
   pub attributes:Vec<Box<Parameter>>
 }
 
@@ -206,8 +206,8 @@ impl Function {
 
   /// Checks if a param with the given name is present in
   /// params attribute
-  pub fn is_param_present(&self, param_name:&str) -> bool {
-    for p in self.params.iter() {
+  pub fn is_attribute_present(&self, param_name:&str) -> bool {
+    for p in self.attributes.iter() {
       if p.name == param_name {
         return true;
       }
@@ -215,8 +215,8 @@ impl Function {
     return false;
   }
   // Checks if a param with the given name has the given value
-  pub fn is_param_value_present(&self, param_name:&str, param_value:&str) -> bool {
-    for p in self.params.iter() {
+  pub fn is_attribute_value_present(&self, param_name:&str, param_value:&str) -> bool {
+    for p in self.attributes.iter() {
       if p.name == param_name {
         return p.value == param_value;
       } 

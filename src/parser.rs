@@ -356,7 +356,7 @@ impl Parser {
 
   fn do_infunctionparametername(&mut self, c:char) {
     if c == ':' && self.buffer.len() > 0 {
-      self.current_param.name = self.buffer.clone();
+      self.current_function_param.name = self.buffer.clone();
       // DEBUG:
       println!("FunctionParamName: {}", self.buffer);
       // ------
@@ -367,14 +367,11 @@ impl Parser {
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTION;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-    } else if c == ',' && self.buffer.len() > 0 {
-      self.current_param.name = self.buffer.clone();
-      // DEBUG:
-      println!("FunctionParamName: {}", self.buffer);
-      // ------
-      self.buffer.truncate(0);
+    } else if c == ',' && self.buffer.len() == 0 {
+      // If it comes in again from do_infunctionparametertype
       self.state = model::ParserState::INFUNCTIONPARAMNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
+      self.store_current_function_param();
     } else if Parser::is_valid_name_character(&c) {
       match self.substate {
         model::ParserSubState::LEADINGBLANKS => {
@@ -410,21 +407,27 @@ impl Parser {
 
   fn do_infunctionparametertype(&mut self, c:char) {
     if c == ')' && self.buffer.len() > 0 {
-      self.current_param.name = self.buffer.clone();
+      self.current_function_param.typename = self.buffer.clone();
       // DEBUG:
       println!("FunctionParamType: {}", self.buffer);
       // ------
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTION;
       self.substate = model::ParserSubState::LEADINGBLANKS;
+      self.store_current_function_param();
+      
+    // TODO: make an else if c == '(' && self.buffer.len() > 0 ...
+    //       to realize parsing of functionparameters parameters
+    
     } else if c == ',' && self.buffer.len() > 0 {
-      self.current_param.name = self.buffer.clone();
+      self.current_function_param.typename = self.buffer.clone();
       // DEBUG:
       println!("FunctionParamType: {}", self.buffer);
       // ------
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTIONPARAMNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
+      self.store_current_function_param();
     } else if Parser::is_valid_name_character(&c) {
       match self.substate {
         model::ParserSubState::LEADINGBLANKS => {
@@ -615,7 +618,7 @@ impl Parser {
         self.substate = model::ParserSubState::LEADINGBLANKS;
         self.current_param.value = self.buffer.clone();
         println!("FunctionAttributeValue: {}", self.buffer);
-        self.buffer.truncate(0);
+        self.buffer.truncate(0);        
       } else {
         self.buffer.push(c);
       }
@@ -924,6 +927,14 @@ impl Parser {
     self.current_function.attributes.push(self.current_param.clone());
     self.current_param.name.truncate(0);
     self.current_param.value.truncate(0);
+  }
+  
+  fn store_current_function_param(&mut self) {
+    self.current_function.params.push(self.current_function_param.clone());
+    self.current_function_param.name.truncate(0);
+    self.current_function_param.typename.truncate(0);
+    self.current_function_param.is_array = false;
+    self.current_function_param.params.truncate(0);
   }
 
   pub fn is_whitespace_or_newline(c:&char) -> bool {
