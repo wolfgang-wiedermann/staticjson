@@ -36,9 +36,8 @@ interface StudentRepository {
   // Get-Method for Students
   // "method" is a mandatory param per function 
   //   it definies the HTTP-Method to use for service call
-  getStudentById(id:int) -> StudentEntity {
+  getStudentById(id:int(path-param="id")) -> StudentEntity {
     method="GET",
-    path-params="id",
     path="/repos/student/{id}"
   }
   
@@ -46,9 +45,21 @@ interface StudentRepository {
   // "method" is a mandatory param per function 
   //   it definies the HTTP-Method to use for service call
   // "path" is mandatory if no Interface-Parameter path is available
-  findStudent(name:string, vorname:string) -> StudentEntity[] {
+  findStudent(name:string(query-param="name"), 
+              vorname:string(query-param="vorname")) -> StudentEntity[] {
     method="GET",
-    query-params="name,vorname",
+    path="/repos/student"
+  }
+  
+  // Method to create a new student object
+  createStudent(s:StudentEntity) -> StudentEntity {
+    method="POST",
+    path="/repos/student"
+  }
+  
+  // Method to update a new student object
+  updateStudent(s:StudentEntity) {
+    method="PUT",
     path="/repos/student"
   }
 }
@@ -63,9 +74,8 @@ interface OrtRepository(
   // Get-Method for Ort-Objects
   // method is a mandatory param per function 
   // it definies the HTTP-Method to use for service call
-  getOrtById(id:int) -> OrtEntity {
+  getOrtById(id:int(path-param="id")) -> OrtEntity {
     method="GET",
-    path-params="id",
     path="{id}"
   }
 }
