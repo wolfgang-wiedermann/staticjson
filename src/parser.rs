@@ -87,13 +87,18 @@ impl Parser {
         model::ParserState::ININTERFACECMT => self.do_ininterfacecomment(c),
         model::ParserState::INFUNCTIONPARAMNAME => self.do_infunctionparametername(c),
         model::ParserState::INFUNCTIONPARAMTYPE => self.do_infunctionparametertype(c),
+        // TODO: if functionparameter type is array!
+        model::ParserState::INFUNCTIONPARAMPARAMNAME => self.do_infunctionparameterparamname(c),
+        model::ParserState::INFUNCTIONPARAMPARAMVALUE => self.do_infunctionparameterparamvalue(c),
+        model::ParserState::INFUNCTIONPARAMPARAMSTRING => self.do_infunctionparameterparamstring(c),
+        model::ParserState::INFUNCTIONPARAMPARAMLIST => self.do_infunctionparameterparamlist(c),
         model::ParserState::INFUNCTION => self.do_infunction(c),
         model::ParserState::INFUNCTIONRETURNTYPE => self.do_infunctionreturntype(c),
         model::ParserState::INFUNCTIONRETURNTYPEARRAY => self.do_infunctionreturntypearray(c),
         model::ParserState::BEHINDFUNCTIONRETURNTYPEARRAY => self.do_behindfunctionreturntypearray(c),
         model::ParserState::INFUNCTIONATTRIBUTENAME => self.do_infunctionattributename(c),
         model::ParserState::INFUNCTIONATTRIBUTEVALUE => self.do_infunctionattributevalue(c),
-        model::ParserState::INFUNCTIONATTRIBUTESTRING => self.do_infunctionattributestring(c),
+        model::ParserState::INFUNCTIONATTRIBUTESTRING => self.do_infunctionattributestring(c),        
         // This has to be here until all parts of the automaton for parsing interfaces are coded
         _  => self.raise_syntax_error("\nERROR: Invalid State\n"),
       }
@@ -415,11 +420,18 @@ impl Parser {
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTION;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      self.store_current_function_param();
+      self.store_current_function_param();    
+    } else if c == '(' && self.buffer.len() > 0 {
+      self.current_function_param.typename = self.buffer.clone();
+      // DEBUG:
+      println!("FunctionParamType: {}", self.buffer);
+      // ------
+      self.buffer.truncate(0);
+      self.state = model::ParserState::INFUNCTIONPARAMPARAMNAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      // has to be stored after all function param params are read!
+      // self.store_current_function_param();
       
-    // TODO: make an else if c == '(' && self.buffer.len() > 0 ...
-    //       to realize parsing of functionparameters parameters
-    
     } else if c == ',' && self.buffer.len() > 0 {
       self.current_function_param.typename = self.buffer.clone();
       // DEBUG:
@@ -461,6 +473,81 @@ impl Parser {
       // ----
       self.raise_syntax_error("Invalid character in function parameter types");
     }  
+  }
+  
+  fn do_infunctionparameterparamname(&mut self, c:char) {
+    if c == ')' && self.buffer.len() == 0 {
+      self.buffer.truncate(0);
+      self.state = model::ParserState::INFUNCTION;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      self.store_current_function_param();   
+    } else if c == '=' && self.buffer.len() > 0 {
+      // DEBUG:
+      println!("FunctionParamParamName: {}", self.buffer);
+      // ------
+      self.current_param.name = self.buffer.clone();
+      self.buffer.truncate(0);
+      self.state = model::ParserState::INFUNCTIONPARAMPARAMVALUE;
+      self.substate = model::ParserSubState::LEADINGBLANKS;         
+    } else if Parser::is_valid_name_character(&c) {
+      match self.substate {
+        model::ParserSubState::LEADINGBLANKS => {
+          self.buffer.push(c);
+          self.substate = model::ParserSubState::VALUE;
+        }
+        model::ParserSubState::VALUE => {
+          self.buffer.push(c);
+        }
+        model::ParserSubState::TRAILINGBLANKS => {
+          self.raise_syntax_error("blanks are not allowed within function parameter types");
+        }
+      }
+    } else if Parser::is_whitespace_or_newline(&c) {
+      match self.substate {
+        model::ParserSubState::VALUE => {
+          self.substate = model::ParserSubState::TRAILINGBLANKS;
+        }
+        _ => {
+          // Nix machen
+        }
+      }
+    }
+  }
+  
+  fn do_infunctionparameterparamvalue(&mut self, c:char) {
+    if c == '"' {
+      self.state = model::ParserState::INFUNCTIONPARAMPARAMSTRING;
+      self.substate = model::ParserSubState::LEADINGBLANKS; 
+    } else if !Parser::is_whitespace_or_newline(&c) {
+      self.raise_syntax_error("invalid character in definition function parameter parameters");
+    }
+  }
+  
+  fn do_infunctionparameterparamstring(&mut self, c:char) {
+    if c == '"' && self.cminus1 != '\\' {
+      // Debug output:
+      println!("FunctionParamParamString: {}", self.buffer);
+      // ---
+      self.state = model::ParserState::INFUNCTIONPARAMPARAMLIST;
+      self.current_param.value = self.buffer.clone();
+      self.store_current_function_param_param();
+      self.buffer.truncate(0);
+    } else {
+      self.buffer.push(c);
+    }
+  }
+  
+  fn do_infunctionparameterparamlist(&mut self, c:char) {
+    if c == ',' {
+      self.state = model::ParserState::INFUNCTIONPARAMPARAMNAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS; 
+    } else if c == ')' {
+      self.state = model::ParserState::INFUNCTIONPARAMNAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS; 
+      self.store_current_function_param(); 
+    } else if !Parser::is_whitespace_or_newline(&c) {
+      self.raise_syntax_error("invalid character in definition function parameter parameters");
+    }
   }
 
   fn do_infunction(&mut self, c:char) {
@@ -937,6 +1024,12 @@ impl Parser {
     self.current_function_param.typename.truncate(0);
     self.current_function_param.is_array = false;
     self.current_function_param.params.truncate(0);
+  }
+   
+  fn store_current_function_param_param(&mut self) {
+    self.current_function_param.params.push(self.current_param.clone());
+    self.current_param.name.truncate(0);
+    self.current_param.value.truncate(0);
   }
 
   pub fn is_whitespace_or_newline(c:&char) -> bool {
