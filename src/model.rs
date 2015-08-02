@@ -195,7 +195,7 @@ impl Interface {
 pub struct Function {
   pub name:String,
   pub returntype:String,
-  //TODO: returntype_is_array:bool,
+  pub returntype_is_array:bool,
   pub params:Vec<Box<FunctionParameter>>,
   pub attributes:Vec<Box<Parameter>>
 }
@@ -205,6 +205,7 @@ impl Function {
     Function {
       name:String::new(),
       returntype:String::new(),
+      returntype_is_array:false,
       params:Vec::new(),
       attributes:Vec::new()
     }

@@ -21,9 +21,9 @@ impl Parser {
 
   pub fn new() -> Parser {
     Parser {
-      buffer:String::new(),
-      types:Box::new(Vec::new()),
-      interfaces:Box::new(Vec::new()),
+      buffer: String::new(),
+      types: Box::new(Vec::new()),
+      interfaces: Box::new(Vec::new()),
       current_type: Box::new(model::Type { typename: String::new(), 
                                            attributes: Vec::new(),
                                            params: Vec::new() }),
@@ -32,6 +32,7 @@ impl Parser {
                                            params: Vec::new() }),
       current_function: Box::new(model::Function { name: String::new(),
                                            returntype: String::new(),
+                                           returntype_is_array:false,
                                            params: Vec::new(),
                                            attributes: Vec::new()}),
       current_function_param: Box::new(model::FunctionParameter { name: String::new(), 
@@ -97,10 +98,7 @@ impl Parser {
         _  => self.raise_syntax_error("\nERROR: Invalid State\n"),
       }
       self.cminus1 = c;
-    } 
-
-    // Debug-Output 
-      println!("\n{:?}\n", self.interfaces);
+    }     
     
     return model::ParserResult {
       types: self.types.clone(),
@@ -534,6 +532,7 @@ impl Parser {
 
   fn do_infunctionreturntypearray(&mut self, c:char) {
     if c == ']' {
+      self.current_function.returntype_is_array = true;
       self.state = model::ParserState::BEHINDFUNCTIONRETURNTYPEARRAY;
       self.substate = model::ParserSubState::LEADINGBLANKS;
     } else {

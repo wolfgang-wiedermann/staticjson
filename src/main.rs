@@ -27,7 +27,8 @@ fn main() {
 
   if model.options.debug {
     // Print the parsed results for debugging purposes  
-    println!("{:?}", result);
+    println!("{:?}\n", result.interfaces);
+    println!("{:?}", result.types);
   }
 
   match opts.target_language {
