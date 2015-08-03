@@ -1092,8 +1092,8 @@ impl Parser {
   }
 
   fn raise_syntax_error(&mut self, txt:&str) {
-    //panic!("SYNTAX-ERROR: {} in line {}:{}", txt, self.line+1, self.column-1);
-      panic!("SYNTAX-ERROR: {} : {:?}", txt, self.state);
+    panic!("SYNTAX-ERROR: {} in line {}:{}", txt, self.line+1, self.column-1);
+    //panic!("SYNTAX-ERROR: {} : {:?}", txt, self.state);
   }
   // #end_region helper functions
 }
