@@ -88,8 +88,7 @@ impl Parser {
         model::ParserState::INFUNCTIONPARAMNAME => self.do_infunctionparametername(c),
         model::ParserState::INFUNCTIONPARAMTYPE => self.do_infunctionparametertype(c),
         model::ParserState::INFUNCTIONPARAMTYPEARRAY => self.do_infunctionparametertypearray(c),
-        model::ParserState::BEHINDFUNCTIONPARAMTYPEARRAY => self.do_behindfunctionparametertypearray(c),
-        // TODO: if functionparameter type is array!
+        model::ParserState::BEHINDFUNCTIONPARAMTYPEARRAY => self.do_behindfunctionparametertypearray(c),        
         model::ParserState::INFUNCTIONPARAMPARAMNAME => self.do_infunctionparameterparamname(c),
         model::ParserState::INFUNCTIONPARAMPARAMVALUE => self.do_infunctionparameterparamvalue(c),
         model::ParserState::INFUNCTIONPARAMPARAMSTRING => self.do_infunctionparameterparamstring(c),
@@ -102,7 +101,7 @@ impl Parser {
         model::ParserState::INFUNCTIONATTRIBUTEVALUE => self.do_infunctionattributevalue(c),
         model::ParserState::INFUNCTIONATTRIBUTESTRING => self.do_infunctionattributestring(c),        
         // This has to be here until all parts of the automaton for parsing interfaces are coded
-        _  => self.raise_syntax_error("\nERROR: Invalid State\n"),
+        //_  => self.raise_syntax_error("\nERROR: Invalid State\n"),
       }
       self.cminus1 = c;
     }     
