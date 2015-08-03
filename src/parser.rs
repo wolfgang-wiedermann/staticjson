@@ -87,6 +87,8 @@ impl Parser {
         model::ParserState::ININTERFACECMT => self.do_ininterfacecomment(c),
         model::ParserState::INFUNCTIONPARAMNAME => self.do_infunctionparametername(c),
         model::ParserState::INFUNCTIONPARAMTYPE => self.do_infunctionparametertype(c),
+        model::ParserState::INFUNCTIONPARAMTYPEARRAY => self.do_infunctionparametertypearray(c),
+        model::ParserState::BEHINDFUNCTIONPARAMTYPEARRAY => self.do_behindfunctionparametertypearray(c),
         // TODO: if functionparameter type is array!
         model::ParserState::INFUNCTIONPARAMPARAMNAME => self.do_infunctionparameterparamname(c),
         model::ParserState::INFUNCTIONPARAMPARAMVALUE => self.do_infunctionparameterparamvalue(c),
@@ -429,9 +431,16 @@ impl Parser {
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTIONPARAMPARAMNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      // has to be stored after all function param params are read!
-      // self.store_current_function_param();
-      
+      // has to be stored after all function param params are read!      
+    } else if c == '[' && self.buffer.len() > 0 {      
+    self.current_function_param.typename = self.buffer.clone();
+      // DEBUG:
+      println!("FunctionParamType: {}", self.buffer);
+      // ------
+      self.buffer.truncate(0);
+      self.state = model::ParserState::INFUNCTIONPARAMTYPEARRAY;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      // has to be stored after all function param params are read!      
     } else if c == ',' && self.buffer.len() > 0 {
       self.current_function_param.typename = self.buffer.clone();
       // DEBUG:
@@ -473,6 +482,31 @@ impl Parser {
       // ----
       self.raise_syntax_error("Invalid character in function parameter types");
     }  
+  }
+  
+  fn do_infunctionparametertypearray(&mut self, c:char) {
+    if c == ']' {
+      self.current_function_param.is_array = true;
+      self.state = model::ParserState::BEHINDFUNCTIONPARAMTYPEARRAY;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+    } else {
+      self.raise_syntax_error("Invalid character [ must be followed by ]!");
+    }
+  }
+  
+  fn do_behindfunctionparametertypearray(&mut self, c:char) {
+    if c == ')' {            
+      self.state = model::ParserState::INFUNCTION;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      self.store_current_function_param();    
+    } else if c == '(' {      
+      self.state = model::ParserState::INFUNCTIONPARAMPARAMNAME;
+      self.substate = model::ParserSubState::LEADINGBLANKS;
+      // has to be stored after all function param params are read!      
+    } else if !Parser::is_valid_name_character(&c) {
+      println!("Character: {}", c);
+      self.raise_syntax_error("Invalid character behind function parameter type array definition");
+    }
   }
   
   fn do_infunctionparameterparamname(&mut self, c:char) {
@@ -1009,7 +1043,7 @@ impl Parser {
     self.current_function.name.truncate(0);
     self.current_function.params.truncate(0);
     self.current_function.attributes.truncate(0);
-    //self.current_function.return_type_is_array = false;
+    self.current_function.returntype_is_array = false;
   }
 
   fn store_current_function_attribute(&mut self) {

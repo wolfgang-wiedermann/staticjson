@@ -45,7 +45,7 @@ interface StudentRepository {
   // "method" is a mandatory param per function 
   //   it definies the HTTP-Method to use for service call
   // "path" is mandatory if no Interface-Parameter path is available
-  findStudent(name:string(query-param="name"), 
+  findStudents(name:string(query-param="name"), 
               vorname:string(query-param="vorname")) -> StudentEntity[] {
     method="GET",
     path="/repos/student"
@@ -55,6 +55,18 @@ interface StudentRepository {
   createStudent(s:StudentEntity) -> StudentEntity {
     method="POST",
     path="/repos/student"
+  }
+  
+  // Method to create a set of new student objects
+  createStudents(s:StudentEntity[]) -> StudentEntity {
+    method="POST",
+    path="/repos/students"
+  }
+  
+    // Method to create a set of new student objects
+  createStudents2(s:StudentEntity[](serialized-as="text/xml")) -> StudentEntity {
+    method="POST",
+    path="/repos/students"
   }
   
   // Method to update a new student object
