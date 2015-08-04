@@ -89,5 +89,14 @@ interface OrtRepository(
   getOrtById(id:int(path-param="id")) -> OrtEntity {
     method="GET",
     path="{id}"
-  }
+  }  
+}
+
+//
+// Sample: Interface with empty param list (makes no sence but is also supported)
+//
+interface WithoutParamsAndFunctions() {
+
+  // No function definitions inside
+  
 }

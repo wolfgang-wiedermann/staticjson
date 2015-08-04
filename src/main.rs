@@ -27,7 +27,9 @@ fn main() {
 
   if model.options.debug {
     // Print the parsed results for debugging purposes  
+    println!("\nInterfaces\n----------\n");
     println!("{:?}\n", result.interfaces);
+    println!("Types\n-----\n");
     println!("{:?}", result.types);
   }
 

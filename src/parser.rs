@@ -121,7 +121,7 @@ impl Parser {
       self.buffer.truncate(0);
       self.state = model::ParserState::ININTERFACENAME;
     } else if Parser::is_whitespace_or_newline(&c) && self.buffer.len() == 0 {
-      // ignorieren und puffer leeren
+      // ignore it and free the buffer
       self.buffer.truncate(0);
     } else if Parser::is_whitespace_or_newline(&c) && self.buffer.len() > 0 {
       self.raise_syntax_error("type awaitet, blanks can not stand in middle of this string");
@@ -194,18 +194,12 @@ impl Parser {
       
   fn do_ininterfacename(&mut self, c:char) {
     if c == '{' && self.buffer.len() > 0 {
-      self.current_interface.name = self.buffer.clone();
-      // DEBUG:
-      println!("Interface: {}", self.buffer);
-      // ------
+      self.current_interface.name = self.buffer.clone();      
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTIONNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
     } else if c == '(' && self.buffer.len() > 0 {
-      self.current_interface.name = self.buffer.clone();
-      // DEBUG:
-      println!("Interface: {}", self.buffer);
-      // ------
+      self.current_interface.name = self.buffer.clone();      
       self.buffer.truncate(0);
       self.state = model::ParserState::ININTERFACEPARAMNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
@@ -238,12 +232,9 @@ impl Parser {
 
   fn do_ininterfaceparamname(&mut self, c:char) {
     if c == '=' && self.buffer.len() > 0 {
-      self.current_param.name = self.buffer.clone();
-      // DEBUG:
-      println!("InterfaceParamName: {}", self.buffer);
-      // END DEBUG
+      self.current_param.name = self.buffer.clone();      
       self.buffer.truncate(0);
-      self.state = model::ParserState::ININTERFACEPARAMVALUE; // TODO: Find out state
+      self.state = model::ParserState::ININTERFACEPARAMVALUE;
       self.substate = model::ParserSubState::LEADINGBLANKS;
     } else if c == ')' && self.buffer.len() == 0 {
       self.state = model::ParserState::OUTOFINTERFACEPARAMLIST;
@@ -271,9 +262,6 @@ impl Parser {
         }
       }
     } else {
-      // DEBUG:
-      println!("CHAR: {}", c);
-      // END DEBUG
       self.raise_syntax_error("Invalid character in interface param name");
     }
   }
@@ -282,11 +270,11 @@ impl Parser {
     if c == '"' {
       self.state = model::ParserState::ININTERFACEPARAMSTRING;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-    } else if c == ',' {
+    } else if c == ',' && self.current_param.value.len() != 0 { 
       self.state = model::ParserState::ININTERFACEPARAMNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
       self.store_current_interface_param();
-    } else if c == ')' {
+    } else if c == ')' && self.current_param.value.len() != 0 { 
       self.state = model::ParserState::OUTOFINTERFACEPARAMLIST;
       self.substate = model::ParserSubState::LEADINGBLANKS;
       self.store_current_interface_param();
@@ -299,8 +287,10 @@ impl Parser {
     if c == '"' && self.cminus1 != '\\' {
       self.state = model::ParserState::ININTERFACEPARAMVALUE;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      self.current_param.value = self.buffer.clone();
-      println!("InterfaceParamString: {}", self.buffer);
+      if self.buffer.len() == 0 {
+          self.raise_syntax_error("empty interface param values are not allowed");
+      }
+      self.current_param.value = self.buffer.clone();      
       self.buffer.truncate(0);
     } else {
       self.buffer.push(c);
@@ -319,9 +309,6 @@ impl Parser {
   fn do_infunctionname(&mut self, c:char) {
     if c == '(' && self.buffer.len() > 0 {
       self.current_function.name = self.buffer.clone();
-      // DEBUG:
-      println!("{}", self.buffer);
-      // ------
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTIONPARAMNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
@@ -329,6 +316,8 @@ impl Parser {
       self.state = model::ParserState::INITIAL;
       self.substate = model::ParserSubState::LEADINGBLANKS;
       self.store_current_interface();
+    } else if c == '/' && self.cminus1 == '/' && self.buffer.len() == 0 {
+      self.state = model::ParserState::ININTERFACECMT;        
     } else if Parser::is_valid_name_character(&c) {
       match self.substate {
         model::ParserSubState::LEADINGBLANKS => {
@@ -342,8 +331,6 @@ impl Parser {
           self.raise_syntax_error("blanks are not allowed within interface names");
         }
       }
-    } else if c == '/' && self.cminus1 == '/' {
-      self.state = model::ParserState::ININTERFACECMT;
     } else if Parser::is_whitespace_or_newline(&c) {
       match self.substate {
         model::ParserSubState::VALUE => {
@@ -353,20 +340,14 @@ impl Parser {
           // Nix machen
         }
       }
-    } else if c != '/' {
-      // DEBUG:
-        println!("CHAR: {}", c);
-      // ----
+    } else if c != '/' {      
       self.raise_syntax_error("Invalid character in interface name");
     }  
   }
 
   fn do_infunctionparametername(&mut self, c:char) {
     if c == ':' && self.buffer.len() > 0 {
-      self.current_function_param.name = self.buffer.clone();
-      // DEBUG:
-      println!("FunctionParamName: {}", self.buffer);
-      // ------
+      self.current_function_param.name = self.buffer.clone();      
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTIONPARAMTYPE;
       self.substate = model::ParserSubState::LEADINGBLANKS;
@@ -403,52 +384,38 @@ impl Parser {
           // Nix machen
         }
       }
-    } else {
-      // DEBUG:
-      println!("CHAR: {}", c);
-      println!("BUFF: {}", self.buffer);
-      // ----
+    } else {      
       self.raise_syntax_error("Invalid character in interface name");
     }  
   }
 
   fn do_infunctionparametertype(&mut self, c:char) {
     if c == ')' && self.buffer.len() > 0 {
-      self.current_function_param.typename = self.buffer.clone();
-      // DEBUG:
-      println!("FunctionParamType: {}", self.buffer);
-      // ------
+      self.current_function_param.typename = self.buffer.clone();      
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTION;
       self.substate = model::ParserSubState::LEADINGBLANKS;
       self.store_current_function_param();    
     } else if c == '(' && self.buffer.len() > 0 {
-      self.current_function_param.typename = self.buffer.clone();
-      // DEBUG:
-      println!("FunctionParamType: {}", self.buffer);
-      // ------
+      self.current_function_param.typename = self.buffer.clone();      
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTIONPARAMPARAMNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      // has to be stored after all function param params are read!      
+      // current function is stored after all function param params are read!
     } else if c == '[' && self.buffer.len() > 0 {      
-    self.current_function_param.typename = self.buffer.clone();
-      // DEBUG:
-      println!("FunctionParamType: {}", self.buffer);
-      // ------
+    self.current_function_param.typename = self.buffer.clone();      
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTIONPARAMTYPEARRAY;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      // has to be stored after all function param params are read!      
+      // current function is stored after all function param params are read!
     } else if c == ',' && self.buffer.len() > 0 {
-      self.current_function_param.typename = self.buffer.clone();
-      // DEBUG:
-      println!("FunctionParamType: {}", self.buffer);
-      // ------
+      self.current_function_param.typename = self.buffer.clone();      
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTIONPARAMNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
       self.store_current_function_param();
+    } else if c == '/' && self.cminus1 == '/' {
+      self.state = model::ParserState::ININTERFACECMT;
     } else if Parser::is_valid_name_character(&c) {
       match self.substate {
         model::ParserSubState::LEADINGBLANKS => {
@@ -462,8 +429,6 @@ impl Parser {
           self.raise_syntax_error("blanks are not allowed within function parameter types");
         }
       }
-    } else if c == '/' && self.cminus1 == '/' {
-      self.state = model::ParserState::ININTERFACECMT;
     } else if Parser::is_whitespace_or_newline(&c) {
       match self.substate {
         model::ParserSubState::VALUE => {
@@ -473,12 +438,7 @@ impl Parser {
           // Nix machen
         }
       }
-    } else if c != '/' {
-      // DEBUG:
-      println!("CHAR: {}", c);
-      println!("BUFF: {}", self.buffer);
-      println!("EXPR: {}", c == ')' && self.buffer.len() > 0);
-      // ----
+    } else if c != '/' {      
       self.raise_syntax_error("Invalid character in function parameter types");
     }  
   }
@@ -501,9 +461,8 @@ impl Parser {
     } else if c == '(' {      
       self.state = model::ParserState::INFUNCTIONPARAMPARAMNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-      // has to be stored after all function param params are read!      
-    } else if !Parser::is_valid_name_character(&c) {
-      println!("Character: {}", c);
+      // current function is stored after all function param params are read!      
+    } else if !Parser::is_valid_name_character(&c) {      
       self.raise_syntax_error("Invalid character behind function parameter type array definition");
     }
   }
@@ -514,10 +473,7 @@ impl Parser {
       self.state = model::ParserState::INFUNCTION;
       self.substate = model::ParserSubState::LEADINGBLANKS;
       self.store_current_function_param();   
-    } else if c == '=' && self.buffer.len() > 0 {
-      // DEBUG:
-      println!("FunctionParamParamName: {}", self.buffer);
-      // ------
+    } else if c == '=' && self.buffer.len() > 0 {      
       self.current_param.name = self.buffer.clone();
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTIONPARAMPARAMVALUE;
@@ -557,10 +513,7 @@ impl Parser {
   }
   
   fn do_infunctionparameterparamstring(&mut self, c:char) {
-    if c == '"' && self.cminus1 != '\\' {
-      // Debug output:
-      println!("FunctionParamParamString: {}", self.buffer);
-      // ---
+    if c == '"' && self.cminus1 != '\\' {      
       self.state = model::ParserState::INFUNCTIONPARAMPARAMLIST;
       self.current_param.value = self.buffer.clone();
       self.store_current_function_param_param();
@@ -588,34 +541,23 @@ impl Parser {
       self.state = model::ParserState::INFUNCTIONATTRIBUTENAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
     } else if c == '-' && self.cminus1 != '-' {
-      // Maybee if next is
+      // Maybee if next is > then - is a valid char at this place
     } else if c == '>' && self.cminus1 == '-' { 
       self.state = model::ParserState::INFUNCTIONRETURNTYPE;
       self.substate = model::ParserSubState::LEADINGBLANKS;    
-    } else if !Parser::is_whitespace_or_newline(&c) {
-      // DEBUG:
-      println!("CHAR: {}", c);
-      println!("BUFF: {}", self.buffer);
-      // ----
+    } else if !Parser::is_whitespace_or_newline(&c) {      
       self.raise_syntax_error("Invalid character in behind function parameter list");
     }
   }
   
   fn do_infunctionreturntype(&mut self, c:char) {
     if c == '{' && self.buffer.len() > 0 {
-      self.current_function.returntype = self.buffer.clone();
-      // DEBUG:
-      println!("FunctionReturnType: {}", self.buffer);
-      // ------
+      self.current_function.returntype = self.buffer.clone();      
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTIONATTRIBUTENAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
     } else if c == '[' && self.buffer.len() > 0 {
-      self.current_function.returntype = self.buffer.clone();
-      // DEBUG:
-      println!("FunctionReturnType: {}", self.buffer);
-      println!("FunctionReturnType is array");
-      // ------
+      self.current_function.returntype = self.buffer.clone();      
       self.buffer.truncate(0);
       self.state = model::ParserState::INFUNCTIONRETURNTYPEARRAY;
       self.substate = model::ParserSubState::LEADINGBLANKS;
@@ -641,11 +583,7 @@ impl Parser {
           // Nix machen
         }
       }
-    } else {
-      // DEBUG:
-      println!("CHAR: {}", c);
-      println!("BUFF: {}", self.buffer);      
-      // ----
+    } else {      
       self.raise_syntax_error("Invalid character in function return type");
     }
   }
@@ -671,18 +609,15 @@ impl Parser {
   
   fn do_infunctionattributename(&mut self, c:char) {
     if c == '=' && self.buffer.len() > 0 {
-      self.current_param.name = self.buffer.clone();
-      // DEBUG:
-      println!("FunctionAttributeName: {}", self.buffer);
-      // END DEBUG
+      self.current_param.name = self.buffer.clone();      
       self.buffer.truncate(0);
-      self.state = model::ParserState::INFUNCTIONATTRIBUTEVALUE; // TODO: Find out state
+      self.state = model::ParserState::INFUNCTIONATTRIBUTEVALUE;
       self.substate = model::ParserSubState::LEADINGBLANKS;
     } else if c == '}' && self.buffer.len() == 0 {
       self.state = model::ParserState::INFUNCTIONNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
       self.store_current_function();
-    } else if c == '/' && self.cminus1 == '/' {
+    } else if c == '/' && self.cminus1 == '/' && self.buffer.len() == 0 {
       self.state = model::ParserState::ININTERFACECMT;
       self.substate = model::ParserSubState::LEADINGBLANKS;
       self.buffer.truncate(0);
@@ -708,10 +643,7 @@ impl Parser {
           // Nix machen
         }
       }
-    } else if c != '/' {
-      // DEBUG:
-      println!("CHAR: {}", c);
-      // END DEBUG
+    } else if c != '/' {      
       self.raise_syntax_error("Invalid character in attribute name");
     }
   }
@@ -720,11 +652,11 @@ impl Parser {
     if c == '"' {
       self.state = model::ParserState::INFUNCTIONATTRIBUTESTRING;
       self.substate = model::ParserSubState::LEADINGBLANKS;
-    } else if c == ',' {
+    } else if c == ',' && self.current_param.value.len() > 0 {
       self.state = model::ParserState::INFUNCTIONATTRIBUTENAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
       self.store_current_function_attribute();
-    } else if c == '}' {
+    } else if c == '}' && self.current_param.value.len() > 0 {
       self.state = model::ParserState::INFUNCTIONNAME;
       self.substate = model::ParserSubState::LEADINGBLANKS;
       self.store_current_function_attribute();
@@ -738,8 +670,10 @@ impl Parser {
       if c == '"' && self.cminus1 != '\\' {
         self.state = model::ParserState::INFUNCTIONATTRIBUTEVALUE;
         self.substate = model::ParserSubState::LEADINGBLANKS;
+        if self.buffer.len() == 0 {
+          self.raise_syntax_error("empty function attribute values are not allowed");
+        }
         self.current_param.value = self.buffer.clone();
-        println!("FunctionAttributeValue: {}", self.buffer);
         self.buffer.truncate(0);        
       } else {
         self.buffer.push(c);
