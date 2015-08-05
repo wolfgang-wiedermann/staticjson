@@ -3,7 +3,7 @@
 */
 #[derive(Clone, Debug)]
 pub enum TargetLanguage {
-  SWIFT, C, RUST, HTMLDOC, JSVALIDATE
+  SWIFT, C, RUST, HTMLDOC, JSVALIDATE, JAXRS
 }
 
 #[derive(Clone, Debug)]

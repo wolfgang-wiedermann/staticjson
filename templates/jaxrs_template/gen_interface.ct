@@ -1,0 +1,15 @@
+{{ // 
+// Generate code for interface
+//
+fn gen_interface(ifa:&Box<model::Interface>) -> String {
+  let mut str:String = String::new();
+}}package interfaces;
+
+import java.util.ArrayList;
+// ...
+
+/**
+* Generated Interface for  {{= ifa.name }} with JAX-RS Annotations
+*/
+{{   return str;
+} }}

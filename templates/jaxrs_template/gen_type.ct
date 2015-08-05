@@ -1,0 +1,23 @@
+{{ // 
+// Generate code for type
+//
+fn gen_type(typ:&Box<model::Type>) -> String {
+  let mut str:String = String::new(); 
+}}package entities
+
+import java.util.ArrayList;
+
+/**
+* generated type for Entity  {{= typ.typename }}
+*/
+
+@Entity
+public class {{= typ.typename }} {
+{{     for attribut in typ.attributes.iter() { }}
+    private TYPEFOR( {{= attribut.attribute_type }})  {{= util::lsnake_to_lcamel(&attribut.name) }};   
+{{     } }}
+}
+{{   return str;
+} 
+
+}}

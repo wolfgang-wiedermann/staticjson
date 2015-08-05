@@ -51,6 +51,7 @@ pub fn parse_commandline(params:Vec<String>) -> model::CommandlineOptions {
     "rust"       => model::TargetLanguage::RUST,
     "htmldoc"    => model::TargetLanguage::HTMLDOC,
     "jsvalidate" => model::TargetLanguage::JSVALIDATE,
+    "jaxrs"      => model::TargetLanguage::JAXRS,
     _            => panic!("ERROR: Invalid target language"),
   };
 
