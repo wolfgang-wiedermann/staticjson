@@ -11,5 +11,12 @@ import java.util.ArrayList;
 /**
 * Generated Interface for  {{= ifa.name }} with JAX-RS Annotations
 */
+{{ if ifa.is_param_present("path") { }}
+@Path(" {{= ifa.get_param_value("path") }}") {{ } }}
+public interface I {{= ifa.name }} {
+{{ for function in ifa.functions.iter() { }}
+    public RETURNTYPE  {{= function.name }}();
+{{ } }}
+}
 {{   return str;
 } }}

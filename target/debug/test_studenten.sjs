@@ -31,14 +31,14 @@ type OrtEntity {
 //
 // First simple interface sample
 //
-interface StudentRepository {
+interface StudentRepository(path="/repos") {
 
   // Get-Method for Students
   // "method" is a mandatory param per function 
   //   it definies the HTTP-Method to use for service call
   getStudentById(id:int(path-param="id")) -> StudentEntity {
     method="GET",
-    path="/repos/student/{id}"
+    path="/student/{id}"
   }
   
   // Find-Method for Students
@@ -48,31 +48,31 @@ interface StudentRepository {
   findStudents(name:string(query-param="name"), 
               vorname:string(query-param="vorname")) -> StudentEntity[] {
     method="GET",
-    path="/repos/student"
+    path="/student"
   }
   
   // Method to create a new student object
   createStudent(s:StudentEntity) -> StudentEntity {
     method="POST",
-    path="/repos/student"
+    path="/student"
   }
   
   // Method to create a set of new student objects
   createStudents(s:StudentEntity[]) -> StudentEntity {
     method="POST",
-    path="/repos/students"
+    path="/students"
   }
   
     // Method to create a set of new student objects
   createStudents2(s:StudentEntity[](serialized-as="text/xml")) -> StudentEntity {
     method="POST",
-    path="/repos/students"
+    path="/students"
   }
   
   // Method to update a new student object
   updateStudent(s:StudentEntity) {
     method="PUT",
-    path="/repos/student"
+    path="/student"
   }
 }
 

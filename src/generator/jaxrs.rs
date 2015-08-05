@@ -51,5 +51,19 @@ fn gen_interface(ifa:&Box<model::Interface>) -> String {
   str.push_str("package interfaces;\n\nimport java.util.ArrayList;\n// ...\n\n/**\n* Generated Interface for ");
   str.push_str(&ifa.name);
   str.push_str(" with JAX-RS Annotations\n*/");
+if ifa.is_param_present("path") { 
+    str.push_str("\n@Path(\"");
+    str.push_str(&ifa.get_param_value("path"));
+    str.push_str("\")");
+} 
+  str.push_str("\npublic interface I");
+  str.push_str(&ifa.name);
+  str.push_str(" {");
+for function in ifa.functions.iter() { 
+    str.push_str("\n    public RETURNTYPE ");
+    str.push_str(&function.name);
+    str.push_str("();");
+} 
+  str.push_str("\n}");
   return str;
 } 
