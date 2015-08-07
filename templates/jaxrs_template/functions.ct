@@ -66,7 +66,7 @@ fn get_java_type_initial(sjtype:&str, is_array:bool) -> &str {
     if is_array {
       jtype = "new ArrayList<double>()";
     } else {
-      jtype = "0.0";
+      jtype = "0.0d";
     }
   } else if sjtype == "date" {
     if is_array {

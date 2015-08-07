@@ -32,7 +32,7 @@ if typ.is_param_value_present("jpa-entity", "true") {
     str.push_str("\nimport javax.jaxb.XmlRootElement;");
 } if typ.is_param_present("jpa-table") { 
     str.push_str("\nimport javax.jpa.Table;");
-} if typ.is_param_present("jpa-column") { 
+} if typ.is_attribute_param_present("jpa-column") { 
     str.push_str("\nimport javax.jpa.Column;");
 } 
   str.push_str("\n\n/**\n* Generated Type for Entity ");
@@ -199,7 +199,7 @@ fn get_java_type_initial(sjtype:&str, is_array:bool) -> &str {
     if is_array {
       jtype = "new ArrayList<double>()";
     } else {
-      jtype = "0.0";
+      jtype = "0.0d";
     }
   } else if sjtype == "date" {
     if is_array {

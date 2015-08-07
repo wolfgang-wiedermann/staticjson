@@ -180,6 +180,15 @@ impl Type {
     }      
     return String::new();
   }
+
+  pub fn is_attribute_param_present(&self, param_name:&str) -> bool {
+    for a in self.attributes.iter() {
+      if a.is_param_present(param_name) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 #[derive(Clone, Debug)]
