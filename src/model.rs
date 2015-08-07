@@ -99,6 +99,7 @@ impl Attribute {
     }
     return false;
   }
+
   // Checks if a param with the given name has the given value
   pub fn is_param_value_present(&self, param_name:&str, param_value:&str) -> bool {
     for p in self.params.iter() {
@@ -107,6 +108,16 @@ impl Attribute {
       } 
     }
     return false;
+  }
+
+  // Gets the value of the parameter with the given name
+  pub fn get_param_value(&self, param_name:&str) -> String {          
+    for p in self.params.iter() {
+      if p.name == param_name {
+        return (*p).value.clone();        
+      }     
+    }      
+    return String::new();
   }
 }
 

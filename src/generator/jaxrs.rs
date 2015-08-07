@@ -32,6 +32,8 @@ if typ.is_param_value_present("jpa-entity", "true") {
     str.push_str("\nimport javax.jaxb.XmlRootElement;");
 } if typ.is_param_present("jpa-table") { 
     str.push_str("\nimport javax.jpa.Table;");
+} if typ.is_param_present("jpa-column") { 
+    str.push_str("\nimport javax.jpa.Column;");
 } 
   str.push_str("\n\n/**\n* Generated Type for Entity ");
   str.push_str(&typ.typename);
@@ -67,7 +69,13 @@ if typ.is_param_value_present("jpa-entity", "true") {
     } 
   str.push_str("\n    }");
     for attribut in typ.attributes.iter() { 
-    str.push_str("\n\n    public ");
+    str.push_str("\n");
+if attribut.is_param_present("jpa-column") { 
+      str.push_str("\n    @Column(name=\"");
+      str.push_str(&attribut.get_param_value("jpa-column"));
+      str.push_str("\")");
+} 
+    str.push_str("\n    public ");
     str.push_str(&get_java_type(&attribut.attribute_type, attribut.is_array));
     str.push_str(" get");
     str.push_str(&util::lsnake_to_ucamel(&attribut.name));

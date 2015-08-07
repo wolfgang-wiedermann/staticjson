@@ -10,7 +10,8 @@ import java.io.Serializable;
 {{ if typ.is_param_value_present("jpa-entity", "true") { }}
 import javax.jpa.Entity; {{ } if typ.is_param_value_present("jaxb-xml-root", "true") { }}
 import javax.jaxb.XmlRootElement; {{ } if typ.is_param_present("jpa-table") { }}
-import javax.jpa.Table; {{ } }}
+import javax.jpa.Table; {{ } if typ.is_param_present("jpa-column") { }}
+import javax.jpa.Column; {{ } }}
 
 /**
 * Generated Type for Entity  {{= typ.typename }} 
@@ -32,6 +33,8 @@ public class  {{= typ.typename }} implements Serializable {
     }
 {{     for attribut in typ.attributes.iter() { }}
 
+{{ if attribut.is_param_present("jpa-column") { }}
+    @Column(name=" {{= attribut.get_param_value("jpa-column") }}") {{ } }}
     public  {{= get_java_type(&attribut.attribute_type, attribut.is_array) }} get {{= util::lsnake_to_ucamel(&attribut.name) }}() {
         return this. {{= util::lsnake_to_lcamel(&attribut.name) }};
     }

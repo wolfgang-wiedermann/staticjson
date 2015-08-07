@@ -26,13 +26,18 @@ type OrtEntity (
     jpa-table="tbl_ort"
   ) {
   postleitzahl:decimal(
+    jpa-column="plz",
     maxlen="5", 
     minlen="5", 
     decimals="0", 
     mandatory="true"
   );
-  ortsname:string;
-  landkreis_id:int;
+  ortsname:string(
+    jpa-column="wohnort"
+  );
+  landkreis_id:int(
+    jpa-column="landkreis_id"
+  );
 }
 
 //
