@@ -27,3 +27,76 @@ type OrtEntity {
   ortsname:string;
   landkreis_id:int;
 }
+
+//
+// First simple interface sample
+//
+interface StudentRepository(path="/repos") {
+
+  // Get-Method for Students
+  // "method" is a mandatory param per function 
+  //   it definies the HTTP-Method to use for service call
+  getStudentById(id:int(path-param="id")) -> StudentEntity {
+    method="GET",
+    path="/student/{id}"
+  }
+  
+  // Find-Method for Students
+  // "method" is a mandatory param per function 
+  //   it definies the HTTP-Method to use for service call
+  // "path" is mandatory if no Interface-Parameter path is available
+  findStudents(name:string(query-param="name"), 
+              vorname:string(query-param="vorname")) -> StudentEntity[] {
+    method="GET",
+    path="/student"
+  }
+  
+  // Method to create a new student object
+  createStudent(s:StudentEntity) -> StudentEntity {
+    method="POST",
+    path="/student"
+  }
+  
+  // Method to create a set of new student objects
+  createStudents(s:StudentEntity[]) -> StudentEntity {
+    method="POST",
+    path="/students"
+  }
+  
+    // Method to create a set of new student objects
+  createStudents2(s:StudentEntity[](serialized-as="text/xml")) -> StudentEntity {
+    method="POST",
+    path="/students"
+  }
+  
+  // Method to update a new student object
+  updateStudent(s:StudentEntity) {
+    method="PUT",
+    path="/student"
+  }
+}
+
+//
+// Second simple interface sample with interface parameters
+//
+interface OrtRepository(
+    pattern="Repository", 
+    path="/repos/ort") {
+    
+  // Get-Method for Ort-Objects
+  // method is a mandatory param per function 
+  // it definies the HTTP-Method to use for service call
+  getOrtById(id:int(path-param="id")) -> OrtEntity {
+    method="GET",
+    path="{id}"
+  }  
+}
+
+//
+// Sample: Interface with empty param list (makes no sence but is also supported)
+//
+interface WithoutParamsAndFunctions() {
+
+  // No function definitions inside
+  
+}
