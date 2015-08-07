@@ -25,19 +25,75 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
 fn gen_type(typ:&Box<model::Type>) -> String {
   let mut str:String = String::new(); 
 
-  str.push_str("package entities\n\nimport java.util.ArrayList;\n\n/**\n* generated type for Entity ");
+  str.push_str("package entities;\n\nimport java.util.ArrayList;\nimport java.io.Serializable;");
+if typ.is_param_value_present("jpa-entity", "true") { 
+    str.push_str("\nimport javax.jpa.Entity;");
+} if typ.is_param_value_present("jaxb-xml-root", "true") { 
+    str.push_str("\nimport javax.jaxb.XmlRootElement;");
+} if typ.is_param_present("jpa-table") { 
+    str.push_str("\nimport javax.jpa.Table;");
+} 
+  str.push_str("\n\n/**\n* Generated Type for Entity ");
   str.push_str(&typ.typename);
-  str.push_str("\n*/\n\n@Entity\npublic class");
+  str.push_str(" \n*/");
+if typ.is_param_value_present("jpa-entity", "true") { 
+    str.push_str("\n@Entity");
+} if typ.is_param_value_present("jaxb-xml-root", "true") { 
+    str.push_str("\n@XmlRootElement");
+} if typ.is_param_present("jpa-table") { 
+    str.push_str("\n@Table(name=\"");
+    str.push_str(&typ.get_param_value("jpa-table"));
+    str.push_str("\")");
+} 
+  str.push_str("\npublic class ");
   str.push_str(&typ.typename);
-  str.push_str(" {");
+  str.push_str(" implements Serializable {\n");
     for attribut in typ.attributes.iter() { 
-    str.push_str("\n    private TYPEFOR(");
-    str.push_str(&attribut.attribute_type);
-    str.push_str(") ");
+    str.push_str("\n    private ");
+    str.push_str(&get_java_type(&attribut.attribute_type, attribut.is_array));
+    str.push_str(" ");
     str.push_str(&util::lsnake_to_lcamel(&attribut.name));
     str.push_str(";   ");
     } 
-  str.push_str("\n}");
+  str.push_str("\n\n    public ");
+  str.push_str(&typ.typename);
+  str.push_str("() {");
+    for attribut in typ.attributes.iter() { 
+    str.push_str("\n        this.");
+    str.push_str(&util::lsnake_to_lcamel(&attribut.name));
+    str.push_str(" = ");
+    str.push_str(&get_java_type_initial(&attribut.attribute_type, attribut.is_array));
+    str.push_str(";");
+    } 
+  str.push_str("\n    }");
+    for attribut in typ.attributes.iter() { 
+    str.push_str("\n\n    public ");
+    str.push_str(&get_java_type(&attribut.attribute_type, attribut.is_array));
+    str.push_str(" get");
+    str.push_str(&util::lsnake_to_ucamel(&attribut.name));
+    str.push_str("() {\n        return this.");
+    str.push_str(&util::lsnake_to_lcamel(&attribut.name));
+    str.push_str(";\n    }\n    \n    public void set");
+    str.push_str(&util::lsnake_to_ucamel(&attribut.name));
+    str.push_str("(");
+    str.push_str(&get_java_type(&attribut.attribute_type, attribut.is_array));
+    str.push_str(" value) {\n        this.");
+    str.push_str(&util::lsnake_to_lcamel(&attribut.name));
+    str.push_str(" = value;\n    }");
+    } 
+  str.push_str("\n\n    public static boolean isValid(");
+  str.push_str(&typ.typename);
+  str.push_str(" obj) {\n        return obj != null");
+    for attribut in typ.attributes.iter() { 
+      if attribut.is_param_value_present("mandatory", "true") { 
+      str.push_str("\n        && obj.");
+      str.push_str(&util::lsnake_to_lcamel(&attribut.name));
+      str.push_str(" != ");
+      str.push_str(&get_java_type_initial(&attribut.attribute_type, attribut.is_array));
+      str.push_str("");
+      }
+    } 
+  str.push_str(";\n    }\n}");
   return str;
 } 
 
@@ -67,3 +123,86 @@ for function in ifa.functions.iter() {
   str.push_str("\n}");
   return str;
 } 
+// rust utility functions for jaxrs 
+
+fn get_java_type(sjtype:&str, is_array:bool) -> &str {
+  let mut jtype:&str;
+  if !model::Type::is_basic_type(sjtype) {
+    jtype = sjtype;
+  } else if sjtype == "int" || sjtype == "uint" {
+    if is_array {
+      jtype = "ArrayList<int>";
+    } else {
+      jtype = "int";
+    }
+  } else if sjtype == "long" || sjtype == "ulong" {
+    if is_array {
+      jtype = "ArrayList<long>";
+    } else {
+      jtype = "long";
+    }
+  } else if sjtype == "string" {
+    if is_array {
+      jtype = "ArrayList<String>";
+    } else {
+      jtype = "String";
+    }
+  } else if sjtype == "decimal" {
+    if is_array {
+      jtype = "ArrayList<double>";
+    } else {
+      jtype = "double";
+    }
+  } else if sjtype == "date" {
+    if is_array {
+      jtype = "ArrayList<java.util.Date>";
+    } else {
+      jtype = "java.util.Date";
+    }
+  } else {
+    jtype = "undef";
+  }
+  return jtype.clone();
+}
+
+fn get_java_type_initial(sjtype:&str, is_array:bool) -> &str {
+  let mut jtype:&str;
+  if !model::Type::is_basic_type(sjtype) {
+    jtype = "null";
+  } else if sjtype == "int" || sjtype == "uint" {
+    if is_array {
+      jtype = "new ArrayList<int>()";
+    } else {
+      jtype = "0";
+    }
+  } else if sjtype == "long" || sjtype == "ulong" {
+    if is_array {
+      jtype = "new ArrayList<long>()";
+    } else {
+      jtype = "0";
+    }
+  } else if sjtype == "string" {
+    if is_array {
+      jtype = "new ArrayList<String>()";
+    } else {
+      jtype = "null";
+    }
+  } else if sjtype == "decimal" {
+    if is_array {
+      jtype = "new ArrayList<double>()";
+    } else {
+      jtype = "0.0";
+    }
+  } else if sjtype == "date" {
+    if is_array {
+      jtype = "new ArrayList<java.util.Date>()";
+    } else {
+      jtype = "null";
+    }
+  } else {
+    jtype = "undef";
+  }
+  return jtype.clone();
+}
+
+

@@ -18,4 +18,4 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
     let filename = format!("{}/interfaces/I{}.java", folder, ifa.name);
     filehandler::write_file(filename, result);
   }
-} }}{{+ jaxrs_template/gen_type.ct }}{{+ jaxrs_template/gen_interface.ct }}
+} }}{{+ jaxrs_template/gen_type.ct }}{{+ jaxrs_template/gen_interface.ct }}{{+ jaxrs_template/functions.ct }}

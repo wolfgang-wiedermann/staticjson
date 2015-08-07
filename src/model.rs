@@ -159,6 +159,16 @@ impl Type {
     }
     return false;
   }
+    
+  // Gets the value of the parameter with the given name
+  pub fn get_param_value(&self, param_name:&str) -> String {          
+    for p in self.params.iter() {
+      if p.name == param_name {
+        return (*p).value.clone();        
+      }     
+    }      
+    return String::new();
+  }
 }
 
 #[derive(Clone, Debug)]

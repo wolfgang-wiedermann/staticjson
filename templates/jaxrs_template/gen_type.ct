@@ -3,19 +3,51 @@
 //
 fn gen_type(typ:&Box<model::Type>) -> String {
   let mut str:String = String::new(); 
-}}package entities
+}}package entities;
 
 import java.util.ArrayList;
+import java.io.Serializable;
+{{ if typ.is_param_value_present("jpa-entity", "true") { }}
+import javax.jpa.Entity; {{ } if typ.is_param_value_present("jaxb-xml-root", "true") { }}
+import javax.jaxb.XmlRootElement; {{ } if typ.is_param_present("jpa-table") { }}
+import javax.jpa.Table; {{ } }}
 
 /**
-* generated type for Entity  {{= typ.typename }}
+* Generated Type for Entity  {{= typ.typename }} 
 */
+{{ if typ.is_param_value_present("jpa-entity", "true") { }}
+@Entity {{ } if typ.is_param_value_present("jaxb-xml-root", "true") { }}
+@XmlRootElement {{ } if typ.is_param_present("jpa-table") { }}
+@Table(name=" {{= typ.get_param_value("jpa-table") }}") {{ } }}
+public class  {{= typ.typename }} implements Serializable {
 
-@Entity
-public class {{= typ.typename }} {
 {{     for attribut in typ.attributes.iter() { }}
-    private TYPEFOR( {{= attribut.attribute_type }})  {{= util::lsnake_to_lcamel(&attribut.name) }};   
+    private  {{= get_java_type(&attribut.attribute_type, attribut.is_array) }}  {{= util::lsnake_to_lcamel(&attribut.name) }};   
 {{     } }}
+
+    public  {{= typ.typename }}() {
+{{     for attribut in typ.attributes.iter() { }}
+        this. {{= util::lsnake_to_lcamel(&attribut.name) }} =  {{= get_java_type_initial(&attribut.attribute_type, attribut.is_array) }};
+{{     } }}
+    }
+{{     for attribut in typ.attributes.iter() { }}
+
+    public  {{= get_java_type(&attribut.attribute_type, attribut.is_array) }} get {{= util::lsnake_to_ucamel(&attribut.name) }}() {
+        return this. {{= util::lsnake_to_lcamel(&attribut.name) }};
+    }
+    
+    public void set {{= util::lsnake_to_ucamel(&attribut.name) }}( {{= get_java_type(&attribut.attribute_type, attribut.is_array) }} value) {
+        this. {{= util::lsnake_to_lcamel(&attribut.name) }} = value;
+    }
+{{     } }}
+
+    public static boolean isValid( {{= typ.typename }} obj) {
+        return obj != null {{     for attribut in typ.attributes.iter() { 
+      if attribut.is_param_value_present("mandatory", "true") { }}
+        && obj. {{= util::lsnake_to_lcamel(&attribut.name) }} !=  {{= get_java_type_initial(&attribut.attribute_type, attribut.is_array) }}
+{{       }
+    } }};
+    }
 }
 {{   return str;
 } 

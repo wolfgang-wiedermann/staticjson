@@ -1,6 +1,10 @@
 // Ein schnell geschriebenes Test-Beispiel:
 
-type StudentEntity (type_param="1234") {
+type StudentEntity (
+    type_param="1234",
+    jpa-entity="true",
+    jpa-table="tbl_student"
+  ) {
   mtknr_id:decimal(maxlen="10", decimals="0", mandatory="true");
   mtknr_id2:int[];
   mtknr_id3:uint;
@@ -17,7 +21,10 @@ type StudentEntity (type_param="1234") {
   custom_order_id:decimal;
 }
 
-type OrtEntity {
+type OrtEntity (
+    jpa-entity="true",
+    jpa-table="tbl_ort"
+  ) {
   postleitzahl:decimal(
     maxlen="5", 
     minlen="5", 
