@@ -3,7 +3,8 @@
 //
 fn gen_type(typ:&Box<model::Type>) -> String {
   let mut str:String = String::new(); 
-}}package entities;
+  if typ.is_param_present("java-package") {
+}}package  {{= typ.get_param_value("java-package") }}; {{ } }}
 
 import java.util.ArrayList;
 import java.io.Serializable;
@@ -14,8 +15,8 @@ import javax.persistence.Column; {{ } if typ.is_attribute_param_present("jpa-tra
 import javax.persistence.Transient; {{ } if typ.is_attribute_param_present("jpa-id") { }}
 import javax.persistence.Id; {{ } if typ.is_attribute_param_present("jpa-generated-value") { }}
 import javax.persistence.GeneratedValue; {{ } if typ.is_param_value_present("jaxb-xml-root", "true") { }}
-import javax.jaxb.XmlRootElement; {{  } if typ.is_attribute_param_present("jaxb-transient") { }}
-import javax.jaxb.XmlTransient; {{ } }}
+import javax.xml.bind.annotation.XmlRootElement; {{  } if typ.is_attribute_param_present("jaxb-transient") { }}
+import javax.xml.bind.annotation.XmlTransient; {{ } }}
 
 /**
 * Generated Type for Entity  {{= typ.typename }} 

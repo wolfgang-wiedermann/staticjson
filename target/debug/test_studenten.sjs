@@ -1,7 +1,7 @@
 // Ein schnell geschriebenes Test-Beispiel:
 
 type StudentEntity (
-    type_param="1234",
+    java-package="entities",
     jpa-entity="true",
     jpa-table="tbl_student"
   ) {
@@ -25,6 +25,7 @@ type StudentEntity (
 }
 
 type OrtEntity (
+    java-package="entities",
     jpa-entity="true",
     jpa-table="tbl_ort"
   ) {

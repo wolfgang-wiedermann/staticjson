@@ -24,8 +24,13 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
 //
 fn gen_type(typ:&Box<model::Type>) -> String {
   let mut str:String = String::new(); 
+  if typ.is_param_present("java-package") {
 
-  str.push_str("package entities;\n\nimport java.util.ArrayList;\nimport java.io.Serializable;");
+    str.push_str("package ");
+    str.push_str(&typ.get_param_value("java-package"));
+    str.push_str(";");
+} 
+  str.push_str("\n\nimport java.util.ArrayList;\nimport java.io.Serializable;");
 if typ.is_param_value_present("jpa-entity", "true") { 
     str.push_str("\nimport javax.persistence.Entity;");
 } if typ.is_param_present("jpa-table") { 
@@ -39,9 +44,9 @@ if typ.is_param_value_present("jpa-entity", "true") {
 } if typ.is_attribute_param_present("jpa-generated-value") { 
     str.push_str("\nimport javax.persistence.GeneratedValue;");
 } if typ.is_param_value_present("jaxb-xml-root", "true") { 
-    str.push_str("\nimport javax.jaxb.XmlRootElement;");
+    str.push_str("\nimport javax.xml.bind.annotation.XmlRootElement;");
  } if typ.is_attribute_param_present("jaxb-transient") { 
-    str.push_str("\nimport javax.jaxb.XmlTransient;");
+    str.push_str("\nimport javax.xml.bind.annotation.XmlTransient;");
 } 
   str.push_str("\n\n/**\n* Generated Type for Entity ");
   str.push_str(&typ.typename);
