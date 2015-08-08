@@ -976,6 +976,7 @@ impl Parser {
     self.current_function.name.truncate(0);
     self.current_function.params.truncate(0);
     self.current_function.attributes.truncate(0);
+    self.current_function.returntype = "void".to_string();
     self.current_function.returntype_is_array = false;
   }
 

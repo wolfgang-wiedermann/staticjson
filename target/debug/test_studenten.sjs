@@ -83,7 +83,7 @@ interface StudentRepository(
   }
   
     // Method to create a set of new student objects
-  createStudents2(s:StudentEntity[](serialized-as="text/xml")) -> StudentEntity {
+  createStudents2(s:StudentEntity[](serialized-as="text/xml")) -> StudentEntity[] {
     method="POST",
     path="/students"
   }
