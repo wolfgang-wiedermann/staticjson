@@ -28,12 +28,16 @@ fn gen_type(typ:&Box<model::Type>) -> String {
   str.push_str("package entities;\n\nimport java.util.ArrayList;\nimport java.io.Serializable;");
 if typ.is_param_value_present("jpa-entity", "true") { 
     str.push_str("\nimport javax.jpa.Entity;");
-} if typ.is_param_value_present("jaxb-xml-root", "true") { 
-    str.push_str("\nimport javax.jaxb.XmlRootElement;");
 } if typ.is_param_present("jpa-table") { 
     str.push_str("\nimport javax.jpa.Table;");
 } if typ.is_attribute_param_present("jpa-column") { 
     str.push_str("\nimport javax.jpa.Column;");
+} if typ.is_attribute_param_present("jpa-transient") { 
+    str.push_str("\nimport javax.jpa.Transient;");
+} if typ.is_param_value_present("jaxb-xml-root", "true") { 
+    str.push_str("\nimport javax.jaxb.XmlRootElement;");
+ } if typ.is_attribute_param_present("jaxb-transient") { 
+    str.push_str("\nimport javax.jaxb.XmlTransient;");
 } 
   str.push_str("\n\n/**\n* Generated Type for Entity ");
   str.push_str(&typ.typename);
@@ -74,6 +78,8 @@ if attribut.is_param_present("jpa-column") {
       str.push_str("\n    @Column(name=\"");
       str.push_str(&attribut.get_param_value("jpa-column"));
       str.push_str("\")");
+} if attribut.is_param_value_present("jpa-transient", "true") { 
+      str.push_str("\n    @Transient");
 } 
     str.push_str("\n    public ");
     str.push_str(&get_java_type(&attribut.attribute_type, attribut.is_array));

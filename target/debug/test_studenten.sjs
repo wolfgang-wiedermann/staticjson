@@ -18,7 +18,7 @@ type StudentEntity (
   geburtsort:OrtEntity;
   wohnorte:OrtEntity[];
   ganzzahl:int; 
-  custom_order_id:decimal;
+  custom_order_id:decimal(jpa-transient="true");
 }
 
 type OrtEntity (
