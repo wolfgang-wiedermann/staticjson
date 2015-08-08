@@ -9,14 +9,26 @@ use util;
 pub fn generate(tree:model::ParserResult, folder:&str) {
   for typ in tree.types.iter() {
     let result = gen_type(typ);
-    let filename = format!("{}/entites/{}.java", folder, typ.typename);
-    filehandler::write_file(filename, result);
+    if typ.is_param_present("java-package") {
+      let package = typ.get_param_value("java-package").replace(".", "/");
+      let filename = format!("{}/{}/{}.java", folder, package, typ.typename);
+      filehandler::write_file(filename, result);
+    } else {
+      let filename = format!("{}/{}.java", folder, typ.typename);
+      filehandler::write_file(filename, result);
+    }
   }
   
   for ifa in tree.interfaces.iter() {
     let result = gen_interface(ifa);
-    let filename = format!("{}/interfaces/I{}.java", folder, ifa.name);
-    filehandler::write_file(filename, result);
+    if ifa.is_param_present("java-package") {
+      let package = ifa.get_param_value("java-package").replace(".", "/");
+      let filename = format!("{}/{}/{}.java", folder, package, ifa.name);
+      filehandler::write_file(filename, result);
+    } else {
+      let filename = format!("{}/{}.java", folder, ifa.name);
+      filehandler::write_file(filename, result);
+    }
   }
 } 
 // 
@@ -130,8 +142,13 @@ if attribut.is_param_value_present("jpa-id", "true") {
 //
 fn gen_interface(ifa:&Box<model::Interface>) -> String {
   let mut str:String = String::new();
+  if ifa.is_param_present("java-package") {
 
-  str.push_str("package interfaces;\n\nimport java.util.ArrayList;\n// ...\n\n/**\n* Generated Interface for ");
+    str.push_str("package ");
+    str.push_str(&ifa.get_param_value("java-package"));
+    str.push_str(";");
+} 
+  str.push_str("\n\nimport java.util.ArrayList;\n// ...\n\n/**\n* Generated Interface for ");
   str.push_str(&ifa.name);
   str.push_str(" with JAX-RS Annotations\n*/");
 if ifa.is_param_present("path") { 
@@ -139,7 +156,7 @@ if ifa.is_param_present("path") {
     str.push_str(&ifa.get_param_value("path"));
     str.push_str("\")");
 } 
-  str.push_str("\npublic interface I");
+  str.push_str("\npublic interface ");
   str.push_str(&ifa.name);
   str.push_str(" {");
 for function in ifa.functions.iter() { 

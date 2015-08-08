@@ -1,7 +1,7 @@
 // Ein schnell geschriebenes Test-Beispiel:
 
 type StudentEntity (
-    java-package="entities",
+    java-package="de.ww.entities",
     jpa-entity="true",
     jpa-table="tbl_student"
   ) {
@@ -25,7 +25,7 @@ type StudentEntity (
 }
 
 type OrtEntity (
-    java-package="entities",
+    java-package="de.ww.entities",
     jpa-entity="true",
     jpa-table="tbl_ort"
   ) {
@@ -47,7 +47,10 @@ type OrtEntity (
 //
 // First simple interface sample
 //
-interface StudentRepository(path="/repos") {
+interface StudentRepository(
+    java-package="de.ww.interfaces",
+    path="/repos"
+  ) {
 
   // Get-Method for Students
   // "method" is a mandatory param per function 
@@ -96,6 +99,7 @@ interface StudentRepository(path="/repos") {
 // Second simple interface sample with interface parameters
 //
 interface OrtRepository(
+    java-package="de.ww.interfaces",
     pattern="Repository", 
     path="/repos/ort") {
     

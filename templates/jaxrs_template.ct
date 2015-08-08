@@ -9,13 +9,25 @@ use util;
 pub fn generate(tree:model::ParserResult, folder:&str) {
   for typ in tree.types.iter() {
     let result = gen_type(typ);
-    let filename = format!("{}/entites/{}.java", folder, typ.typename);
-    filehandler::write_file(filename, result);
+    if typ.is_param_present("java-package") {
+      let package = typ.get_param_value("java-package").replace(".", "/");
+      let filename = format!("{}/{}/{}.java", folder, package, typ.typename);
+      filehandler::write_file(filename, result);
+    } else {
+      let filename = format!("{}/{}.java", folder, typ.typename);
+      filehandler::write_file(filename, result);
+    }
   }
   
   for ifa in tree.interfaces.iter() {
     let result = gen_interface(ifa);
-    let filename = format!("{}/interfaces/I{}.java", folder, ifa.name);
-    filehandler::write_file(filename, result);
+    if ifa.is_param_present("java-package") {
+      let package = ifa.get_param_value("java-package").replace(".", "/");
+      let filename = format!("{}/{}/{}.java", folder, package, ifa.name);
+      filehandler::write_file(filename, result);
+    } else {
+      let filename = format!("{}/{}.java", folder, ifa.name);
+      filehandler::write_file(filename, result);
+    }
   }
 } }}{{+ jaxrs_template/gen_type.ct }}{{+ jaxrs_template/gen_interface.ct }}{{+ jaxrs_template/functions.ct }}
