@@ -37,7 +37,8 @@ type OrtEntity (
     mandatory="true"
   );
   ortsname:string(
-    jpa-column="wohnort"
+    jpa-column="wohnort",
+    maxlen="50"
   );
   landkreis_id:int(
     jpa-column="landkreis_id"

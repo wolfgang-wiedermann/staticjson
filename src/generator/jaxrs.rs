@@ -130,18 +130,22 @@ if attribut.is_param_value_present("jpa-id", "true") {
       str.push_str(" != ");
       str.push_str(&get_java_type_initial(&attribut.attribute_type, attribut.is_array));
       str.push_str("");
-      } if attribut.is_param_present("maxlen") && attribut.attribute_type == "string" { 
-      str.push_str("\n        && obj.");
+      } if attribut.is_param_present("maxlen") && attribut.attribute_type == "string" && !attribut.is_array { 
+      str.push_str("\n        && (obj.");
+      str.push_str(&util::lsnake_to_lcamel(&attribut.name));
+      str.push_str(" != null && \n            obj.");
       str.push_str(&util::lsnake_to_lcamel(&attribut.name));
       str.push_str(".length() <= ");
       str.push_str(&attribut.get_param_value("maxlen"));
-      str.push_str("");
-      } if attribut.is_param_present("minlen") && attribut.attribute_type == "string" { 
-      str.push_str("\n        && obj.");
+      str.push_str(")");
+      } if attribut.is_param_present("minlen") && attribut.attribute_type == "string" && !attribut.is_array { 
+      str.push_str("\n        && (obj.");
+      str.push_str(&util::lsnake_to_lcamel(&attribut.name));
+      str.push_str(" != null && \n            obj.");
       str.push_str(&util::lsnake_to_lcamel(&attribut.name));
       str.push_str(".length() >= ");
       str.push_str(&attribut.get_param_value("minlen"));
-      str.push_str("");
+      str.push_str(")");
       } 
     } 
   str.push_str(";\n    }\n}");

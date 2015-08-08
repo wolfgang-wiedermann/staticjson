@@ -62,10 +62,12 @@ public class  {{= typ.typename }} implements Serializable {
         return obj != null {{     for attribut in typ.attributes.iter() { 
       if attribut.is_param_value_present("mandatory", "true") { }}
         && obj. {{= util::lsnake_to_lcamel(&attribut.name) }} !=  {{= get_java_type_initial(&attribut.attribute_type, attribut.is_array) }}
-{{       } if attribut.is_param_present("maxlen") && attribut.attribute_type == "string" { }}
-        && obj. {{= util::lsnake_to_lcamel(&attribut.name) }}.length() <=  {{= attribut.get_param_value("maxlen") }}
-{{       } if attribut.is_param_present("minlen") && attribut.attribute_type == "string" { }}
-        && obj. {{= util::lsnake_to_lcamel(&attribut.name) }}.length() >=  {{= attribut.get_param_value("minlen") }}
+{{       } if attribut.is_param_present("maxlen") && attribut.attribute_type == "string" && !attribut.is_array { }}
+        && (obj. {{= util::lsnake_to_lcamel(&attribut.name) }} != null && 
+            obj. {{= util::lsnake_to_lcamel(&attribut.name) }}.length() <=  {{= attribut.get_param_value("maxlen") }})
+{{       } if attribut.is_param_present("minlen") && attribut.attribute_type == "string" && !attribut.is_array { }}
+        && (obj. {{= util::lsnake_to_lcamel(&attribut.name) }} != null && 
+            obj. {{= util::lsnake_to_lcamel(&attribut.name) }}.length() >=  {{= attribut.get_param_value("minlen") }})
 {{       } 
     } }};
     }
