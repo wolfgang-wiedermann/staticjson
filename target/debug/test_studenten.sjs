@@ -3,8 +3,8 @@
 type StudentEntity (
     java-package="de.ww.entities",
     jpa-entity="true",
-    jpa-table="tbl_student"
-  ) {
+    jpa-table="tbl_student") {
+    
   mtknr_id:decimal(maxlen="10", decimals="0", mandatory="true");
   mtknr_id2:int[];
   mtknr_id3:uint(
@@ -27,8 +27,8 @@ type StudentEntity (
 type OrtEntity (
     java-package="de.ww.entities",
     jpa-entity="true",
-    jpa-table="tbl_ort"
-  ) {
+    jpa-table="tbl_ort") {
+    
   postleitzahl:string(
     jpa-column="plz",
     jpa-id="true",
@@ -49,8 +49,7 @@ type OrtEntity (
 //
 interface StudentRepository(
     java-package="de.ww.interfaces",
-    path="/repos"
-  ) {
+    path="/repos") {
 
   // Get-Method for Students
   // "method" is a mandatory param per function 

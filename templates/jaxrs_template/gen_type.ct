@@ -52,11 +52,21 @@ public class  {{= typ.typename }} implements Serializable {
     }
 {{     } }}
 
+    /**
+    * The function isValid offert a validation function for the
+    * mandatory attributes and other constraints of staticjson code
+    * @param object to check
+    * @return check result
+    */
     public static boolean isValid( {{= typ.typename }} obj) {
         return obj != null {{     for attribut in typ.attributes.iter() { 
       if attribut.is_param_value_present("mandatory", "true") { }}
         && obj. {{= util::lsnake_to_lcamel(&attribut.name) }} !=  {{= get_java_type_initial(&attribut.attribute_type, attribut.is_array) }}
-{{       }
+{{       } if attribut.is_param_present("maxlen") && attribut.attribute_type == "string" { }}
+        && obj. {{= util::lsnake_to_lcamel(&attribut.name) }}.length() <=  {{= attribut.get_param_value("maxlen") }}
+{{       } if attribut.is_param_present("minlen") && attribut.attribute_type == "string" { }}
+        && obj. {{= util::lsnake_to_lcamel(&attribut.name) }}.length() >=  {{= attribut.get_param_value("minlen") }}
+{{       } 
     } }};
     }
 }
