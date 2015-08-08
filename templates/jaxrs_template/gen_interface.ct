@@ -16,7 +16,12 @@ import java.util.ArrayList;
 @Path(" {{= ifa.get_param_value("path") }}") {{ } }}
 public interface  {{= ifa.name }} {
 {{ for function in ifa.functions.iter() { }}
-    public RETURNTYPE  {{= function.name }}();
+
+    /** 
+     *  {{= function.returntype }}
+     *  {{= format!("is_array = {}", function.returntype_is_array) }}
+     */
+    public  {{= get_java_type(&function.returntype, function.returntype_is_array) }}  {{= function.name }}();
 {{ } }}
 }
 {{   return str;

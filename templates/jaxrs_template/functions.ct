@@ -1,9 +1,13 @@
 {{ // rust utility functions for jaxrs 
 
-fn get_java_type(sjtype:&str, is_array:bool) -> &str {
+fn get_java_type(sjtype:&str, is_array:bool) -> String {
   let mut jtype:&str;
   if !model::Type::is_basic_type(sjtype) {
-    jtype = sjtype;
+    if is_array {
+      return format!("ArrayList<{}>", sjtype);
+    } else {
+      jtype = sjtype;
+    }
   } else if sjtype == "int" || sjtype == "uint" {
     if is_array {
       jtype = "ArrayList<int>";
@@ -37,13 +41,17 @@ fn get_java_type(sjtype:&str, is_array:bool) -> &str {
   } else {
     jtype = "undef";
   }
-  return jtype.clone();
+  return jtype.to_string();
 }
 
-fn get_java_type_initial(sjtype:&str, is_array:bool) -> &str {
+fn get_java_type_initial(sjtype:&str, is_array:bool) -> String {
   let mut jtype:&str;
   if !model::Type::is_basic_type(sjtype) {
-    jtype = "null";
+    if is_array {
+      return format!("new ArrayList<{}>", sjtype);
+    } else {
+      jtype = "null";
+    }
   } else if sjtype == "int" || sjtype == "uint" {
     if is_array {
       jtype = "new ArrayList<int>()";
@@ -77,7 +85,7 @@ fn get_java_type_initial(sjtype:&str, is_array:bool) -> &str {
   } else {
     jtype = "undef";
   }
-  return jtype.clone();
+  return jtype.to_string();
 }
 
 }}

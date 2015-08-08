@@ -176,7 +176,13 @@ if ifa.is_param_present("path") {
   str.push_str(&ifa.name);
   str.push_str(" {");
 for function in ifa.functions.iter() { 
-    str.push_str("\n    public RETURNTYPE ");
+    str.push_str("\n\n    /** \n     * ");
+    str.push_str(&function.returntype);
+    str.push_str("\n     * ");
+    str.push_str(&format!("is_array = {}", function.returntype_is_array));
+    str.push_str("\n     */\n    public ");
+    str.push_str(&get_java_type(&function.returntype, function.returntype_is_array));
+    str.push_str(" ");
     str.push_str(&function.name);
     str.push_str("();");
 } 
@@ -185,10 +191,14 @@ for function in ifa.functions.iter() {
 } 
 // rust utility functions for jaxrs 
 
-fn get_java_type(sjtype:&str, is_array:bool) -> &str {
+fn get_java_type(sjtype:&str, is_array:bool) -> String {
   let mut jtype:&str;
   if !model::Type::is_basic_type(sjtype) {
-    jtype = sjtype;
+    if is_array {
+      return format!("ArrayList<{}>", sjtype);
+    } else {
+      jtype = sjtype;
+    }
   } else if sjtype == "int" || sjtype == "uint" {
     if is_array {
       jtype = "ArrayList<int>";
@@ -222,13 +232,17 @@ fn get_java_type(sjtype:&str, is_array:bool) -> &str {
   } else {
     jtype = "undef";
   }
-  return jtype.clone();
+  return jtype.to_string();
 }
 
-fn get_java_type_initial(sjtype:&str, is_array:bool) -> &str {
+fn get_java_type_initial(sjtype:&str, is_array:bool) -> String {
   let mut jtype:&str;
   if !model::Type::is_basic_type(sjtype) {
-    jtype = "null";
+    if is_array {
+      return format!("new ArrayList<{}>", sjtype);
+    } else {
+      jtype = "null";
+    }
   } else if sjtype == "int" || sjtype == "uint" {
     if is_array {
       jtype = "new ArrayList<int>()";
@@ -262,7 +276,7 @@ fn get_java_type_initial(sjtype:&str, is_array:bool) -> &str {
   } else {
     jtype = "undef";
   }
-  return jtype.clone();
+  return jtype.to_string();
 }
 
 
