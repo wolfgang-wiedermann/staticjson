@@ -7,7 +7,10 @@ type StudentEntity (
   ) {
   mtknr_id:decimal(maxlen="10", decimals="0", mandatory="true");
   mtknr_id2:int[];
-  mtknr_id3:uint;
+  mtknr_id3:uint(
+    jpa-id="true",
+    jpa-generated-value="true"
+  );
   mtknr_id4:long;
   mtknr_id5:ulong;
   string_array:string[];
@@ -25,11 +28,11 @@ type OrtEntity (
     jpa-entity="true",
     jpa-table="tbl_ort"
   ) {
-  postleitzahl:decimal(
+  postleitzahl:string(
     jpa-column="plz",
+    jpa-id="true",
     maxlen="5", 
-    minlen="5", 
-    decimals="0", 
+    minlen="5",  
     mandatory="true"
   );
   ortsname:string(

@@ -27,13 +27,17 @@ fn gen_type(typ:&Box<model::Type>) -> String {
 
   str.push_str("package entities;\n\nimport java.util.ArrayList;\nimport java.io.Serializable;");
 if typ.is_param_value_present("jpa-entity", "true") { 
-    str.push_str("\nimport javax.jpa.Entity;");
+    str.push_str("\nimport javax.persistence.Entity;");
 } if typ.is_param_present("jpa-table") { 
-    str.push_str("\nimport javax.jpa.Table;");
+    str.push_str("\nimport javax.persistence.Table;");
 } if typ.is_attribute_param_present("jpa-column") { 
-    str.push_str("\nimport javax.jpa.Column;");
+    str.push_str("\nimport javax.persistence.Column;");
 } if typ.is_attribute_param_present("jpa-transient") { 
-    str.push_str("\nimport javax.jpa.Transient;");
+    str.push_str("\nimport javax.persistence.Transient;");
+} if typ.is_attribute_param_present("jpa-id") { 
+    str.push_str("\nimport javax.persistence.Id;");
+} if typ.is_attribute_param_present("jpa-generated-value") { 
+    str.push_str("\nimport javax.persistence.GeneratedValue;");
 } if typ.is_param_value_present("jaxb-xml-root", "true") { 
     str.push_str("\nimport javax.jaxb.XmlRootElement;");
  } if typ.is_attribute_param_present("jaxb-transient") { 
@@ -74,7 +78,11 @@ if typ.is_param_value_present("jpa-entity", "true") {
   str.push_str("\n    }");
     for attribut in typ.attributes.iter() { 
     str.push_str("\n");
-if attribut.is_param_present("jpa-column") { 
+if attribut.is_param_value_present("jpa-id", "true") { 
+      str.push_str("\n    @Id");
+} if attribut.is_param_value_present("jpa-generated-value", "true") { 
+      str.push_str("\n    @GeneratedValue");
+} if attribut.is_param_present("jpa-column") { 
       str.push_str("\n    @Column(name=\"");
       str.push_str(&attribut.get_param_value("jpa-column"));
       str.push_str("\")");

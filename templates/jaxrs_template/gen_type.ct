@@ -8,10 +8,12 @@ fn gen_type(typ:&Box<model::Type>) -> String {
 import java.util.ArrayList;
 import java.io.Serializable;
 {{ if typ.is_param_value_present("jpa-entity", "true") { }}
-import javax.jpa.Entity; {{ } if typ.is_param_present("jpa-table") { }}
-import javax.jpa.Table; {{ } if typ.is_attribute_param_present("jpa-column") { }}
-import javax.jpa.Column; {{ } if typ.is_attribute_param_present("jpa-transient") { }}
-import javax.jpa.Transient; {{ } if typ.is_param_value_present("jaxb-xml-root", "true") { }}
+import javax.persistence.Entity; {{ } if typ.is_param_present("jpa-table") { }}
+import javax.persistence.Table; {{ } if typ.is_attribute_param_present("jpa-column") { }}
+import javax.persistence.Column; {{ } if typ.is_attribute_param_present("jpa-transient") { }}
+import javax.persistence.Transient; {{ } if typ.is_attribute_param_present("jpa-id") { }}
+import javax.persistence.Id; {{ } if typ.is_attribute_param_present("jpa-generated-value") { }}
+import javax.persistence.GeneratedValue; {{ } if typ.is_param_value_present("jaxb-xml-root", "true") { }}
 import javax.jaxb.XmlRootElement; {{  } if typ.is_attribute_param_present("jaxb-transient") { }}
 import javax.jaxb.XmlTransient; {{ } }}
 
@@ -35,7 +37,9 @@ public class  {{= typ.typename }} implements Serializable {
     }
 {{     for attribut in typ.attributes.iter() { }}
 
-{{ if attribut.is_param_present("jpa-column") { }}
+{{ if attribut.is_param_value_present("jpa-id", "true") { }}
+    @Id {{ } if attribut.is_param_value_present("jpa-generated-value", "true") { }}
+    @GeneratedValue {{ } if attribut.is_param_present("jpa-column") { }}
     @Column(name=" {{= attribut.get_param_value("jpa-column") }}") {{ } if attribut.is_param_value_present("jpa-transient", "true") { }}
     @Transient {{ } }}
     public  {{= get_java_type(&attribut.attribute_type, attribut.is_array) }} get {{= util::lsnake_to_ucamel(&attribut.name) }}() {
