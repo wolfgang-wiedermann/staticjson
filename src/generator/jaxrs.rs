@@ -167,7 +167,11 @@ fn gen_interface(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -
     str.push_str(&ifa.get_param_value("java-package"));
     str.push_str(";");
 } 
-  str.push_str("\n\nimport java.util.ArrayList;\n// ...");
+  str.push_str("\n\nimport java.util.ArrayList;");
+if ifa.is_param_present("path") { 
+    str.push_str("\nimport javax.ws.rs.Path;");
+} 
+  str.push_str("");
   str.push_str(&get_interfaces_referenced_java_packages(&ifa, types.clone()));
   str.push_str("\n\n/**\n* Generated Interface for ");
   str.push_str(&ifa.name);

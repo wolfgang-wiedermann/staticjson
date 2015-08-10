@@ -6,8 +6,8 @@ fn gen_interface(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -
   if ifa.is_param_present("java-package") {
 }}package  {{= ifa.get_param_value("java-package") }}; {{ } }}
 
-import java.util.ArrayList;
-// ...
+import java.util.ArrayList; {{ if ifa.is_param_present("path") { }}
+import javax.ws.rs.Path; {{ } }}
 {{= get_interfaces_referenced_java_packages(&ifa, types.clone()) }}
 
 /**
