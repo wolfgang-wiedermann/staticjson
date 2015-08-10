@@ -10,13 +10,13 @@ fn get_java_type(sjtype:&str, is_array:bool) -> String {
     }
   } else if sjtype == "int" || sjtype == "uint" {
     if is_array {
-      jtype = "ArrayList<int>";
+      jtype = "ArrayList<Integer>";
     } else {
       jtype = "int";
     }
   } else if sjtype == "long" || sjtype == "ulong" {
     if is_array {
-      jtype = "ArrayList<long>";
+      jtype = "ArrayList<Long>";
     } else {
       jtype = "long";
     }
@@ -48,7 +48,7 @@ fn get_java_type_initial(sjtype:&str, is_array:bool) -> String {
   let mut jtype:&str;
   if !model::Type::is_basic_type(sjtype) {
     if is_array {
-      return format!("new ArrayList<{}>", sjtype);
+      return format!("new ArrayList<{}>()", sjtype);
     } else {
       jtype = "null";
     }
