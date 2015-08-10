@@ -88,7 +88,7 @@ fn get_java_type_initial(sjtype:&str, is_array:bool) -> String {
   return jtype.to_string();
 }
 
-fn get_referenced_java_packages(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {    
+fn get_types_referenced_java_packages(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {    
   let mut packageSet:HashSet<String> = HashSet::new();
   for attr in typ.attributes.iter() {
     if !model::Type::is_basic_type(&attr.attribute_type) {
@@ -97,6 +97,27 @@ fn get_referenced_java_packages(typ:&Box<model::Type>, types:Box<Vec<Box<model::
            && t.is_param_present("java-package") 
            && !(typ.is_param_present("java-package") 
                 && typ.get_param_value("java-package") == t.get_param_value("java-package")){
+           packageSet.insert(format!("{}.{}", t.get_param_value("java-package"), t.typename));
+        }
+      }
+    }
+  }
+  let mut ret = String::new();
+  for package in &packageSet {
+    ret.push_str(&format!("\nimport {};", package));
+  }
+  return ret.clone();
+}
+
+fn get_interfaces_referenced_java_packages(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {    
+  let mut packageSet:HashSet<String> = HashSet::new();
+  for func in ifa.functions.iter() {
+    if !model::Type::is_basic_type(&func.returntype) {
+      for t in types.iter() {
+        if t.typename == func.returntype
+           && t.is_param_present("java-package") 
+           && !(ifa.is_param_present("java-package") 
+                && ifa.get_param_value("java-package") == t.get_param_value("java-package")){
            packageSet.insert(format!("{}.{}", t.get_param_value("java-package"), t.typename));
         }
       }

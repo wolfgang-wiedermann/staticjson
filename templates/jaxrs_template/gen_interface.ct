@@ -1,13 +1,14 @@
 {{ // 
 // Generate code for interface
 //
-fn gen_interface(ifa:&Box<model::Interface>) -> String {
+fn gen_interface(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {
   let mut str:String = String::new();
   if ifa.is_param_present("java-package") {
 }}package  {{= ifa.get_param_value("java-package") }}; {{ } }}
 
 import java.util.ArrayList;
 // ...
+{{= get_interfaces_referenced_java_packages(&ifa, types.clone()) }}
 
 /**
 * Generated Interface for  {{= ifa.name }} with JAX-RS Annotations

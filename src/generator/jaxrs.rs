@@ -21,7 +21,7 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
   }
   
   for ifa in tree.interfaces.iter() {
-    let result = gen_interface(ifa);
+    let result = gen_interface(ifa, tree.types.clone());
     if ifa.is_param_present("java-package") {
       let package = ifa.get_param_value("java-package").replace(".", "/");
       let filename = format!("{}/{}/{}.java", folder, package, ifa.name);
@@ -61,7 +61,8 @@ if typ.is_param_value_present("jpa-entity", "true") {
  } if typ.is_attribute_param_present("jaxb-transient") { 
     str.push_str("\nimport javax.xml.bind.annotation.XmlTransient;");
 } 
-  str.push_str(&get_referenced_java_packages(&typ, types.clone()));
+  str.push_str("");
+  str.push_str(&get_types_referenced_java_packages(&typ, types.clone()));
   str.push_str("\n\n/**\n* Generated Type for Entity ");
   str.push_str(&typ.typename);
   str.push_str(" \n*/");
@@ -158,7 +159,7 @@ if attribut.is_param_value_present("jpa-id", "true") {
 // 
 // Generate code for interface
 //
-fn gen_interface(ifa:&Box<model::Interface>) -> String {
+fn gen_interface(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {
   let mut str:String = String::new();
   if ifa.is_param_present("java-package") {
 
@@ -166,7 +167,9 @@ fn gen_interface(ifa:&Box<model::Interface>) -> String {
     str.push_str(&ifa.get_param_value("java-package"));
     str.push_str(";");
 } 
-  str.push_str("\n\nimport java.util.ArrayList;\n// ...\n\n/**\n* Generated Interface for ");
+  str.push_str("\n\nimport java.util.ArrayList;\n// ...");
+  str.push_str(&get_interfaces_referenced_java_packages(&ifa, types.clone()));
+  str.push_str("\n\n/**\n* Generated Interface for ");
   str.push_str(&ifa.name);
   str.push_str(" with JAX-RS Annotations\n*/");
 if ifa.is_param_present("path") { 
@@ -281,7 +284,7 @@ fn get_java_type_initial(sjtype:&str, is_array:bool) -> String {
   return jtype.to_string();
 }
 
-fn get_referenced_java_packages(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {    
+fn get_types_referenced_java_packages(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {    
   let mut packageSet:HashSet<String> = HashSet::new();
   for attr in typ.attributes.iter() {
     if !model::Type::is_basic_type(&attr.attribute_type) {
@@ -290,6 +293,27 @@ fn get_referenced_java_packages(typ:&Box<model::Type>, types:Box<Vec<Box<model::
            && t.is_param_present("java-package") 
            && !(typ.is_param_present("java-package") 
                 && typ.get_param_value("java-package") == t.get_param_value("java-package")){
+           packageSet.insert(format!("{}.{}", t.get_param_value("java-package"), t.typename));
+        }
+      }
+    }
+  }
+  let mut ret = String::new();
+  for package in &packageSet {
+    ret.push_str(&format!("\nimport {};", package));
+  }
+  return ret.clone();
+}
+
+fn get_interfaces_referenced_java_packages(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {    
+  let mut packageSet:HashSet<String> = HashSet::new();
+  for func in ifa.functions.iter() {
+    if !model::Type::is_basic_type(&func.returntype) {
+      for t in types.iter() {
+        if t.typename == func.returntype
+           && t.is_param_present("java-package") 
+           && !(ifa.is_param_present("java-package") 
+                && ifa.get_param_value("java-package") == t.get_param_value("java-package")){
            packageSet.insert(format!("{}.{}", t.get_param_value("java-package"), t.typename));
         }
       }

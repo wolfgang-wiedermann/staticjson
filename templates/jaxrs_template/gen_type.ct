@@ -16,7 +16,8 @@ import javax.persistence.Transient; {{ } if typ.is_attribute_param_present("jpa-
 import javax.persistence.Id; {{ } if typ.is_attribute_param_present("jpa-generated-value") { }}
 import javax.persistence.GeneratedValue; {{ } if typ.is_param_value_present("jaxb-xml-root", "true") { }}
 import javax.xml.bind.annotation.XmlRootElement; {{  } if typ.is_attribute_param_present("jaxb-transient") { }}
-import javax.xml.bind.annotation.XmlTransient; {{ } }}{{= get_referenced_java_packages(&typ, types.clone()) }}
+import javax.xml.bind.annotation.XmlTransient; {{ } }}
+{{= get_types_referenced_java_packages(&typ, types.clone()) }}
 
 /**
 * Generated Type for Entity  {{= typ.typename }} 
