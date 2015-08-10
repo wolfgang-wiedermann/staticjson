@@ -1,6 +1,7 @@
 {{ use model;
 use filehandler;
 use util;
+use std::collections::HashSet;
 
 //
 // This generate Method is the entry point to generation
@@ -8,7 +9,7 @@ use util;
 //
 pub fn generate(tree:model::ParserResult, folder:&str) {
   for typ in tree.types.iter() {
-    let result = gen_type(typ);
+    let result = gen_type(typ, tree.types.clone());
     if typ.is_param_present("java-package") {
       let package = typ.get_param_value("java-package").replace(".", "/");
       let filename = format!("{}/{}/{}.java", folder, package, typ.typename);

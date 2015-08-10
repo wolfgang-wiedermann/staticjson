@@ -45,6 +45,13 @@ type OrtEntity (
   );
 }
 
+type OtherPackageEntity (
+    java-package="de.ww.entities2") {
+  test:string;
+  test2:string;
+  test3:OrtEntity;
+}
+
 //
 // First simple interface sample
 //

@@ -1,7 +1,7 @@
 {{ // 
 // Generate code for type
 //
-fn gen_type(typ:&Box<model::Type>) -> String {
+fn gen_type(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {
   let mut str:String = String::new(); 
   if typ.is_param_present("java-package") {
 }}package  {{= typ.get_param_value("java-package") }}; {{ } }}
@@ -16,7 +16,7 @@ import javax.persistence.Transient; {{ } if typ.is_attribute_param_present("jpa-
 import javax.persistence.Id; {{ } if typ.is_attribute_param_present("jpa-generated-value") { }}
 import javax.persistence.GeneratedValue; {{ } if typ.is_param_value_present("jaxb-xml-root", "true") { }}
 import javax.xml.bind.annotation.XmlRootElement; {{  } if typ.is_attribute_param_present("jaxb-transient") { }}
-import javax.xml.bind.annotation.XmlTransient; {{ } }}
+import javax.xml.bind.annotation.XmlTransient; {{ } }}{{= get_referenced_java_packages(&typ, types.clone()) }}
 
 /**
 * Generated Type for Entity  {{= typ.typename }} 

@@ -1,6 +1,7 @@
 use model;
 use filehandler;
 use util;
+use std::collections::HashSet;
 
 //
 // This generate Method is the entry point to generation
@@ -8,7 +9,7 @@ use util;
 //
 pub fn generate(tree:model::ParserResult, folder:&str) {
   for typ in tree.types.iter() {
-    let result = gen_type(typ);
+    let result = gen_type(typ, tree.types.clone());
     if typ.is_param_present("java-package") {
       let package = typ.get_param_value("java-package").replace(".", "/");
       let filename = format!("{}/{}/{}.java", folder, package, typ.typename);
@@ -34,7 +35,7 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
 // 
 // Generate code for type
 //
-fn gen_type(typ:&Box<model::Type>) -> String {
+fn gen_type(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {
   let mut str:String = String::new(); 
   if typ.is_param_present("java-package") {
 
@@ -60,6 +61,7 @@ if typ.is_param_value_present("jpa-entity", "true") {
  } if typ.is_attribute_param_present("jaxb-transient") { 
     str.push_str("\nimport javax.xml.bind.annotation.XmlTransient;");
 } 
+  str.push_str(&get_referenced_java_packages(&typ, types.clone()));
   str.push_str("\n\n/**\n* Generated Type for Entity ");
   str.push_str(&typ.typename);
   str.push_str(" \n*/");
@@ -277,6 +279,27 @@ fn get_java_type_initial(sjtype:&str, is_array:bool) -> String {
     jtype = "undef";
   }
   return jtype.to_string();
+}
+
+fn get_referenced_java_packages(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {    
+  let mut packageSet:HashSet<String> = HashSet::new();
+  for attr in typ.attributes.iter() {
+    if !model::Type::is_basic_type(&attr.attribute_type) {
+      for t in types.iter() {
+        if t.typename == attr.attribute_type
+           && t.is_param_present("java-package") 
+           && !(typ.is_param_present("java-package") 
+                && typ.get_param_value("java-package") == t.get_param_value("java-package")){
+           packageSet.insert(format!("{}.{}", t.get_param_value("java-package"), t.typename));
+        }
+      }
+    }
+  }
+  let mut ret = String::new();
+  for package in &packageSet {
+    ret.push_str(&format!("\nimport {};", package));
+  }
+  return ret.clone();
 }
 
 
