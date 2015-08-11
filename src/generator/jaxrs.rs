@@ -193,7 +193,20 @@ for function in ifa.functions.iter() {
     str.push_str(&get_java_type(&function.returntype, function.returntype_is_array));
     str.push_str(" ");
     str.push_str(&function.name);
-    str.push_str("();");
+    str.push_str("(");
+let mut i = 0;
+for param in function.params.iter() { 
+  i = i+1;   
+  if i > 1 { 
+    str.push_str(", "); 
+  } 
+      str.push_str("");
+      str.push_str(&get_java_type(&param.typename, param.is_array));
+      str.push_str(" ");
+      str.push_str(&param.name);
+      str.push_str("");
+} 
+    str.push_str(");");
 } 
   str.push_str("\n}");
   return str;

@@ -358,8 +358,7 @@ impl Parser {
     } else if c == ',' && self.buffer.len() == 0 {
       // If it comes in again from do_infunctionparametertype
       self.state = model::ParserState::INFUNCTIONPARAMNAME;
-      self.substate = model::ParserSubState::LEADINGBLANKS;
-      self.store_current_function_param();
+      self.substate = model::ParserSubState::LEADINGBLANKS;    
     } else if Parser::is_valid_name_character(&c) {
       match self.substate {
         model::ParserSubState::LEADINGBLANKS => {

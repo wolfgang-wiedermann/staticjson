@@ -22,7 +22,13 @@ public interface  {{= ifa.name }} {
      *  {{= function.returntype }}
      *  {{= format!("is_array = {}", function.returntype_is_array) }}
      */
-    public  {{= get_java_type(&function.returntype, function.returntype_is_array) }}  {{= function.name }}();
+    public  {{= get_java_type(&function.returntype, function.returntype_is_array) }}  {{= function.name }}(
+{{ let mut i = 0;
+for param in function.params.iter() { 
+  i = i+1;   
+  if i > 1 { 
+    str.push_str(", "); 
+  } }} {{= get_java_type(&param.typename, param.is_array) }}  {{= param.name }} {{ } }});
 {{ } }}
 }
 {{   return str;
