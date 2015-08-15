@@ -23,7 +23,8 @@ Currently staticjson is in its very early development state. It can not be used 
    ort:string;
  }
  
- interface KundenRepository(java-package="de.test.interfaces",
+ interface KundenRepository(
+     java-package="de.test.interfaces",
      path="/repos") {
  
    // Method to retrieve a customer by its id
@@ -63,9 +64,13 @@ println(KundeEntity.serialize(kunde));
 
 ## Usage of generated java code
 
-```java
-// Model class
+The code generation process generates java code for types and interfaces.
+A type is a usual java bean with attributes, getters and setters. Additional
+to getters and setters, it generates a validation function which supplies 
+a useful way to check the validity of the content of the attributes
+within the object.
 
+```java
 package de.test.entities;
 
 import java.util.ArrayList;
@@ -157,9 +162,14 @@ public class KundeEntity implements Serializable {
             obj.vorname.length() <= 50);
     }
 }
+```
 
-// Interface
+Additional to the generated types, staticjson supports the generation of
+interfaces. So its a fully featured interface definition language for http based
+rest like interfaces. The following code listing is the result of the jaxrs generator
+and shows a JAX-RS interface.
 
+```java
 package de.test.interfaces;
 
 import java.util.ArrayList;
