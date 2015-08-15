@@ -18,9 +18,9 @@ import javax.ws.rs.Path; {{ } }}
 public interface  {{= ifa.name }} {
 {{ for function in ifa.functions.iter() { }}
 
-    /** 
-     *  {{= function.returntype }}
-     *  {{= format!("is_array = {}", function.returntype_is_array) }}
+    /** {{ for param in function.params.iter() { }}
+     * @param  {{= param.name }} {{ } }} 
+     * @return  {{= get_java_type(&function.returntype, function.returntype_is_array) }}
      */ {{ if function.is_attribute_value_present("method", "GET") { }}
     @GET {{ } if function.is_attribute_value_present("method", "PUT") { }}
     @PUT {{ } if function.is_attribute_value_present("method", "POST") { }}

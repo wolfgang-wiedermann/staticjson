@@ -185,10 +185,14 @@ if ifa.is_param_present("path") {
   str.push_str(&ifa.name);
   str.push_str(" {");
 for function in ifa.functions.iter() { 
-    str.push_str("\n\n    /** \n     * ");
-    str.push_str(&function.returntype);
-    str.push_str("\n     * ");
-    str.push_str(&format!("is_array = {}", function.returntype_is_array));
+    str.push_str("\n\n    /**");
+for param in function.params.iter() { 
+      str.push_str("\n     * @param ");
+      str.push_str(&param.name);
+      str.push_str("");
+} 
+    str.push_str(" \n     * @return ");
+    str.push_str(&get_java_type(&function.returntype, function.returntype_is_array));
     str.push_str("\n     */");
 if function.is_attribute_value_present("method", "GET") { 
       str.push_str("\n    @GET");
