@@ -215,6 +215,9 @@ if function.is_attribute_value_present("method", "GET") {
       str.push_str(&function.get_attribute_value("path"));
       str.push_str("\")");
 } 
+      if function.returntype != "void" && !model::Type::is_basic_type(&function.returntype) { 
+      str.push_str("\n    @Produces(\"application/json\")");
+} 
     str.push_str("\n    public ");
     str.push_str(&get_java_type(&function.returntype, function.returntype_is_array));
     str.push_str(" ");

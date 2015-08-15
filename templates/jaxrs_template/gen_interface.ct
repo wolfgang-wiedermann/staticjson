@@ -30,7 +30,9 @@ public interface  {{= ifa.name }} {
     @PUT {{ } if function.is_attribute_value_present("method", "POST") { }}
     @POST {{ } if function.is_attribute_value_present("method", "DELETE") { }}
     @DELETE {{ } if function.is_attribute_present("path") { }}
-    @Path(" {{= function.get_attribute_value("path") }}") {{ } }}
+    @Path(" {{= function.get_attribute_value("path") }}") {{ } 
+      if function.returntype != "void" && !model::Type::is_basic_type(&function.returntype) { }}
+    @Produces("application/json") {{ } }}
     public  {{= get_java_type(&function.returntype, function.returntype_is_array) }}  {{= function.name }}(
 {{ let mut i = 0;
 for param in function.params.iter() { 
