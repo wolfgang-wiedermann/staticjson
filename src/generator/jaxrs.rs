@@ -189,7 +189,21 @@ for function in ifa.functions.iter() {
     str.push_str(&function.returntype);
     str.push_str("\n     * ");
     str.push_str(&format!("is_array = {}", function.returntype_is_array));
-    str.push_str("\n     */\n    public ");
+    str.push_str("\n     */");
+if function.is_attribute_value_present("method", "GET") { 
+      str.push_str("\n    @GET");
+} if function.is_attribute_value_present("method", "PUT") { 
+      str.push_str("\n    @PUT");
+} if function.is_attribute_value_present("method", "POST") { 
+      str.push_str("\n    @POST");
+} if function.is_attribute_value_present("method", "DELETE") { 
+      str.push_str("\n    @DELETE");
+} if function.is_attribute_present("path") { 
+      str.push_str("\n    @Path(\"");
+      str.push_str(&function.get_attribute_value("path"));
+      str.push_str("\")");
+} 
+    str.push_str("\n    public ");
     str.push_str(&get_java_type(&function.returntype, function.returntype_is_array));
     str.push_str(" ");
     str.push_str(&function.name);

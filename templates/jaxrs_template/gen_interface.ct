@@ -21,7 +21,12 @@ public interface  {{= ifa.name }} {
     /** 
      *  {{= function.returntype }}
      *  {{= format!("is_array = {}", function.returntype_is_array) }}
-     */
+     */ {{ if function.is_attribute_value_present("method", "GET") { }}
+    @GET {{ } if function.is_attribute_value_present("method", "PUT") { }}
+    @PUT {{ } if function.is_attribute_value_present("method", "POST") { }}
+    @POST {{ } if function.is_attribute_value_present("method", "DELETE") { }}
+    @DELETE {{ } if function.is_attribute_present("path") { }}
+    @Path(" {{= function.get_attribute_value("path") }}") {{ } }}
     public  {{= get_java_type(&function.returntype, function.returntype_is_array) }}  {{= function.name }}(
 {{ let mut i = 0;
 for param in function.params.iter() { 

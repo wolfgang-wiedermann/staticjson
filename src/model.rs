@@ -277,6 +277,15 @@ impl Function {
     }
     return false;
   }
+    
+  pub fn get_attribute_value(&self, attr_name:&str) -> String {          
+    for attr in self.attributes.iter() {
+      if attr.name == attr_name {
+        return (*attr).value.clone();        
+      }     
+    }      
+    return String::new();
+  }
 }
 
 #[derive(Clone, Debug)]
