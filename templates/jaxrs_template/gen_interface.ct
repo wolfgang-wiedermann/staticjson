@@ -7,7 +7,11 @@ fn gen_interface(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -
 }}package  {{= ifa.get_param_value("java-package") }}; {{ } }}
 
 import java.util.ArrayList; {{ if ifa.is_param_present("path") { }}
-import javax.ws.rs.Path; {{ } }}
+import javax.ws.rs.Path; {{ } if ifa.is_function_attribute_value_present("method", "GET") { }}
+import javax.ws.rs.GET; {{ } if ifa.is_function_attribute_value_present("method", "PUT") { }}
+import javax.ws.rs.PUT; {{ } if ifa.is_function_attribute_value_present("method", "POST") { }}
+import javax.ws.rs.POST; {{ } if ifa.is_function_attribute_value_present("method", "DELETE") { }}
+import javax.ws.rs.DELETE; {{ } }}
 {{= get_interfaces_referenced_java_packages(&ifa, types.clone()) }}
 
 /**

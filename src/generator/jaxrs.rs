@@ -170,6 +170,14 @@ fn gen_interface(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -
   str.push_str("\n\nimport java.util.ArrayList;");
 if ifa.is_param_present("path") { 
     str.push_str("\nimport javax.ws.rs.Path;");
+} if ifa.is_function_attribute_value_present("method", "GET") { 
+    str.push_str("\nimport javax.ws.rs.GET;");
+} if ifa.is_function_attribute_value_present("method", "PUT") { 
+    str.push_str("\nimport javax.ws.rs.PUT;");
+} if ifa.is_function_attribute_value_present("method", "POST") { 
+    str.push_str("\nimport javax.ws.rs.POST;");
+} if ifa.is_function_attribute_value_present("method", "DELETE") { 
+    str.push_str("\nimport javax.ws.rs.DELETE;");
 } 
   str.push_str("");
   str.push_str(&get_interfaces_referenced_java_packages(&ifa, types.clone()));

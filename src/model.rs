@@ -236,6 +236,24 @@ impl Interface {
     }      
     return String::new();
   }
+    
+  pub fn is_function_attribute_present(&self, attr_name:&str) -> bool {
+    for f in self.functions.iter() {
+      if f.is_attribute_present(attr_name) {
+        return true;
+      }
+    }
+    return false;
+  }
+    
+  pub fn is_function_attribute_value_present(&self, attr_name:&str, attr_value:&str) -> bool {
+    for f in self.functions.iter() {
+      if f.is_attribute_value_present(attr_name, attr_value) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 #[derive(Clone, Debug)]
