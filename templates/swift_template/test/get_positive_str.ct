@@ -2,7 +2,7 @@
     public static func getPositiveStr() -> String {
         var json = "{";
 {{ let mut r_idx = 0;
-let mut r_max_idx = typ.attributes.len(); 
+let r_max_idx = typ.attributes.len(); 
 for attr in typ.attributes.iter() { }}
         json += "\" {{= attr.name }}\"";
         json += ":";

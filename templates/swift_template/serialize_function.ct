@@ -6,7 +6,7 @@
     var max_idx = 0;
     var buf = "{";
 {{ let mut r_idx = 0;
-let mut r_max_idx = typ.attributes.len();
+let r_max_idx = typ.attributes.len();
 for attr in typ.attributes.iter() {
   r_idx += 1; }}
 {{ if !attr.is_param_value_present("mandatory", "true") { }}

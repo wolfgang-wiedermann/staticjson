@@ -117,7 +117,7 @@ impl Parser {
     if c == ' ' && self.buffer == "type".to_string() {
       self.buffer.truncate(0);
       self.state = model::ParserState::INTYPENAME;
-    } else if(c == ' ' && self.buffer == "interface".to_string()) {
+    } else if c == ' ' && self.buffer == "interface".to_string() {
       self.buffer.truncate(0);
       self.state = model::ParserState::ININTERFACENAME;
     } else if Parser::is_whitespace_or_newline(&c) && self.buffer.len() == 0 {

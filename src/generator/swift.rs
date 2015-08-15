@@ -558,7 +558,7 @@ for attr in typ.attributes.iter() {
   str.push_str(&typ.typename);
   str.push_str(") -> String {\n    var idx = 0;\n    var max_idx = 0;\n    var buf = \"{\";");
 let mut r_idx = 0;
-let mut r_max_idx = typ.attributes.len();
+let r_max_idx = typ.attributes.len();
 for attr in typ.attributes.iter() {
   r_idx += 1; 
     str.push_str("");
@@ -751,7 +751,7 @@ for attr in typ.attributes.iter() {
 } 
   str.push_str("\n    }\n    \n    // TODO: insert a negative Test-Case\n\n    // Helper Functions\n    // Generate a json string for successful parsing unittests\n    public static func getPositiveStr() -> String {\n        var json = \"{\";");
 let mut r_idx = 0;
-let mut r_max_idx = typ.attributes.len(); 
+let r_max_idx = typ.attributes.len(); 
 for attr in typ.attributes.iter() { 
     str.push_str("\n        json += \"\\\"");
     str.push_str(&attr.name);
@@ -777,7 +777,7 @@ if attr.is_array {
 } 
   str.push_str("\n        json += \"}\";\n        return json;\n    }\n\n    // Generate a json string to produce errors parsing unittests\n    public static func getNegativeStr() -> String {\n        var json = \"{\";");
 let mut r_idx = 0;
-let mut r_max_idx = typ.attributes.len(); 
+let r_max_idx = typ.attributes.len(); 
 for attr in typ.attributes.iter() { 
     str.push_str("\n        json += \"\\\"");
     str.push_str(&attr.name);

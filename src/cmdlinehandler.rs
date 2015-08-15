@@ -14,7 +14,7 @@ pub fn parse_commandline(params:Vec<String>) -> model::CommandlineOptions {
     debug:false,
   };
 
-  let program = params[0].clone();
+  //let program = params[0].clone();
   let mut opts = getopts::Options::new();
   opts.optopt("t", "target", "target language", "TARGET_LANGUAGE");
   opts.optopt("o", "output", "output folder", "OUTPUT_FOLDER");
