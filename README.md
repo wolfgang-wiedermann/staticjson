@@ -175,6 +175,8 @@ package de.test.interfaces;
 import java.util.ArrayList;
 import javax.ws.rs.Path;
 import javax.ws.rs.GET;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import de.test.entities.KundeEntity;
 
 /**
@@ -190,7 +192,7 @@ public interface KundenRepository {
     @GET
     @Path("/kunde/{id}")
     @Produces("application/json")
-    public KundeEntity getKundeById(int id);
+    public KundeEntity getKundeById(@PathParam("id") int id);
 
     /** 
      * @return ArrayList<KundeEntity>
