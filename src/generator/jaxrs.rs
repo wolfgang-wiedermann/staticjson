@@ -372,6 +372,16 @@ fn get_interfaces_referenced_java_packages(ifa:&Box<model::Interface>, types:Box
       if param.is_param_present("path-param") {
         package_set.insert(format!("javax.ws.rs.PathParam"));
       }
+      if !model::Type::is_basic_type(&param.typename) {
+        for t in types.iter() {
+          if t.typename == param.typename
+             && t.is_param_present("java-package") 
+             && !(ifa.is_param_present("java-package") 
+                  && ifa.get_param_value("java-package") == t.get_param_value("java-package")){
+             package_set.insert(format!("{}.{}", t.get_param_value("java-package"), t.typename));
+          }
+        }
+      }
     }
   }
   let mut ret = String::new();

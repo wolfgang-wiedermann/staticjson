@@ -77,6 +77,13 @@ interface StudentRepository(
     path="/student"
   }
   
+  // Find-Mehtod for Studends by OrtEntity
+  // helps to check working include functions
+  findStudentsByOrt(ort:OrtEntity) -> StudentEntity[] {
+    method="GET",
+    path="/student/byOrt"
+  }
+  
   // Method to create a new student object
   createStudent(s:StudentEntity) -> StudentEntity {
     method="POST",
