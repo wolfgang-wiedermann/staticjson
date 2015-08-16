@@ -96,9 +96,9 @@ interface StudentRepository(
   }
   
   // Method to update a new student object
-  updateStudent(s:StudentEntity) {
+  updateStudent(s:StudentEntity, id:int(path-param="id")) {
     method="PUT",
-    path="/student"
+    path="/student/{id}"
   }
 }
 
