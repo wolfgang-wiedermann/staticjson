@@ -219,6 +219,8 @@ if function.is_attribute_value_present("method", "GET") {
 } 
       if function.returntype != "void" && !model::Type::is_basic_type(&function.returntype) { 
       str.push_str("\n    @Produces(\"application/json\")");
+} if function.has_complex_functionparam() { 
+      str.push_str("\n    @Consumes(\"application/json\")");
 } 
     str.push_str("\n    public ");
     str.push_str(&get_java_type(&function.returntype, function.returntype_is_array));
@@ -230,6 +232,8 @@ for param in function.params.iter() {
   i = i+1;   
   if i > 1 { 
     str.push_str(", "); 
+  } if param.is_param_present("query-param") {
+    str.push_str(&format!("@QueryParam(\"{}\") ", param.get_param_value("query-param")));
   } if param.is_param_present("path-param") {
     str.push_str(&format!("@PathParam(\"{}\") ", param.get_param_value("path-param")));
   } 
@@ -371,6 +375,9 @@ fn get_interfaces_referenced_java_packages(ifa:&Box<model::Interface>, types:Box
     for param in func.params.iter() {
       if param.is_param_present("path-param") {
         package_set.insert(format!("javax.ws.rs.PathParam"));
+      }
+      if param.is_param_present("query-param") {
+        package_set.insert(format!("javax.ws.rs.QueryParam"));
       }
       if !model::Type::is_basic_type(&param.typename) {
         for t in types.iter() {

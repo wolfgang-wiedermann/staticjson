@@ -315,6 +315,16 @@ impl Function {
     }      
     return String::new();
   }
+    
+  pub fn has_complex_functionparam(&self) -> bool {
+    for fp in self.params.iter() {
+      if fp.typename != "void" 
+          && !Type::is_basic_type(&fp.typename) {
+            return true;
+      }
+    }
+    return false;
+  }
 }
 
 #[derive(Clone, Debug)]

@@ -126,6 +126,9 @@ fn get_interfaces_referenced_java_packages(ifa:&Box<model::Interface>, types:Box
       if param.is_param_present("path-param") {
         package_set.insert(format!("javax.ws.rs.PathParam"));
       }
+      if param.is_param_present("query-param") {
+        package_set.insert(format!("javax.ws.rs.QueryParam"));
+      }
       if !model::Type::is_basic_type(&param.typename) {
         for t in types.iter() {
           if t.typename == param.typename

@@ -33,13 +33,16 @@ public interface  {{= ifa.name }} {
     @DELETE {{ } if function.is_attribute_present("path") { }}
     @Path(" {{= function.get_attribute_value("path") }}") {{ } 
       if function.returntype != "void" && !model::Type::is_basic_type(&function.returntype) { }}
-    @Produces("application/json") {{ } }}
+    @Produces("application/json") {{ } if function.has_complex_functionparam() { }}
+    @Consumes("application/json") {{ } }}
     public  {{= get_java_type(&function.returntype, function.returntype_is_array) }}  {{= function.name }}(
 {{ let mut i = 0;
 for param in function.params.iter() { 
   i = i+1;   
   if i > 1 { 
     str.push_str(", "); 
+  } if param.is_param_present("query-param") {
+    str.push_str(&format!("@QueryParam(\"{}\") ", param.get_param_value("query-param")));
   } if param.is_param_present("path-param") {
     str.push_str(&format!("@PathParam(\"{}\") ", param.get_param_value("path-param")));
   } }} {{= get_java_type(&param.typename, param.is_array) }}  {{= param.name }} {{ } }});
