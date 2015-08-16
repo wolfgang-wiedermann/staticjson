@@ -336,6 +336,7 @@ impl FunctionParameter {
     }
     return false;
   }
+    
   // Checks if a param with the given name has the given value
   pub fn is_param_value_present(&self, param_name:&str, param_value:&str) -> bool {
     for p in self.params.iter() {
@@ -344,6 +345,15 @@ impl FunctionParameter {
       } 
     }
     return false;
+  }
+    
+  pub fn get_param_value(&self, param_name:&str) -> String {          
+    for param in self.params.iter() {
+      if param.name == param_name {
+        return (*param).value.clone();        
+      }     
+    }      
+    return String::new();
   }
 }
 

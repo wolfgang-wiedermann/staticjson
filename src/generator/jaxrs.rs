@@ -228,6 +228,10 @@ if function.is_attribute_value_present("method", "GET") {
 let mut i = 0;
 for param in function.params.iter() { 
   i = i+1;   
+  // TODO: push_str with param annotations here !!!
+  if param.is_param_present("path-param") {
+    str.push_str(&format!("@PathParam(\"{}\") ", param.get_param_value("path-param")));
+  }
   if i > 1 { 
     str.push_str(", "); 
   } 
