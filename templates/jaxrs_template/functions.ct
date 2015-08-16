@@ -122,6 +122,11 @@ fn get_interfaces_referenced_java_packages(ifa:&Box<model::Interface>, types:Box
         }
       }
     }
+    for param in func.params.iter() {
+      if param.is_param_present("path-param") {
+        package_set.insert(format!("javax.ws.rs.PathParam"));
+      }
+    }
   }
   let mut ret = String::new();
   for package in &package_set {
