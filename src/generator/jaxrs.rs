@@ -178,6 +178,8 @@ if ifa.is_param_present("path") {
     str.push_str("\nimport javax.ws.rs.POST;");
 } if ifa.is_function_attribute_value_present("method", "DELETE") { 
     str.push_str("\nimport javax.ws.rs.DELETE;");
+} if ifa.has_function_with_complex_returntype() { 
+    str.push_str("\nimport javax.ws.rs.Produces;");
 } 
   str.push_str("");
   str.push_str(&get_interfaces_referenced_java_packages(&ifa, types.clone()));

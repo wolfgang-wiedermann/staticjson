@@ -11,7 +11,8 @@ import javax.ws.rs.Path; {{ } if ifa.is_function_attribute_value_present("method
 import javax.ws.rs.GET; {{ } if ifa.is_function_attribute_value_present("method", "PUT") { }}
 import javax.ws.rs.PUT; {{ } if ifa.is_function_attribute_value_present("method", "POST") { }}
 import javax.ws.rs.POST; {{ } if ifa.is_function_attribute_value_present("method", "DELETE") { }}
-import javax.ws.rs.DELETE; {{ } }}
+import javax.ws.rs.DELETE; {{ } if ifa.has_function_with_complex_returntype() { }}
+import javax.ws.rs.Produces; {{ } }}
 {{= get_interfaces_referenced_java_packages(&ifa, types.clone()) }}
 
 /**

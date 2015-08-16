@@ -217,6 +217,7 @@ impl Interface {
     }
     return false;
   }
+    
   // Checks if a param with the given name has the given value
   pub fn is_param_value_present(&self, param_name:&str, param_value:&str) -> bool {
     for p in self.params.iter() {
@@ -250,6 +251,16 @@ impl Interface {
     for f in self.functions.iter() {
       if f.is_attribute_value_present(attr_name, attr_value) {
         return true;
+      }
+    }
+    return false;
+  }
+    
+  pub fn has_function_with_complex_returntype(&self) -> bool {
+    for f in self.functions.iter() {
+      if f.returntype != "void" 
+          && !Type::is_basic_type(&f.returntype) {
+            return true;
       }
     }
     return false;
