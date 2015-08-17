@@ -77,7 +77,7 @@ if typ.is_param_value_present("jpa-entity", "true") {
 } 
   str.push_str("\npublic class ");
   str.push_str(&typ.typename);
-  str.push_str(" implements Serializable {\n");
+  str.push_str(" implements Serializable {\n\n  private static final long serialVersionUID = 1L;\n");
     for attribut in typ.attributes.iter() { 
     str.push_str("\n    private ");
     str.push_str(&get_java_type(&attribut.attribute_type, attribut.is_array));
@@ -284,9 +284,9 @@ fn get_java_type(sjtype:&str, is_array:bool) -> String {
     }
   } else if sjtype == "date" {
     if is_array {
-      jtype = "ArrayList<java.util.Date>";
+      jtype = "ArrayList<java.sql.Date>";
     } else {
-      jtype = "java.util.Date";
+      jtype = "java.sql.Date";
     }
   } else {
     jtype = "undef";
@@ -304,13 +304,13 @@ fn get_java_type_initial(sjtype:&str, is_array:bool) -> String {
     }
   } else if sjtype == "int" || sjtype == "uint" {
     if is_array {
-      jtype = "new ArrayList<int>()";
+      jtype = "new ArrayList<Integer>()";
     } else {
       jtype = "0";
     }
   } else if sjtype == "long" || sjtype == "ulong" {
     if is_array {
-      jtype = "new ArrayList<long>()";
+      jtype = "new ArrayList<Long>()";
     } else {
       jtype = "0";
     }
@@ -322,13 +322,13 @@ fn get_java_type_initial(sjtype:&str, is_array:bool) -> String {
     }
   } else if sjtype == "decimal" {
     if is_array {
-      jtype = "new ArrayList<double>()";
+      jtype = "new ArrayList<Double>()";
     } else {
       jtype = "0.0d";
     }
   } else if sjtype == "date" {
     if is_array {
-      jtype = "new ArrayList<java.util.Date>()";
+      jtype = "new ArrayList<java.sql.Date>()";
     } else {
       jtype = "null";
     }
@@ -362,7 +362,8 @@ fn get_types_referenced_java_packages(typ:&Box<model::Type>, types:Box<Vec<Box<m
 fn get_interfaces_referenced_java_packages(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {    
   let mut package_set:HashSet<String> = HashSet::new();
   for func in ifa.functions.iter() {
-    if !model::Type::is_basic_type(&func.returntype) {
+    if !model::Type::is_basic_type(&func.returntype) && func.returntype != "void" {
+      package_set.insert(format!("javax.ws.rs.Consumes"));
       for t in types.iter() {
         if t.typename == func.returntype
            && t.is_param_present("java-package") 

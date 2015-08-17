@@ -28,6 +28,8 @@ import javax.xml.bind.annotation.XmlTransient; {{ } }}
 @Table(name=" {{= typ.get_param_value("jpa-table") }}") {{ } }}
 public class  {{= typ.typename }} implements Serializable {
 
+  private static final long serialVersionUID = 1L;
+
 {{     for attribut in typ.attributes.iter() { }}
     private  {{= get_java_type(&attribut.attribute_type, attribut.is_array) }}  {{= util::lsnake_to_lcamel(&attribut.name) }};   
 {{     } }}
