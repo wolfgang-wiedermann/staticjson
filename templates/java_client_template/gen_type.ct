@@ -1,0 +1,63 @@
+{{ // 
+// Generate code for type
+//
+fn gen_type(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {
+  let mut str:String = String::new(); 
+  if typ.is_param_present("java-package") {
+}}package  {{= typ.get_param_value("java-package") }}; {{ } }}
+
+import java.util.ArrayList;
+import java.io.Serializable;
+{{= get_types_referenced_java_packages(&typ, types.clone()) }}
+
+/**
+* Generated Type for Entity  {{= typ.typename }} 
+*/
+public class  {{= typ.typename }} implements Serializable {
+
+  private static final long serialVersionUID = 1L;
+
+{{     for attribut in typ.attributes.iter() { }}
+    private  {{= get_java_type(&attribut.attribute_type, attribut.is_array) }}  {{= util::lsnake_to_lcamel(&attribut.name) }};   
+{{     } }}
+
+    public  {{= typ.typename }}() {
+{{     for attribut in typ.attributes.iter() { }}
+        this. {{= util::lsnake_to_lcamel(&attribut.name) }} =  {{= get_java_type_initial(&attribut.attribute_type, attribut.is_array) }};
+{{     } }}
+    }
+{{     for attribut in typ.attributes.iter() { }}
+
+    public  {{= get_java_type(&attribut.attribute_type, attribut.is_array) }} get {{= util::lsnake_to_ucamel(&attribut.name) }}() {
+        return this. {{= util::lsnake_to_lcamel(&attribut.name) }};
+    }
+    
+    public void set {{= util::lsnake_to_ucamel(&attribut.name) }}( {{= get_java_type(&attribut.attribute_type, attribut.is_array) }} value) {
+        this. {{= util::lsnake_to_lcamel(&attribut.name) }} = value;
+    }
+{{     } }}
+
+    /**
+    * The function isValid offert a validation function for the
+    * mandatory attributes and other constraints of staticjson code
+    * @param object to check
+    * @return check result
+    */
+    public static boolean isValid( {{= typ.typename }} obj) {
+        return obj != null {{     for attribut in typ.attributes.iter() { 
+      if attribut.is_param_value_present("mandatory", "true") { }}
+        && obj. {{= util::lsnake_to_lcamel(&attribut.name) }} !=  {{= get_java_type_initial(&attribut.attribute_type, attribut.is_array) }}
+{{       } if attribut.is_param_present("maxlen") && attribut.attribute_type == "string" && !attribut.is_array { }}
+        && (obj. {{= util::lsnake_to_lcamel(&attribut.name) }} != null && 
+            obj. {{= util::lsnake_to_lcamel(&attribut.name) }}.length() <=  {{= attribut.get_param_value("maxlen") }})
+{{       } if attribut.is_param_present("minlen") && attribut.attribute_type == "string" && !attribut.is_array { }}
+        && (obj. {{= util::lsnake_to_lcamel(&attribut.name) }} != null && 
+            obj. {{= util::lsnake_to_lcamel(&attribut.name) }}.length() >=  {{= attribut.get_param_value("minlen") }})
+{{       } 
+    } }};
+    }
+}
+{{   return str;
+} 
+
+}}

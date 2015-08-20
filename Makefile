@@ -6,6 +6,7 @@ template:
 	./tools/generate_code.py ./templates/jsoninc_template.ct c > ./src/generator/jsoninc.rs
 	./tools/generate_code.py ./templates/swift_template.ct c > ./src/generator/swift.rs
 	./tools/generate_code.py ./templates/jaxrs_template.ct c > ./src/generator/jaxrs.rs
+	./tools/generate_code.py ./templates/java_client_template.ct c > ./src/generator/java_client.rs
 
 test: all
 	./target/debug/staticjson ./target/debug/test_studenten.sjs -t swift --debug

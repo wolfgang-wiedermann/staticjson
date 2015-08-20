@@ -9,6 +9,7 @@ pub mod generator {
   pub mod swift;
   pub mod jsoninc;
   pub mod jaxrs;
+  pub mod java_client;
 //  pub mod rust;
   pub mod htmldoc; // Generator for html documentation
 }
