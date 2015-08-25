@@ -20,4 +20,15 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
     }
   }
   
-} }}{{+ java_client_template/gen_type.ct }}{{+ jaxrs_template/functions.ct }}
+  for ifa in tree.interfaces.iter() {
+    let result = gen_proxy(ifa, tree.types.clone());
+    if ifa.is_param_present("java-package") {
+      let package = ifa.get_param_value("java-package").replace(".", "/");
+      let filename = format!("{}/{}/{}Proxy.java", folder, package, ifa.name);
+      filehandler::write_file(filename, result);
+    } else {
+      let filename = format!("{}/{}.java", folder, ifa.name);
+      filehandler::write_file(filename, result);
+    }
+  }
+} }}{{+ java_client_template/gen_type.ct }}{{+ java_client_template/gen_proxy.ct }}{{+ jaxrs_template/functions.ct }}

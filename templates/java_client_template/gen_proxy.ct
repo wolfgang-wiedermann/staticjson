@@ -1,0 +1,34 @@
+{{ // 
+// Generate code for interface
+//
+fn gen_proxy(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {
+  let mut str:String = String::new();
+  if ifa.is_param_present("java-package") {
+}}package  {{= ifa.get_param_value("java-package") }}; {{ } }}
+
+import java.util.ArrayList; 
+{{= get_proxies_referenced_java_packages(&ifa, types.clone()) }}
+
+/**
+* Generated Proxy for  {{= ifa.name }}
+*/
+public class  {{= ifa.name }}Proxy {
+{{ for function in ifa.functions.iter() { }}
+
+    /** {{ for param in function.params.iter() { }}
+     * @param  {{= param.name }} {{ } }} 
+     * @return  {{= get_java_type(&function.returntype, function.returntype_is_array) }}
+     */ 
+    public  {{= get_java_type(&function.returntype, function.returntype_is_array) }}  {{= function.name }}(
+{{ let mut i = 0;
+for param in function.params.iter() { 
+  i = i+1;   
+  if i > 1 { 
+    str.push_str(", "); 
+  } }} {{= get_java_type(&param.typename, param.is_array) }}  {{= param.name }} {{ } }}) {
+        // ... TODO ...
+    }
+{{ } }}
+}
+{{   return str;
+} }}

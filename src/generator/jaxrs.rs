@@ -399,4 +399,37 @@ fn get_interfaces_referenced_java_packages(ifa:&Box<model::Interface>, types:Box
   return ret.clone();
 }
 
+fn get_proxies_referenced_java_packages(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {    
+  let mut package_set:HashSet<String> = HashSet::new();
+  for func in ifa.functions.iter() {
+    if !model::Type::is_basic_type(&func.returntype) && func.returntype != "void" {
+      for t in types.iter() {
+        if t.typename == func.returntype
+           && t.is_param_present("java-package") 
+           && !(ifa.is_param_present("java-package") 
+                && ifa.get_param_value("java-package") == t.get_param_value("java-package")){
+           package_set.insert(format!("{}.{}", t.get_param_value("java-package"), t.typename));
+        }
+      }
+    }
+    for param in func.params.iter() {
+      if !model::Type::is_basic_type(&param.typename) {
+        for t in types.iter() {
+          if t.typename == param.typename
+             && t.is_param_present("java-package") 
+             && !(ifa.is_param_present("java-package") 
+                  && ifa.get_param_value("java-package") == t.get_param_value("java-package")){
+             package_set.insert(format!("{}.{}", t.get_param_value("java-package"), t.typename));
+          }
+        }
+      }
+    }
+  }
+  let mut ret = String::new();
+  for package in &package_set {
+    ret.push_str(&format!("\nimport {};", package));
+  }
+  return ret.clone();
+}
+
 
