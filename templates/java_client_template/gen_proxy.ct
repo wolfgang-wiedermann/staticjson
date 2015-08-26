@@ -13,6 +13,9 @@ import java.util.ArrayList;
 * Generated Proxy for  {{= ifa.name }}
 */
 public class  {{= ifa.name }}Proxy {
+
+    // TODO: Attributes and Methods for Authentication and Connection Handling, Basepath and so on...
+
 {{ for function in ifa.functions.iter() { }}
 
     /** {{ for param in function.params.iter() { }}
@@ -25,10 +28,52 @@ for param in function.params.iter() {
   i = i+1;   
   if i > 1 { 
     str.push_str(", "); 
-  } }} {{= get_java_type(&param.typename, param.is_array) }}  {{= param.name }} {{ } }}) {
-        // ... TODO ...
+  } }} {{= get_java_type(&param.typename, param.is_array) }}  {{= param.name }} {{ } }}) { 
+{{     if function.is_attribute_value_present("method", "GET") {
+    str.push_str(&get_impl_for_get_function(&function)) 
+  } else if function.is_attribute_value_present("method", "POST") {
+    str.push_str(&get_impl_for_post_function(&function)) 
+  } else if function.is_attribute_value_present("method", "PUT") {
+    str.push_str(&get_impl_for_put_function(&function))
+  } else if function.is_attribute_value_present("method", "DELETE") {
+    str.push_str(&get_impl_for_delete_function(&function))
+  } }}
     }
 {{ } }}
 }
 {{   return str;
-} }}
+} 
+
+fn get_impl_for_get_function(f:&model::Function) -> String {
+  let mut str:String = String::new();
+}}
+        // HTTP-GET call
+{{ 
+  return str;
+}
+
+fn get_impl_for_post_function(f:&model::Function) -> String {
+  let mut str:String = String::new();
+}}
+        // HTTP-POST call
+{{ 
+  return str;
+}
+
+fn get_impl_for_put_function(f:&model::Function) -> String {
+  let mut str:String = String::new();
+}}
+        // HTTP-PUT call
+{{ 
+  return str;
+}
+
+fn get_impl_for_delete_function(f:&model::Function) -> String {
+  let mut str:String = String::new();
+}}
+        // HTTP-DELETE call
+{{ 
+  return str;
+}
+
+}}

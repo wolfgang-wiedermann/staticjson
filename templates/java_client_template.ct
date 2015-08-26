@@ -5,7 +5,7 @@ use std::collections::HashSet;
 
 //
 // This generate Method is the entry point to generation
-// of html documentation about the given types
+// of java client code for the given types
 //
 pub fn generate(tree:model::ParserResult, folder:&str) {
   for typ in tree.types.iter() {

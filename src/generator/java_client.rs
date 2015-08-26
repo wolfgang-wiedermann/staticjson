@@ -5,7 +5,7 @@ use std::collections::HashSet;
 
 //
 // This generate Method is the entry point to generation
-// of html documentation about the given types
+// of java client code for the given types
 //
 pub fn generate(tree:model::ParserResult, folder:&str) {
   for typ in tree.types.iter() {
@@ -133,7 +133,7 @@ fn gen_proxy(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> St
   str.push_str(&ifa.name);
   str.push_str("\n*/\npublic class ");
   str.push_str(&ifa.name);
-  str.push_str("Proxy {");
+  str.push_str("Proxy {\n\n    // TODO: Attributes and Methods for Authentication and Connection Handling, Basepath and so on...\n");
 for function in ifa.functions.iter() { 
     str.push_str("\n\n    /**");
 for param in function.params.iter() { 
@@ -160,11 +160,55 @@ for param in function.params.iter() {
       str.push_str(&param.name);
       str.push_str("");
 } 
-    str.push_str(") {\n        // ... TODO ...\n    }");
+    str.push_str(") { ");
+    if function.is_attribute_value_present("method", "GET") {
+    str.push_str(&get_impl_for_get_function(&function)) 
+  } else if function.is_attribute_value_present("method", "POST") {
+    str.push_str(&get_impl_for_post_function(&function)) 
+  } else if function.is_attribute_value_present("method", "PUT") {
+    str.push_str(&get_impl_for_put_function(&function))
+  } else if function.is_attribute_value_present("method", "DELETE") {
+    str.push_str(&get_impl_for_delete_function(&function))
+  } 
+    str.push_str("\n    }");
 } 
   str.push_str("\n}");
   return str;
 } 
+
+fn get_impl_for_get_function(f:&model::Function) -> String {
+  let mut str:String = String::new();
+
+  str.push_str("\n        // HTTP-GET call");
+
+  return str;
+}
+
+fn get_impl_for_post_function(f:&model::Function) -> String {
+  let mut str:String = String::new();
+
+  str.push_str("\n        // HTTP-POST call");
+
+  return str;
+}
+
+fn get_impl_for_put_function(f:&model::Function) -> String {
+  let mut str:String = String::new();
+
+  str.push_str("\n        // HTTP-PUT call");
+
+  return str;
+}
+
+fn get_impl_for_delete_function(f:&model::Function) -> String {
+  let mut str:String = String::new();
+
+  str.push_str("\n        // HTTP-DELETE call");
+
+  return str;
+}
+
+
 // rust utility functions for jaxrs 
 
 fn get_java_type(sjtype:&str, is_array:bool) -> String {
