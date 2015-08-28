@@ -21,7 +21,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class  {{= ifa.name }}Proxy {
 
     // TODO: Attributes and Methods for Authentication and Connection Handling, Basepath and so on...
-    private String basePath = "http://localhost:8081/TestApplication/repos";
+    private String basePath = "http://localhost:8081/TestApplication";
+{{ if ifa.is_param_present("path") { }}
+    private String ifaPathFragment = " {{= ifa.get_param_value("path") }}";  
+{{ } else { }}
+    private String ifaPathFragment = null;
+{{ } }}
     private ObjectMapper mapper = new ObjectMapper();
 	private HttpClient clnt = HttpClients.createDefault();
 	
@@ -62,8 +67,18 @@ fn get_impl_for_get_function(f:&model::Function) -> String {
 }}
         // HTTP-GET call
     	try {
-	    	String path = this.basePath+"/ort/{id}";
-	    	path = path.replaceAll("\\{id\\}",""+id);
+	    	String path = this.basePath;
+            if(this.ifaPathFragment != null) {
+                path += this.ifaPathFragment;
+            }
+{{ if f.is_attribute_present("path") { }} 
+            path += " {{= f.get_attribute_value("path") }}";
+{{ } }}
+{{ for param in f.params.iter() { 
+    if param.is_param_present("path-param") { }}
+	    	path = path.replaceAll("\\{ {{= param.get_param_value("path-param") }}\\}",""+ {{= param.name}});
+{{     }
+} }}
 	    	HttpGet get = new HttpGet(path);
 			HttpResponse resp;
 			resp = clnt.execute(get);

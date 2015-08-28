@@ -133,7 +133,15 @@ fn gen_proxy(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> St
   str.push_str(&ifa.name);
   str.push_str("\n*/\npublic class ");
   str.push_str(&ifa.name);
-  str.push_str("Proxy {\n\n    // TODO: Attributes and Methods for Authentication and Connection Handling, Basepath and so on...\n    private String basePath = \"http://localhost:8081/TestApplication/repos\";\n    private ObjectMapper mapper = new ObjectMapper();\n\tprivate HttpClient clnt = HttpClients.createDefault();\n\t\n\tpublic void setBasePath(String basePath) {\n\t\tthis.basePath = basePath;\n\t}\n");
+  str.push_str("Proxy {\n\n    // TODO: Attributes and Methods for Authentication and Connection Handling, Basepath and so on...\n    private String basePath = \"http://localhost:8081/TestApplication\";");
+if ifa.is_param_present("path") { 
+    str.push_str("\n    private String ifaPathFragment = \"");
+    str.push_str(&ifa.get_param_value("path"));
+    str.push_str("\";  ");
+} else { 
+    str.push_str("\n    private String ifaPathFragment = null;");
+} 
+  str.push_str("\n    private ObjectMapper mapper = new ObjectMapper();\n\tprivate HttpClient clnt = HttpClients.createDefault();\n\t\n\tpublic void setBasePath(String basePath) {\n\t\tthis.basePath = basePath;\n\t}\n");
 for function in ifa.functions.iter() { 
     str.push_str("\n\n    /**");
 for param in function.params.iter() { 
@@ -179,7 +187,23 @@ for param in function.params.iter() {
 fn get_impl_for_get_function(f:&model::Function) -> String {
   let mut str:String = String::new();
 
-  str.push_str("\n        // HTTP-GET call\n    \ttry {\n\t    \tString path = this.basePath+\"/ort/{id}\";\n\t    \tpath = path.replaceAll(\"\\\\{id\\\\}\",\"\"+id);\n\t    \tHttpGet get = new HttpGet(path);\n\t\t\tHttpResponse resp;\n\t\t\tresp = clnt.execute(get);\n\t\t\tHttpEntity httpEntity = resp.getEntity();\n\t\t\treturn mapper.readValue(httpEntity.getContent(), ");
+  str.push_str("\n        // HTTP-GET call\n    \ttry {\n\t    \tString path = this.basePath;\n            if(this.ifaPathFragment != null) {\n                path += this.ifaPathFragment;\n            }");
+if f.is_attribute_present("path") { 
+    str.push_str(" \n            path += \"");
+    str.push_str(&f.get_attribute_value("path"));
+    str.push_str("\";");
+} 
+  str.push_str("");
+for param in f.params.iter() { 
+    if param.is_param_present("path-param") { 
+      str.push_str("\n\t    \tpath = path.replaceAll(\"\\\\{");
+      str.push_str(&param.get_param_value("path-param"));
+      str.push_str("\\\\}\",\"\"+");
+      str.push_str(&param.name);
+      str.push_str(");");
+    }
+} 
+  str.push_str("\n\t    \tHttpGet get = new HttpGet(path);\n\t\t\tHttpResponse resp;\n\t\t\tresp = clnt.execute(get);\n\t\t\tHttpEntity httpEntity = resp.getEntity();\n\t\t\treturn mapper.readValue(httpEntity.getContent(), ");
   str.push_str(&get_java_type(&f.returntype, f.returntype_is_array));
   str.push_str(".class);\n    \t} catch(Exception ex) {\n    \t\tthrow new RuntimeException(ex);\n    \t}");
 
