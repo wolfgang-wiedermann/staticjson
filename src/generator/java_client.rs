@@ -20,6 +20,7 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
     }
   }
   
+  // Proxies
   for ifa in tree.interfaces.iter() {
     let result = gen_proxy(ifa, tree.types.clone());
     if ifa.is_param_present("java-package") {
@@ -27,7 +28,20 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
       let filename = format!("{}/{}/{}Proxy.java", folder, package, ifa.name);
       filehandler::write_file(filename, result);
     } else {
-      let filename = format!("{}/{}.java", folder, ifa.name);
+      let filename = format!("{}/{}Proxy.java", folder, ifa.name);
+      filehandler::write_file(filename, result);
+    }
+  }
+  
+  // Testcases
+  for ifa in tree.interfaces.iter() {
+    let result = gen_test(ifa, tree.types.clone());
+    if ifa.is_param_present("java-package") {
+      let package = format!("test.{}", ifa.get_param_value("java-package")).replace(".", "/");
+      let filename = format!("{}/{}/{}Test.java", folder, package, ifa.name);
+      filehandler::write_file(filename, result);
+    } else {
+      let filename = format!("{}/{}Test.java", folder, ifa.name);
       filehandler::write_file(filename, result);
     }
   }
@@ -227,7 +241,23 @@ if f.returntype_is_array {
 fn get_impl_for_post_function(f:&model::Function) -> String {
   let mut str:String = String::new();
 
-  str.push_str("\n        // HTTP-POST call\n        throw new RuntimeException(\"Method not implemented\");");
+  str.push_str("\n        // HTTP-POST call\n        try {\n\t    \tString path = this.basePath;\n            if(this.ifaPathFragment != null) {\n                path += this.ifaPathFragment;\n            }");
+if f.is_attribute_present("path") { 
+    str.push_str(" \n            path += \"");
+    str.push_str(&f.get_attribute_value("path"));
+    str.push_str("\";");
+} 
+  str.push_str("");
+for param in f.params.iter() { 
+    if param.is_param_present("path-param") { 
+      str.push_str("\n\t    \tpath = path.replaceAll(\"\\\\{");
+      str.push_str(&param.get_param_value("path-param"));
+      str.push_str("\\\\}\",\"\"+");
+      str.push_str(&param.name);
+      str.push_str(");");
+    }
+} 
+  str.push_str("\n            //return null;\n    \t} catch(Exception ex) {\n    \t\t//throw new RuntimeException(ex);\n    \t}\n        throw new RuntimeException(\"Method not implemented\");");
 
   return str;
 }
@@ -235,7 +265,23 @@ fn get_impl_for_post_function(f:&model::Function) -> String {
 fn get_impl_for_put_function(f:&model::Function) -> String {
   let mut str:String = String::new();
 
-  str.push_str("\n        // HTTP-PUT call\n        throw new RuntimeException(\"Method not implemented\");");
+  str.push_str("\n        // HTTP-PUT call\n        try {\n\t    \tString path = this.basePath;\n            if(this.ifaPathFragment != null) {\n                path += this.ifaPathFragment;\n            }");
+if f.is_attribute_present("path") { 
+    str.push_str(" \n            path += \"");
+    str.push_str(&f.get_attribute_value("path"));
+    str.push_str("\";");
+} 
+  str.push_str("");
+for param in f.params.iter() { 
+    if param.is_param_present("path-param") { 
+      str.push_str("\n\t    \tpath = path.replaceAll(\"\\\\{");
+      str.push_str(&param.get_param_value("path-param"));
+      str.push_str("\\\\}\",\"\"+");
+      str.push_str(&param.name);
+      str.push_str(");");
+    }
+} 
+  str.push_str("\n            //return null;\n    \t} catch(Exception ex) {\n    \t\t//throw new RuntimeException(ex);\n    \t}\n        throw new RuntimeException(\"Method not implemented\");");
 
   return str;
 }
@@ -243,12 +289,62 @@ fn get_impl_for_put_function(f:&model::Function) -> String {
 fn get_impl_for_delete_function(f:&model::Function) -> String {
   let mut str:String = String::new();
 
-  str.push_str("\n        // HTTP-DELETE call\n        throw new RuntimeException(\"Method not implemented\");");
+  str.push_str("\n        // HTTP-DELETE call\n        try {\n\t    \tString path = this.basePath;\n            if(this.ifaPathFragment != null) {\n                path += this.ifaPathFragment;\n            }");
+if f.is_attribute_present("path") { 
+    str.push_str(" \n            path += \"");
+    str.push_str(&f.get_attribute_value("path"));
+    str.push_str("\";");
+} 
+  str.push_str("");
+for param in f.params.iter() { 
+    if param.is_param_present("path-param") { 
+      str.push_str("\n\t    \tpath = path.replaceAll(\"\\\\{");
+      str.push_str(&param.get_param_value("path-param"));
+      str.push_str("\\\\}\",\"\"+");
+      str.push_str(&param.name);
+      str.push_str(");");
+    }
+} 
+  str.push_str("\n            //return null;\n    \t} catch(Exception ex) {\n    \t\t//throw new RuntimeException(ex);\n    \t}\n        throw new RuntimeException(\"Method not implemented\");");
 
   return str;
 }
 
 
+// 
+// Generate code for interface
+//
+fn gen_test(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {
+  let mut str:String = String::new();
+  if ifa.is_param_present("java-package") {
+
+    str.push_str("package  test.");
+    str.push_str(&ifa.get_param_value("java-package"));
+    str.push_str(";");
+} 
+  str.push_str("\n\nimport org.junit.Test;\n\n/**\n* Generated Proxy for ");
+  str.push_str(&ifa.name);
+  str.push_str("\n*/\npublic class ");
+  str.push_str(&ifa.name);
+  str.push_str("Test {");
+for function in ifa.functions.iter() { 
+    str.push_str("\n\n    /** \n     * Test Case for function ");
+    str.push_str(&function.name);
+    str.push_str("\n     *");
+for param in function.params.iter() { 
+      str.push_str("\n     * @param ");
+      str.push_str(&param.name);
+      str.push_str("");
+} 
+    str.push_str(" \n     * @return ");
+    str.push_str(&get_java_type(&function.returntype, function.returntype_is_array));
+    str.push_str("\n     */ \n    @Test\n    public void ");
+    str.push_str(&function.name);
+    str.push_str("Test() { \n        // TODO: write test code here\n        throw new RuntimeException(\"Method not implemented\");\n    }");
+} 
+  str.push_str("\n}");
+  return str;
+} 
 // rust utility functions for jaxrs 
 
 fn get_java_type(sjtype:&str, is_array:bool) -> String {

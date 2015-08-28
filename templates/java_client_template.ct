@@ -20,6 +20,7 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
     }
   }
   
+  // Proxies
   for ifa in tree.interfaces.iter() {
     let result = gen_proxy(ifa, tree.types.clone());
     if ifa.is_param_present("java-package") {
@@ -27,8 +28,21 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
       let filename = format!("{}/{}/{}Proxy.java", folder, package, ifa.name);
       filehandler::write_file(filename, result);
     } else {
-      let filename = format!("{}/{}.java", folder, ifa.name);
+      let filename = format!("{}/{}Proxy.java", folder, ifa.name);
       filehandler::write_file(filename, result);
     }
   }
-} }}{{+ java_client_template/gen_type.ct }}{{+ java_client_template/gen_proxy.ct }}{{+ jaxrs_template/functions.ct }}
+  
+  // Testcases
+  for ifa in tree.interfaces.iter() {
+    let result = gen_test(ifa, tree.types.clone());
+    if ifa.is_param_present("java-package") {
+      let package = format!("test.{}", ifa.get_param_value("java-package")).replace(".", "/");
+      let filename = format!("{}/{}/{}Test.java", folder, package, ifa.name);
+      filehandler::write_file(filename, result);
+    } else {
+      let filename = format!("{}/{}Test.java", folder, ifa.name);
+      filehandler::write_file(filename, result);
+    }
+  }
+} }}{{+ java_client_template/gen_type.ct }}{{+ java_client_template/gen_proxy.ct }}{{+ java_client_template/gen_test.ct }}{{+ jaxrs_template/functions.ct }}

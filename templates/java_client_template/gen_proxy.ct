@@ -103,6 +103,23 @@ fn get_impl_for_post_function(f:&model::Function) -> String {
   let mut str:String = String::new();
 }}
         // HTTP-POST call
+        try {
+	    	String path = this.basePath;
+            if(this.ifaPathFragment != null) {
+                path += this.ifaPathFragment;
+            }
+{{ if f.is_attribute_present("path") { }} 
+            path += " {{= f.get_attribute_value("path") }}";
+{{ } }}
+{{ for param in f.params.iter() { 
+    if param.is_param_present("path-param") { }}
+	    	path = path.replaceAll("\\{ {{= param.get_param_value("path-param") }}\\}",""+ {{= param.name}});
+{{     }
+} }}
+            //return null;
+    	} catch(Exception ex) {
+    		//throw new RuntimeException(ex);
+    	}
         throw new RuntimeException("Method not implemented");
 {{ 
   return str;
@@ -112,6 +129,23 @@ fn get_impl_for_put_function(f:&model::Function) -> String {
   let mut str:String = String::new();
 }}
         // HTTP-PUT call
+        try {
+	    	String path = this.basePath;
+            if(this.ifaPathFragment != null) {
+                path += this.ifaPathFragment;
+            }
+{{ if f.is_attribute_present("path") { }} 
+            path += " {{= f.get_attribute_value("path") }}";
+{{ } }}
+{{ for param in f.params.iter() { 
+    if param.is_param_present("path-param") { }}
+	    	path = path.replaceAll("\\{ {{= param.get_param_value("path-param") }}\\}",""+ {{= param.name}});
+{{     }
+} }}
+            //return null;
+    	} catch(Exception ex) {
+    		//throw new RuntimeException(ex);
+    	}
         throw new RuntimeException("Method not implemented");
 {{ 
   return str;
@@ -121,6 +155,23 @@ fn get_impl_for_delete_function(f:&model::Function) -> String {
   let mut str:String = String::new();
 }}
         // HTTP-DELETE call
+        try {
+	    	String path = this.basePath;
+            if(this.ifaPathFragment != null) {
+                path += this.ifaPathFragment;
+            }
+{{ if f.is_attribute_present("path") { }} 
+            path += " {{= f.get_attribute_value("path") }}";
+{{ } }}
+{{ for param in f.params.iter() { 
+    if param.is_param_present("path-param") { }}
+	    	path = path.replaceAll("\\{ {{= param.get_param_value("path-param") }}\\}",""+ {{= param.name}});
+{{     }
+} }}
+            //return null;
+    	} catch(Exception ex) {
+    		//throw new RuntimeException(ex);
+    	}
         throw new RuntimeException("Method not implemented");
 {{ 
   return str;

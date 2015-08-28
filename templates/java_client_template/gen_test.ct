@@ -1,0 +1,31 @@
+{{ // 
+// Generate code for interface
+//
+fn gen_test(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {
+  let mut str:String = String::new();
+  if ifa.is_param_present("java-package") {
+}}package  test. {{= ifa.get_param_value("java-package") }}; {{ } }}
+
+import org.junit.Test;
+
+/**
+* Generated Proxy for  {{= ifa.name }}
+*/
+public class  {{= ifa.name }}Test {
+{{ for function in ifa.functions.iter() { }}
+
+    /** 
+     * Test Case for function  {{= function.name }}
+     * {{ for param in function.params.iter() { }}
+     * @param  {{= param.name }} {{ } }} 
+     * @return  {{= get_java_type(&function.returntype, function.returntype_is_array) }}
+     */ 
+    @Test
+    public void  {{= function.name }}Test() { 
+        // TODO: write test code here
+        throw new RuntimeException("Method not implemented");
+    }
+{{ } }}
+}
+{{   return str;
+} }}
