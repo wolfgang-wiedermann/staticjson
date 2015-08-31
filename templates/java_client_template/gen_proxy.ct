@@ -8,6 +8,7 @@ fn gen_proxy(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> St
 
 import java.util.ArrayList; 
 import java.util.Arrays; // TODO: pruefen ob function mit returntype_is_array 
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -27,7 +28,7 @@ public class  {{= ifa.name }}Proxy {
     private String ifaPathFragment = " {{= ifa.get_param_value("path") }}";  
 {{ } else { }}
     private String ifaPathFragment = null;
-{{ } }}
+{{ } }}    
     private ObjectMapper mapper = new ObjectMapper();
 	private HttpClient clnt = HttpClients.createDefault();
 	
@@ -80,7 +81,13 @@ fn get_impl_for_get_function(f:&model::Function) -> String {
 	    	path = path.replaceAll("\\{ {{= param.get_param_value("path-param") }}\\}",""+ {{= param.name}});
 {{     }
 } }}
-	    	HttpGet get = new HttpGet(path);
+            URIBuilder uriBuilder = new URIBuilder(path);
+{{ for param in f.params.iter() {
+    if param.is_param_present("query-param") { }}
+            uriBuilder.addParameter(" {{= param.get_param_value("query-param") }}",  {{= param.name }});
+{{     }
+} }}
+	    	HttpGet get = new HttpGet(uriBuilder.build());
 			HttpResponse resp;
 			resp = clnt.execute(get);
 			HttpEntity httpEntity = resp.getEntity();
