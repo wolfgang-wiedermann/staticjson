@@ -402,6 +402,9 @@ fn get_interfaces_referenced_java_packages(ifa:&Box<model::Interface>, types:Box
 fn get_proxies_referenced_java_packages(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {    
   let mut package_set:HashSet<String> = HashSet::new();
   for func in ifa.functions.iter() {
+    if func.returntype_is_array {
+      package_set.insert(format!("java.util.Arrays"));
+    }
     if !model::Type::is_basic_type(&func.returntype) && func.returntype != "void" {
       for t in types.iter() {
         if t.typename == func.returntype

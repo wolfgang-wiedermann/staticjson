@@ -141,7 +141,7 @@ fn gen_proxy(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> St
     str.push_str(&ifa.get_param_value("java-package"));
     str.push_str(";");
 } 
-  str.push_str("\n\nimport java.util.ArrayList; \nimport java.util.Arrays; // TODO: pruefen ob function mit returntype_is_array \nimport org.apache.http.client.utils.URIBuilder;\nimport org.apache.http.HttpEntity;\nimport org.apache.http.HttpResponse;\nimport org.apache.http.client.HttpClient;\nimport org.apache.http.client.methods.HttpGet;\nimport org.apache.http.impl.client.HttpClients;\nimport com.fasterxml.jackson.databind.ObjectMapper;");
+  str.push_str("\n\nimport java.util.ArrayList; \nimport org.apache.http.client.utils.URIBuilder;\nimport org.apache.http.HttpEntity;\nimport org.apache.http.HttpResponse;\nimport org.apache.http.client.HttpClient;\nimport org.apache.http.client.methods.HttpGet;\nimport org.apache.http.impl.client.HttpClients;\nimport com.fasterxml.jackson.databind.ObjectMapper;");
   str.push_str(&get_proxies_referenced_java_packages(&ifa, types.clone()));
   str.push_str("\n\n/**\n* Generated Proxy for ");
   str.push_str(&ifa.name);
@@ -509,6 +509,9 @@ fn get_interfaces_referenced_java_packages(ifa:&Box<model::Interface>, types:Box
 fn get_proxies_referenced_java_packages(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {    
   let mut package_set:HashSet<String> = HashSet::new();
   for func in ifa.functions.iter() {
+    if func.returntype_is_array {
+      package_set.insert(format!("java.util.Arrays"));
+    }
     if !model::Type::is_basic_type(&func.returntype) && func.returntype != "void" {
       for t in types.iter() {
         if t.typename == func.returntype

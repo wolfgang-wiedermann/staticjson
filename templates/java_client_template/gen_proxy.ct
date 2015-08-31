@@ -7,7 +7,6 @@ fn gen_proxy(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> St
 }}package  {{= ifa.get_param_value("java-package") }}; {{ } }}
 
 import java.util.ArrayList; 
-import java.util.Arrays; // TODO: pruefen ob function mit returntype_is_array 
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
