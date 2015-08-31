@@ -267,7 +267,7 @@ for param in f.params.iter() {
       str.push_str(");");
     }
 } 
-  str.push_str("\n            //return null;\n    \t} catch(Exception ex) {\n    \t\t//throw new RuntimeException(ex);\n    \t}\n        throw new RuntimeException(\"Method not implemented\");");
+  str.push_str("\n            // nice post examle see http://stackoverflow.com/questions/12059278/how-to-post-json-request-using-apache-httpclient-3-1\n            // return null;\n    \t} catch(Exception ex) {\n    \t\t// throw new RuntimeException(ex);\n    \t}\n        throw new RuntimeException(\"Method not implemented\");");
 
   return str;
 }

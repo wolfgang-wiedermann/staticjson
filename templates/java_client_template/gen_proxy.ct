@@ -122,9 +122,10 @@ fn get_impl_for_post_function(f:&model::Function) -> String {
 	    	path = path.replaceAll("\\{ {{= param.get_param_value("path-param") }}\\}",""+ {{= param.name}});
 {{     }
 } }}
-            //return null;
+            // nice post examle see http://stackoverflow.com/questions/12059278/how-to-post-json-request-using-apache-httpclient-3-1
+            // return null;
     	} catch(Exception ex) {
-    		//throw new RuntimeException(ex);
+    		// throw new RuntimeException(ex);
     	}
         throw new RuntimeException("Method not implemented");
 {{ 
