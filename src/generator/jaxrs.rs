@@ -359,6 +359,7 @@ fn get_types_referenced_java_packages(typ:&Box<model::Type>, types:Box<Vec<Box<m
   return ret.clone();
 }
 
+#[allow(dead_code)]
 fn get_interfaces_referenced_java_packages(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {    
   let mut package_set:HashSet<String> = HashSet::new();
   for func in ifa.functions.iter() {
@@ -399,6 +400,7 @@ fn get_interfaces_referenced_java_packages(ifa:&Box<model::Interface>, types:Box
   return ret.clone();
 }
 
+#[allow(dead_code)]
 fn get_proxies_referenced_java_packages(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {    
   let mut package_set:HashSet<String> = HashSet::new();
   for func in ifa.functions.iter() {

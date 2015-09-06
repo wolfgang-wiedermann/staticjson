@@ -35,7 +35,7 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
   
   // Testcases
   for ifa in tree.interfaces.iter() {
-    let result = gen_test(ifa, tree.types.clone());
+    let result = gen_test(ifa);
     if ifa.is_param_present("java-package") {
       let package = format!("test.{}", ifa.get_param_value("java-package")).replace(".", "/");
       let filename = format!("{}/{}/{}Test.java", folder, package, ifa.name);

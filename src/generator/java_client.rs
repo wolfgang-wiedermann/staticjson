@@ -35,7 +35,7 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
   
   // Testcases
   for ifa in tree.interfaces.iter() {
-    let result = gen_test(ifa, tree.types.clone());
+    let result = gen_test(ifa);
     if ifa.is_param_present("java-package") {
       let package = format!("test.{}", ifa.get_param_value("java-package")).replace(".", "/");
       let filename = format!("{}/{}/{}Test.java", folder, package, ifa.name);
@@ -340,7 +340,7 @@ for param in f.params.iter() {
 // 
 // Generate code for interface
 //
-fn gen_test(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {
+fn gen_test(ifa:&Box<model::Interface>) -> String {
   let mut str:String = String::new();
   if ifa.is_param_present("java-package") {
 
@@ -482,6 +482,7 @@ fn get_types_referenced_java_packages(typ:&Box<model::Type>, types:Box<Vec<Box<m
   return ret.clone();
 }
 
+#[allow(dead_code)]
 fn get_interfaces_referenced_java_packages(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {    
   let mut package_set:HashSet<String> = HashSet::new();
   for func in ifa.functions.iter() {
@@ -522,6 +523,7 @@ fn get_interfaces_referenced_java_packages(ifa:&Box<model::Interface>, types:Box
   return ret.clone();
 }
 
+#[allow(dead_code)]
 fn get_proxies_referenced_java_packages(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {    
   let mut package_set:HashSet<String> = HashSet::new();
   for func in ifa.functions.iter() {

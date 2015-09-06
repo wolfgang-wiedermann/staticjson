@@ -1,7 +1,7 @@
 {{ // 
 // Generate code for interface
 //
-fn gen_test(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {
+fn gen_test(ifa:&Box<model::Interface>) -> String {
   let mut str:String = String::new();
   if ifa.is_param_present("java-package") {
 }}package  test. {{= ifa.get_param_value("java-package") }}; {{ } }}
