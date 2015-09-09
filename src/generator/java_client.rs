@@ -267,7 +267,9 @@ for param in f.params.iter() {
       str.push_str(");");
     }
 } 
-  str.push_str("\n            // TODO: the name of the method parameter in writeValueAsString must be retrieved dynamically\n            String jsonString = mapper.writeValueAsString(s);\n            HttpPost post = new HttpPost(path);\n            StringEntity request = new StringEntity(jsonString, ContentType.APPLICATION_JSON);\n            post.setEntity(request);\n            HttpResponse resp;\n\t\t\tresp = clnt.execute(post);\n            post.releaseConnection();\n\t\t\tHttpEntity httpEntity = resp.getEntity();");
+  str.push_str("            \n            String jsonString = mapper.writeValueAsString(");
+  str.push_str(&f.get_serialized_functionparam_name());
+  str.push_str(");\n            HttpPost post = new HttpPost(path);\n            StringEntity request = new StringEntity(jsonString, ContentType.APPLICATION_JSON);\n            post.setEntity(request);\n            HttpResponse resp;\n\t\t\tresp = clnt.execute(post);\n            post.releaseConnection();\n\t\t\tHttpEntity httpEntity = resp.getEntity();");
 if f.returntype_is_array { 
     str.push_str("\n            ");
     str.push_str(&get_java_type(&f.returntype, f.returntype_is_array));

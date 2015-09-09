@@ -124,9 +124,8 @@ fn get_impl_for_post_function(f:&model::Function) -> String {
     if param.is_param_present("path-param") { }}
 	    	path = path.replaceAll("\\{ {{= param.get_param_value("path-param") }}\\}",""+ {{= param.name}});
 {{     }
-} }}
-            // TODO: the name of the method parameter in writeValueAsString must be retrieved dynamically
-            String jsonString = mapper.writeValueAsString(s);
+} }}            
+            String jsonString = mapper.writeValueAsString( {{= f.get_serialized_functionparam_name() }});
             HttpPost post = new HttpPost(path);
             StringEntity request = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
             post.setEntity(request);
