@@ -219,7 +219,7 @@ if function.is_attribute_value_present("method", "GET") {
 } 
       if function.returntype != "void" && !model::Type::is_basic_type(&function.returntype) { 
       str.push_str("\n    @Produces(\"application/json\")");
-} if function.has_complex_functionparam() { 
+} if function.has_serialized_functionparam() { 
       str.push_str("\n    @Consumes(\"application/json\")");
 } 
     str.push_str("\n    public ");

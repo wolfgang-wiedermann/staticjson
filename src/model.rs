@@ -325,6 +325,18 @@ impl Function {
     }
     return false;
   }
+  
+  // Checks if the function has a param which must be serialized as json object
+  pub fn has_serialized_functionparam(&self) -> bool {
+    for fp in self.params.iter() {
+      if !(fp.typename == "void" 
+           || fp.is_param_present("query-param") 
+           || fp.is_param_present("path-param")) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 #[derive(Clone, Debug)]

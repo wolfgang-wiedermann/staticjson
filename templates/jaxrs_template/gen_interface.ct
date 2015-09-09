@@ -33,7 +33,7 @@ public interface  {{= ifa.name }} {
     @DELETE {{ } if function.is_attribute_present("path") { }}
     @Path(" {{= function.get_attribute_value("path") }}") {{ } 
       if function.returntype != "void" && !model::Type::is_basic_type(&function.returntype) { }}
-    @Produces("application/json") {{ } if function.has_complex_functionparam() { }}
+    @Produces("application/json") {{ } if function.has_serialized_functionparam() { }}
     @Consumes("application/json") {{ } }}
     public  {{= get_java_type(&function.returntype, function.returntype_is_array) }}  {{= function.name }}(
 {{ let mut i = 0;
