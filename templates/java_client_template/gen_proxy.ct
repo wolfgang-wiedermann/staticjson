@@ -13,6 +13,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.HttpClients;
@@ -165,11 +166,27 @@ fn get_impl_for_put_function(f:&model::Function) -> String {
 	    	path = path.replaceAll("\\{ {{= param.get_param_value("path-param") }}\\}",""+ {{= param.name}});
 {{     }
 } }}
-            //return null;
+            String jsonString = mapper.writeValueAsString( {{= f.get_serialized_functionparam_name() }});
+            HttpPut put = new HttpPut(path);
+            StringEntity request = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
+            put.setEntity(request);
+            HttpResponse resp;
+			resp = clnt.execute(put);
+            put.releaseConnection();			
+{{ if f.returntype_is_array { }}
+            HttpEntity httpEntity = resp.getEntity();
+             {{= get_java_type(&f.returntype, f.returntype_is_array) }} lst = new  {{= get_java_type(&f.returntype, f.returntype_is_array) }}();
+			 {{= get_java_type(&f.returntype, false) }}[] array = mapper.readValue(httpEntity.getContent(),  {{= get_java_type(&f.returntype, false) }}[].class);
+			lst.addAll(Arrays.asList(array));
+			return lst;
+{{ } else if f.returntype != "void" { }}
+            HttpEntity httpEntity = resp.getEntity();
+			return mapper.readValue(httpEntity.getContent(),  {{= get_java_type(&f.returntype, f.returntype_is_array) }}.class);
+{{ } }}
+
     	} catch(Exception ex) {
-    		//throw new RuntimeException(ex);
+    		throw new RuntimeException(ex);
     	}
-        throw new RuntimeException("Method not implemented");
 {{ 
   return str;
 }
