@@ -10,6 +10,7 @@ pub mod generator {
   pub mod jsoninc;
   pub mod jaxrs;
   pub mod java_client;
+  pub mod jquery;
 //  pub mod rust;
   pub mod htmldoc; // Generator for html documentation
 }

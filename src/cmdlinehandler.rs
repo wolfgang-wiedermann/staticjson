@@ -53,6 +53,7 @@ pub fn parse_commandline(params:Vec<String>) -> model::CommandlineOptions {
     "jsvalidate" => model::TargetLanguage::JSVALIDATE,
     "jaxrs"      => model::TargetLanguage::JAXRS,
     "javaclient" => model::TargetLanguage::JAVACLIENT,
+    "jquery"     => model::TargetLanguage::JQUERY,
     _            => panic!("ERROR: Invalid target language"),
   };
 
