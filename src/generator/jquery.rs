@@ -86,7 +86,7 @@ if f.is_attribute_present("path") {
 } else { 
     str.push_str("\n        var path = self.url;");
 } 
-  str.push_str("");
+  str.push_str("\n");
 for param in f.params.iter() { 
     if param.is_param_present("path-param") { 
       str.push_str("        \n\t    path = path.replace(\"{");
@@ -98,14 +98,14 @@ for param in f.params.iter() {
 } 
   for param in f.params.iter() {
     if param.is_param_present("query-param") { 
-      str.push_str("\n        if(queryParams.length > 0) {\n            queryParams += \"&\";\n        }\n        // TODO: Parameter-Werte noch URL-Encoden\n        queryParams += \"");
+      str.push_str("\n        if(queryParams.length > 0) {\n            queryParams += \"&\";\n        }                \n        queryParams += \"");
       str.push_str(&param.get_param_value("query-param"));
       str.push_str("=\" + encodeURIComponent(");
       str.push_str(&param.name);
       str.push_str(");            ");
     }
   }  
-  str.push_str(" \n        if(queryParams.length > 0) {\n            path = path + \"?\" + queryParams;\n        }        \n        console.log(method + \" \" + path);\n        \n        $.ajax({\n            \"url\": path,\n            \"method\": method,\n            \"dataType\": \"json\",\n            \"success\": successHandler,\n            \"error\": errorHandler\n        });");
+  str.push_str(" \n        if(queryParams.length > 0) {\n            path = path + \"?\" + queryParams;\n        }        \n        // DEBUG OUTPUT:\n        console.log(method + \" \" + path);\n        \n        $.ajax({\n            \"url\": path,\n            \"method\": method,\n            \"dataType\": \"json\",\n            \"success\": successHandler,\n            \"error\": errorHandler\n        });");
 
   return str;
 }

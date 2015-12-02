@@ -52,6 +52,7 @@ fn get_impl_for_get_function(f:&model::Function) -> String {
 {{ } else { }}
         var path = self.url;
 {{ } }}
+
 {{ for param in f.params.iter() { 
     if param.is_param_present("path-param") { }}        
 	    path = path.replace("{ {{= param.get_param_value("path-param") }}}", encodeURIComponent( {{= param.name}}));
@@ -61,14 +62,14 @@ fn get_impl_for_get_function(f:&model::Function) -> String {
     if param.is_param_present("query-param") { }}
         if(queryParams.length > 0) {
             queryParams += "&";
-        }
-        // TODO: Parameter-Werte noch URL-Encoden
+        }                
         queryParams += " {{= param.get_param_value("query-param") }}=" + encodeURIComponent( {{= param.name }});            
 {{     }
   }  }} 
         if(queryParams.length > 0) {
             path = path + "?" + queryParams;
         }        
+        // DEBUG OUTPUT:
         console.log(method + " " + path);
         
         $.ajax({
