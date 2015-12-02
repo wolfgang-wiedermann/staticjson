@@ -46,20 +46,39 @@ fn get_impl_for_get_function(f:&model::Function) -> String {
 }}
         // HTTP-GET call    
         var method = "GET";
+        var queryParams = "";
 {{ if f.is_attribute_present("path") { }} 
         var path = self.url + " {{= f.get_attribute_value("path") }}";
+{{ } else { }}
+        var path = self.url;
 {{ } }}
 {{ for param in f.params.iter() { 
-    if param.is_param_present("path-param") { }}
-            // TODO:
-	    	// path = path.replaceAll("\\{ {{= param.get_param_value("path-param") }}\\}",""+ {{= param.name}});
+    if param.is_param_present("path-param") { }}        
+	    path = path.replace("{ {{= param.get_param_value("path-param") }}}", encodeURIComponent( {{= param.name}}));
 {{     }
 } 
   for param in f.params.iter() {
     if param.is_param_present("query-param") { }}
-            // path.addQueryParameter(" {{= param.get_param_value("query-param") }}",  {{= param.name }});
+        if(queryParams.length > 0) {
+            queryParams += "&";
+        }
+        // TODO: Parameter-Werte noch URL-Encoden
+        queryParams += " {{= param.get_param_value("query-param") }}=" + encodeURIComponent( {{= param.name }});            
 {{     }
-  }  
+  }  }} 
+        if(queryParams.length > 0) {
+            path = path + "?" + queryParams;
+        }        
+        console.log(method + " " + path);
+        
+        $.ajax({
+            "url": path,
+            "method": method,
+            "dataType": "json",
+            "success": successHandler,
+            "error": errorHandler
+        });
+{{ 
   return str;
 }
 

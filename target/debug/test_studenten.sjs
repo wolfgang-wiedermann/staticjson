@@ -79,6 +79,7 @@ interface StudentRepository(
   
   // Find-Mehtod for Studends by OrtEntity
   // helps to check working include functions
+  // HINT: Pracitically this method is bullshit because GET can not handle an object payload
   findStudentsByOrt(ort:OrtEntity) -> StudentEntity[] {
     method="GET",
     path="/student/byOrt"
