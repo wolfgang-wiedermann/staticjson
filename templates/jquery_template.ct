@@ -21,4 +21,4 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
     let filename = format!("{}/{}.js", folder, ifa.name);
     filehandler::write_file(filename, result);    
   }
-} }}{{+ jquery_template/gen_proxy.ct }}
+} }}{{+ jquery_template/gen_proxy.ct }}{{+ jquery_template/namespace_fcts.ct }}

@@ -57,6 +57,7 @@ type OtherPackageEntity (
 //
 interface StudentRepository(
     java-package="de.ww.interfaces",
+    js-namespace="de.ww.proxy",
     path="/repos") {
 
   // Get-Method for Students
