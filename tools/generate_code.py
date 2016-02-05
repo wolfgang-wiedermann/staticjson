@@ -140,7 +140,7 @@ def parse(filename, encodetype):
         elif state == PS_INBRACKETS:
             if c == '=':
                 state = PS_INVALUEASSIGNMENT
-            elif c == ' ':
+            elif c == ' ' or c == '\n' or c == '\r' or c == '\t':
                 state = PS_INCODE
             else:
                 print "Error: invalid char {0}".format(c)
