@@ -120,15 +120,17 @@ if f.is_attribute_present("path") {
     str.push_str(" \n        var path = self.url + \"");
     str.push_str(&f.get_attribute_value("path"));
     str.push_str("\";");
+} else { 
+    str.push_str("\n        var path = self.url;");
 } 
-  str.push_str("");
+  str.push_str("\n");
 for param in f.params.iter() { 
     if param.is_param_present("path-param") { 
-      str.push_str("\n            // TODO:\n\t    \t// path = path.replaceAll(\"\\\\{");
+      str.push_str("        \n\t    path = path.replace(\"{");
       str.push_str(&param.get_param_value("path-param"));
-      str.push_str("\\\\}\",\"\"+");
+      str.push_str("}\", encodeURIComponent(");
       str.push_str(&param.name);
-      str.push_str(");");
+      str.push_str("));");
     }
 } 
   for param in f.params.iter() {
@@ -153,15 +155,17 @@ if f.is_attribute_present("path") {
     str.push_str(" \n        var path = self.url + \"");
     str.push_str(&f.get_attribute_value("path"));
     str.push_str("\";");
+} else { 
+    str.push_str("\n        var path = self.url;");
 } 
-  str.push_str("");
+  str.push_str("\n");
 for param in f.params.iter() { 
     if param.is_param_present("path-param") { 
-      str.push_str("\n            // TODO:\n\t    \t// path = path.replaceAll(\"\\\\{");
+      str.push_str("        \n\t    path = path.replace(\"{");
       str.push_str(&param.get_param_value("path-param"));
-      str.push_str("\\\\}\",\"\"+");
+      str.push_str("}\", encodeURIComponent(");
       str.push_str(&param.name);
-      str.push_str(");");
+      str.push_str("));");
     }
 } 
   for param in f.params.iter() {

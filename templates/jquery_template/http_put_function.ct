@@ -7,11 +7,13 @@ fn get_impl_for_put_function(f:&model::Function) -> String {
         var method = "PUT";
 {{ if f.is_attribute_present("path") { }} 
         var path = self.url + " {{= f.get_attribute_value("path") }}";
+{{ } else { }}
+        var path = self.url;
 {{ } }}
+
 {{ for param in f.params.iter() { 
-    if param.is_param_present("path-param") { }}
-            // TODO:
-	    	// path = path.replaceAll("\\{ {{= param.get_param_value("path-param") }}\\}",""+ {{= param.name}});
+    if param.is_param_present("path-param") { }}        
+	    path = path.replace("{ {{= param.get_param_value("path-param") }}}", encodeURIComponent( {{= param.name}}));
 {{     }
 } 
   for param in f.params.iter() {
