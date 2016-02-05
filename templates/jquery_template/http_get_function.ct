@@ -1,0 +1,45 @@
+{{
+
+fn get_impl_for_get_function(f:&model::Function) -> String {
+  let mut str:String = String::new();
+}}
+        // HTTP-GET call    
+        var method = "GET";
+        var queryParams = "";
+{{ if f.is_attribute_present("path") { }} 
+        var path = self.url + " {{= f.get_attribute_value("path") }}";
+{{ } else { }}
+        var path = self.url;
+{{ } }}
+
+{{ for param in f.params.iter() { 
+    if param.is_param_present("path-param") { }}        
+	    path = path.replace("{ {{= param.get_param_value("path-param") }}}", encodeURIComponent( {{= param.name}}));
+{{     }
+} 
+  for param in f.params.iter() {
+    if param.is_param_present("query-param") { }}
+        if(queryParams.length > 0) {
+            queryParams += "&";
+        }                
+        queryParams += " {{= param.get_param_value("query-param") }}=" + encodeURIComponent( {{= param.name }});            
+{{     }
+  }  }} 
+        if(queryParams.length > 0) {
+            path = path + "?" + queryParams;
+        }        
+        // DEBUG OUTPUT:
+        console.log(method + " " + path);
+        
+        $.ajax({
+            "url": path,
+            "method": method,
+            "dataType": "json",
+            "success": successHandler,
+            "error": errorHandler
+        });
+{{ 
+  return str;
+}
+
+}}

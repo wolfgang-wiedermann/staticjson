@@ -74,6 +74,7 @@ str.push_str(", ");  }
   return str;
 } 
 
+
 fn get_impl_for_get_function(f:&model::Function) -> String {
   let mut str:String = String::new();
 
@@ -109,6 +110,8 @@ for param in f.params.iter() {
   return str;
 }
 
+
+
 fn get_impl_for_post_function(f:&model::Function) -> String {
   let mut str:String = String::new();
 
@@ -140,6 +143,8 @@ for param in f.params.iter() {
   return str;
 }
 
+
+
 fn get_impl_for_put_function(f:&model::Function) -> String {
   let mut str:String = String::new();
 
@@ -170,6 +175,8 @@ for param in f.params.iter() {
   }  
   return str;
 }
+
+
 
 fn get_impl_for_delete_function(f:&model::Function) -> String {
   let mut str:String = String::new();
