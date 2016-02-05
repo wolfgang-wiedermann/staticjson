@@ -26,16 +26,15 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
 // Generate code for interface
 //
 fn gen_proxy(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {
-  let mut str:String = String::new();
-  if ifa.is_param_present("java-package") {
+  let mut str:String = String::new();  
 
-    str.push_str("// TODO: Namespace anstelle von \"proxy\" aufbauen: ");
-    str.push_str(&ifa.get_param_value("java-package"));
-    str.push_str(";");
-} 
-  str.push_str("\nvar proxy = proxy || {};\n\n/**\n* Generated Proxy for ");
+  str.push_str("// Namespace generieren\n");
+  str.push_str(&buildup_js_namespace_from_ifa(ifa));
+  str.push_str("\n\n/**\n* Generated Proxy for ");
   str.push_str(&ifa.name);
-  str.push_str("\n*/\nproxy.");
+  str.push_str("\n*/\n");
+  str.push_str(&get_js_namespace_from_ifa(ifa));
+  str.push_str(".");
   str.push_str(&ifa.name);
   str.push_str("Proxy = function(urlBase) {\n    var self = this;\n\n    // URL-Basis aufbauen\n    self.url = urlBase;");
 if ifa.is_param_present("path") { 
@@ -201,6 +200,83 @@ for param in f.params.iter() {
     }
   }  
   return str;
+}
+
+
+
+fn buildup_js_namespace_from_type(t:&model::Type) -> String {
+    if t.is_param_present("js-namespace") {
+        let ns = t.get_param_value("js-namespace");
+        return buildup_js_namespace(&ns);
+    } else {
+        let mut str:String = String::new();
+        str.push_str("var model = model || {};");
+        return str;
+    }
+}
+
+fn buildup_js_namespace_from_ifa(i:&model::Interface) -> String {
+    if i.is_param_present("js-namespace") {
+        let ns = i.get_param_value("js-namespace");
+        return buildup_js_namespace(&ns);
+    } else {
+        let mut str:String = String::new();
+        str.push_str("var proxy = proxy || {};");
+        return str;
+    }
+}
+
+fn buildup_js_namespace(s:&str) -> String {
+    let mut str:String = String::new();
+    let mut ns:String = String::new();
+    let mut split = s.split(".");
+    let mut i = 0;
+    
+    for token in split {        
+        if i == 0 {
+            ns.push_str(token);
+            
+            str.push_str("var ");
+            str.push_str(&ns);
+            str.push_str(" = ");
+            str.push_str(&ns);
+            str.push_str(" || {};\n");
+        } else {
+            ns.push_str(".");
+            ns.push_str(token);
+            
+            str.push_str(&ns);
+            str.push_str(" = ");
+            str.push_str(&ns);
+            str.push_str(" || {};\n");
+        }
+        i += 1;
+    }    
+    
+    // str.push_str(s);
+    return str;
+}
+
+fn get_js_namespace_from_type(i:&model::Type) -> String {
+    let mut str:String = String::new();
+    if i.is_param_present("js-namespace") {
+        let ns = i.get_param_value("js-namespace");
+        str.push_str(&ns);
+    } else {        
+        str.push_str("model");        
+    }
+    return str;
+}
+
+fn get_js_namespace_from_ifa(i:&model::Interface) -> String {
+    let mut str:String = String::new();
+    if i.is_param_present("js-namespace") {
+        let ns = i.get_param_value("js-namespace");
+        str.push_str(&ns);
+    } else {        
+        str.push_str("proxy");        
+    }
+    return str;
 }
 
 

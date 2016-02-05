@@ -2,15 +2,15 @@
 // Generate code for interface
 //
 fn gen_proxy(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {
-  let mut str:String = String::new();
-  if ifa.is_param_present("java-package") {
-}}// TODO: Namespace anstelle von "proxy" aufbauen:  {{= ifa.get_param_value("java-package") }}; {{ } }}
-var proxy = proxy || {};
+  let mut str:String = String::new();  
+}}// Namespace generieren
+
+{{= buildup_js_namespace_from_ifa(ifa) }}
 
 /**
 * Generated Proxy for  {{= ifa.name }}
 */
-proxy. {{= ifa.name }}Proxy = function(urlBase) {
+ {{= get_js_namespace_from_ifa(ifa) }}. {{= ifa.name }}Proxy = function(urlBase) {
     var self = this;
 
     // URL-Basis aufbauen
