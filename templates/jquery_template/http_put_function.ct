@@ -40,11 +40,8 @@ fn get_impl_for_put_function(f:&model::Function) -> String {
             "url": path,
             "method": method,
             "contentType":'application/json; charset=UTF-8',
-            {{ for param in f.params.iter() { 
-                if(!(param.is_param_present("query-param") 
-                     || param.is_param_present("path-param"))) {
-            }} "data": JSON.stringify( {{= param.name }}) {{ str.push_str(", ");  
-                }
+            {{ if(f.has_serialized_functionparam()) { 
+            }} "data": JSON.stringify( {{= f.get_serialized_functionparam_name() }}) {{ str.push_str(", ");  
                } }}
             "dataType": "json",
             "success": successHandler,

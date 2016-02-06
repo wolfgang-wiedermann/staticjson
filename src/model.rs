@@ -42,7 +42,7 @@ pub enum ParserState {
   INFUNCTIONPARAMTYPE, INFUNCTION,
   INFUNCTIONPARAMTYPEARRAY, BEHINDFUNCTIONPARAMTYPEARRAY,
   
-  // Special: Function Params can have Parameters - TODO: has to be implemented in parser
+  // Special: Function Params can have Parameters 
   INFUNCTIONPARAMPARAMNAME, INFUNCTIONPARAMPARAMVALUE, 
   INFUNCTIONPARAMPARAMSTRING, INFUNCTIONPARAMPARAMLIST,
   // --  

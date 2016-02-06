@@ -109,6 +109,12 @@ interface StudentRepository(
     method="PUT",
     path="/student/{id}"
   }
+  
+  // Sample for a DELETE method with path param
+  removeStudent(id:int(path-param="id")) {
+    method="DELETE",
+    path="/student/{id}"
+  }
 }
 
 //

@@ -152,15 +152,12 @@ for param in f.params.iter() {
     }
   }  
   str.push_str(" \n        if(queryParams.length > 0) {\n            path = path + \"?\" + queryParams;\n        }        \n        // DEBUG OUTPUT:\n        console.log(method + \" \" + path);\n        \n        $.ajax({\n            \"url\": path,\n            \"method\": method,\n            \"contentType\":'application/json; charset=UTF-8',\n           ");
-for param in f.params.iter() { 
-                if(!(param.is_param_present("query-param") 
-                     || param.is_param_present("path-param"))) {
+if(f.has_serialized_functionparam()) { 
             
-      str.push_str(" \"data\": JSON.stringify(");
-      str.push_str(&param.name);
-      str.push_str(")");
+    str.push_str(" \"data\": JSON.stringify(");
+    str.push_str(&f.get_serialized_functionparam_name());
+    str.push_str(")");
 str.push_str(", ");  
-                }
                } 
   str.push_str("\n            \"dataType\": \"json\",\n            \"success\": successHandler,\n            \"error\": errorHandler\n        });");
 
@@ -209,15 +206,12 @@ for param in f.params.iter() {
     }
   }  
   str.push_str(" \n        if(queryParams.length > 0) {\n            path = path + \"?\" + queryParams;\n        }        \n        // DEBUG OUTPUT:\n        console.log(method + \" \" + path);\n        \n        $.ajax({\n            \"url\": path,\n            \"method\": method,\n            \"contentType\":'application/json; charset=UTF-8',\n           ");
-for param in f.params.iter() { 
-                if(!(param.is_param_present("query-param") 
-                     || param.is_param_present("path-param"))) {
+if(f.has_serialized_functionparam()) { 
             
-      str.push_str(" \"data\": JSON.stringify(");
-      str.push_str(&param.name);
-      str.push_str(")");
+    str.push_str(" \"data\": JSON.stringify(");
+    str.push_str(&f.get_serialized_functionparam_name());
+    str.push_str(")");
 str.push_str(", ");  
-                }
                } 
   str.push_str("\n            \"dataType\": \"json\",\n            \"success\": successHandler,\n            \"error\": errorHandler\n        });");
 
@@ -229,31 +223,35 @@ str.push_str(", ");
 fn get_impl_for_delete_function(f:&model::Function) -> String {
   let mut str:String = String::new();
 
-  str.push_str("\n        // HTTP-DELETE call    \t\n        var method = \"DELETE\";");
+  str.push_str("\n        // HTTP-DELETE call    \t\n        var method = \"DELETE\";\n        var queryParams = \"\";");
 if f.is_attribute_present("path") { 
     str.push_str(" \n        var path = self.url + \"");
     str.push_str(&f.get_attribute_value("path"));
     str.push_str("\";");
+} else { 
+    str.push_str("\n        var path = self.url;");
 } 
-  str.push_str("");
+  str.push_str("\n");
 for param in f.params.iter() { 
     if param.is_param_present("path-param") { 
-      str.push_str("\n            // TODO:\n\t    \t// path = path.replaceAll(\"\\\\{");
+      str.push_str("        \n\t    path = path.replace(\"{");
       str.push_str(&param.get_param_value("path-param"));
-      str.push_str("\\\\}\",\"\"+");
+      str.push_str("}\", encodeURIComponent(");
       str.push_str(&param.name);
-      str.push_str(");");
+      str.push_str("));");
     }
 } 
   for param in f.params.iter() {
     if param.is_param_present("query-param") { 
-      str.push_str("\n            // path.addQueryParameter(\"");
+      str.push_str("\n        if(queryParams.length > 0) {\n            queryParams += \"&\";\n        }                \n        queryParams += \"");
       str.push_str(&param.get_param_value("query-param"));
-      str.push_str("\", ");
+      str.push_str("=\" + encodeURIComponent(");
       str.push_str(&param.name);
-      str.push_str(");");
+      str.push_str(");            ");
     }
   }  
+  str.push_str(" \n        if(queryParams.length > 0) {\n            path = path + \"?\" + queryParams;\n        }        \n        // DEBUG OUTPUT:\n        console.log(method + \" \" + path);\n        \n        $.ajax({\n            \"url\": path,\n            \"method\": method,\n            \"dataType\": \"json\",\n            \"success\": successHandler,\n            \"error\": errorHandler\n        });");
+
   return str;
 }
 
