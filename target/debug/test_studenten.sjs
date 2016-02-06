@@ -124,7 +124,7 @@ interface OrtRepository(
   // it definies the HTTP-Method to use for service call
   getOrtById(id:int(path-param="id")) -> OrtEntity {
     method="GET",
-    path="{id}"
+    path="/{id}"
   }  
 }
 
