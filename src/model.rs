@@ -10,10 +10,10 @@ pub enum TargetLanguage {
 pub enum ParserState {
   INITIAL, INTYPENAME, INTYPE,
 
-  INTYPEPARAMNAME,    // Neu, noch unbenutzt
-  INTYPEPARAMVALUE,   // Neu, noch unbenutzt 
-  INTYPEPARAMSTRING,  // Neu, noch unbenutzt
-  OUTOFFTYPEPARAMLIST,// Neu, noch unbenutzt
+  INTYPEPARAMNAME, 
+  INTYPEPARAMVALUE,
+  INTYPEPARAMSTRING,
+  OUTOFFTYPEPARAMLIST,
 
   INATTRIBUTENAME, INATTRIBUTETYPE, 
   INATTRIBUTEARRAY,
