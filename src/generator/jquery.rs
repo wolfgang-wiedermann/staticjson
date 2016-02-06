@@ -153,10 +153,15 @@ for param in f.params.iter() {
   }  
   str.push_str(" \n        if(queryParams.length > 0) {\n            path = path + \"?\" + queryParams;\n        }        \n        // DEBUG OUTPUT:\n        console.log(method + \" \" + path);\n        \n        $.ajax({\n            \"url\": path,\n            \"method\": method,\n            \"contentType\":'application/json; charset=UTF-8',\n           ");
 for param in f.params.iter() { 
-    str.push_str(" \"data\": JSON.stringify(");
-    str.push_str(&param.name);
-    str.push_str(")");
-str.push_str(", ");  } 
+                if(!(param.is_param_present("query-param") 
+                     || param.is_param_present("path-param"))) {
+            
+      str.push_str(" \"data\": JSON.stringify(");
+      str.push_str(&param.name);
+      str.push_str(")");
+str.push_str(", ");  
+                }
+               } 
   str.push_str("\n            \"dataType\": \"json\",\n            \"success\": successHandler,\n            \"error\": errorHandler\n        });");
 
   return str;
@@ -167,7 +172,7 @@ str.push_str(", ");  }
 fn get_impl_for_put_function(f:&model::Function) -> String {
   let mut str:String = String::new();
 
-  str.push_str("\n        // HTTP-PUT call  \n        var method = \"PUT\";");
+  str.push_str("\n        // HTTP-PUT call  \n        var method = \"PUT\";\n        var queryParams = \"\";");
 if f.is_attribute_present("path") { 
     str.push_str(" \n        var path = self.url + \"");
     str.push_str(&f.get_attribute_value("path"));
@@ -194,6 +199,28 @@ for param in f.params.iter() {
       str.push_str(");");
     }
   }  
+    for param in f.params.iter() {
+    if param.is_param_present("query-param") { 
+      str.push_str("\n        if(queryParams.length > 0) {\n            queryParams += \"&\";\n        }                \n        queryParams += \"");
+      str.push_str(&param.get_param_value("query-param"));
+      str.push_str("=\" + encodeURIComponent(");
+      str.push_str(&param.name);
+      str.push_str(");            ");
+    }
+  }  
+  str.push_str(" \n        if(queryParams.length > 0) {\n            path = path + \"?\" + queryParams;\n        }        \n        // DEBUG OUTPUT:\n        console.log(method + \" \" + path);\n        \n        $.ajax({\n            \"url\": path,\n            \"method\": method,\n            \"contentType\":'application/json; charset=UTF-8',\n           ");
+for param in f.params.iter() { 
+                if(!(param.is_param_present("query-param") 
+                     || param.is_param_present("path-param"))) {
+            
+      str.push_str(" \"data\": JSON.stringify(");
+      str.push_str(&param.name);
+      str.push_str(")");
+str.push_str(", ");  
+                }
+               } 
+  str.push_str("\n            \"dataType\": \"json\",\n            \"success\": successHandler,\n            \"error\": errorHandler\n        });");
+
   return str;
 }
 
