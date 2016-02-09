@@ -115,6 +115,12 @@ interface StudentRepository(
     method="DELETE",
     path="/student/{id}"
   }
+  
+  // POST with Query-Params
+  createDings(id:int(query-param="id")) -> StudentEntity {
+    method="POST",
+    path="/dings/"
+  }
 }
 
 //
