@@ -17,12 +17,7 @@ fn get_impl_for_post_function(f:&model::Function) -> String {
 	    path = path.replace("{ {{= param.get_param_value("path-param") }}}", encodeURIComponent( {{= param.name}}));
 {{     }
 } 
-  for param in f.params.iter() {
-    if param.is_param_present("query-param") { }}
-        path.addQueryParameter(" {{= param.get_param_value("query-param") }}",  {{= param.name }});
-{{     }
-  }  
-    for param in f.params.iter() {
+   for param in f.params.iter() {
     if param.is_param_present("query-param") { }}
         if(queryParams.length > 0) {
             queryParams += "&";

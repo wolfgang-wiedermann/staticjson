@@ -133,16 +133,7 @@ for param in f.params.iter() {
       str.push_str("));");
     }
 } 
-  for param in f.params.iter() {
-    if param.is_param_present("query-param") { 
-      str.push_str("\n        path.addQueryParameter(\"");
-      str.push_str(&param.get_param_value("query-param"));
-      str.push_str("\", ");
-      str.push_str(&param.name);
-      str.push_str(");");
-    }
-  }  
-    for param in f.params.iter() {
+   for param in f.params.iter() {
     if param.is_param_present("query-param") { 
       str.push_str("\n        if(queryParams.length > 0) {\n            queryParams += \"&\";\n        }                \n        queryParams += \"");
       str.push_str(&param.get_param_value("query-param"));
@@ -187,16 +178,7 @@ for param in f.params.iter() {
       str.push_str("));");
     }
 } 
-  for param in f.params.iter() {
-    if param.is_param_present("query-param") { 
-      str.push_str("\n            path.addQueryParameter(\"");
-      str.push_str(&param.get_param_value("query-param"));
-      str.push_str("\", ");
-      str.push_str(&param.name);
-      str.push_str(");");
-    }
-  }  
-    for param in f.params.iter() {
+   for param in f.params.iter() {
     if param.is_param_present("query-param") { 
       str.push_str("\n        if(queryParams.length > 0) {\n            queryParams += \"&\";\n        }                \n        queryParams += \"");
       str.push_str(&param.get_param_value("query-param"));
