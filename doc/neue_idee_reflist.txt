@@ -69,6 +69,6 @@ interface CustomerRepository (
             Customer.adresses="by_reference"
         ) {
         method="GET",
-        path="/customer/{id}",
+        path="/customer",
     }
 }
