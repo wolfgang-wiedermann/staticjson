@@ -1,0 +1,74 @@
+Rund um Staticjson hab ich die folgende neue Idee:
+--------------------------------------------------
+
+Die IDL so aufbohren, dass referenzierte Objekte der Rückgabewerte oder Parameter mittels Referenz oder mittels vollständig
+serialisiertem Objekt aufgelöst werden können. Und zwar individuell pro Funktion/Methode in der sie als Parameter oder
+Rückgabewert verwendet werden. Die Konfiguration soll dann als Configuration by Exception realisiert werden.
+
+Beispiel:
+---------
+
+type Customer (
+    java-package="de.wolfgang-wiedermann.entities",
+    jpa-entity="true",
+    jpa-table="tbl_customer") {
+    
+    customer_id:uint(
+        jpa-id="true",
+        jpa-generated-value="true"
+    );
+    company_name:string;
+    other_attribtes:string;
+    addresses:Address[](
+        default-serialization-type="by_value"
+    );
+    // Alternativer default-serialization-type: by_reference
+}
+
+type Address (
+    java-package="de.wolfgang-wiedermann.entities",
+    jpa-entity="true",
+    jpa-table="tbl_address") {
+    
+    address_id:uint(
+        jpa-id="true",
+        jpa-generated-value="true"
+    );
+    street:string;
+    number:string;
+    postcode:string;
+    city:string;
+}
+
+interface CustomerRepository (
+    java-package="de.wolfgang-wiedermann.ifa"
+    path="/repos") {
+    
+    // Diese Funktion liefert Customers mit Address-Ref-Objekten
+    // im Attribut customers
+    getCustomerById(id:uint(path-param="id")) -> Customer 
+        @serialize(
+            Customer.adresses="by_reference"
+        ) {
+        method="GET",
+        path="/customer/{id}",
+    }
+    
+    // Diese Funktion liefert Customers mit 
+    // vollständigen Address-Objekten
+    // im Attribut customers
+    getCustomerById(id:uint(path-param="id")) -> Customer {
+        method="GET",
+        path="/customer/{id}",
+    }
+    
+    // Liefert eine Liste aller Customer-Objekten, je
+    // mit einer Liste von Address-Ref-Objekten
+    getAllCustomers() -> Customer[] 
+        @serialize(
+            Customer.adresses="by_reference"
+        ) {
+        method="GET",
+        path="/customer/{id}",
+    }
+}
