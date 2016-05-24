@@ -6,7 +6,7 @@ pub mod validator;
 pub mod util;
 
 pub mod generator {
-  pub mod swift;
+//  pub mod swift;
   pub mod jsoninc;
   pub mod jaxrs;
   pub mod java_client;
