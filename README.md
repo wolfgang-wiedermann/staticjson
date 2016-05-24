@@ -1,65 +1,81 @@
 # staticjson
 
-staticjson is a code generation utility which is intended to generate json parsers for specific datatypes. The core target of staticjson are statically typed languages without reflection functionality. 
+staticjson is my current proof of concept for a code generation utility which is intended to generate static code for json parsers for specific datatypes
+and interfaces for HTTP based web APIs. The core target of staticjson is to enable easy use of web APIs to statically typed languages without reflection functionality. 
 
 In statically typed languages with reflection we are able to see great generic json to object mapping frameworks. Without reflection the core principles of that frameworks can not be applied. The idea of staticjson is to bring similar usability to languages without reflection.
 
-Currently staticjson is in its very early development state. It can not be used in real projects until now.
+Currently staticjson is in its very early development state. It can not be used in real projects until now but it already shows the potential power 
+of using annotated IDLs in the context of REST APIs.
 
-# Sample about staticjson
+# Current state of development 
 
-## staticjson code (file: interface.sjs)
+The current version of staticjson is able to produce working serverside Java code (serverside stub) annotated with JAX-RS annotations and 
+JavaScript proxys based on jQuerys ajax functionality. Java and JavaScript both are no statically typed languages without reflection functionality,
+but even with them the power of this IDL based approach is already visible.
+
+# How staticjson works
+
+The following sample shows how staticjson works. For this it step by step shows how to generate a serverside Java stub and
+its corresponding JavaScript client proxy.
+
+## staticjson code (file: sample.sjs)
 
 ```
- type KundeEntity(java-package="de.test.entities") {
-   kundennummer:uint(
-     primary_key="true", 
-     mandatory="true"
-   );
-   name:string(mandatory="true", maxlen="50");
-   vorname:string(mandatory="true", maxlen="50");
-   strasse:string;
-   postleitzahl:string;
-   ort:string;
- }
- 
- interface KundenRepository(
-     java-package="de.test.interfaces",
-     path="/repos") {
- 
-   // Method to retrieve a customer by its id
-   getKundeById(id:int(path-param="id")) -> KundeEntity {
+type Customer (
+        java-package="de.ww.sample.entities",
+        jpa-entity="true",
+        jpa-table="tbl_customer",
+        js-namespace="de.ww.sample.entities"
+    ) {
+  
+  customer_id:int(
+    jpa-id="true", 
+    jpa-generate-value="true"
+  );
+
+  prename:string(maxlen="50");
+  surname:string(maxlen="50");
+}
+
+interface CustomerRepository (
+        java-package="de.ww.sample",
+        js-namespace="de.ww.sample.proxy",
+        path="/api"
+    ) {
+
+  // Get a Customer by its id
+  getCustomerById(id:int(path-param="id")) -> Customer {
     method="GET",
-    path="/kunde/{id}"
-   }
-   
-   // Method to retrieve a list of all customers
-   getKunden() -> KundeEntity[] {
-     method="GET",
-     path="/kunde"
-   }
- }
+    path="/customer/{id}"
+  }
+
+  // Find a customer by its pre- or surname
+  findCustomer(prename:string(query-param="prename"),
+               surname:string(query-param="surname")) -> customer[] {
+    method="GET",
+    path="/customer"
+  }
+
+  // Create a new customer and return it with its server generated id
+  createCustomer(c:Customer) -> Customer {
+    method="POST",
+    path="/customer"
+  }
+
+  // Deletes a customer by its id and returns the id at success
+  deleteCustomer(id:int(path-param="id")) -> int {
+    method="DELETE",
+    path="/customer/{id}"
+  }
+}
+
 ```
 
-## call the client code generation
+## Call the server side code generation
 
 ```bash
- staticjson interface.sjs -t swift
-```
-
-## Usage of generated swift code
-
-```swift
-let kundeJSON = "{\"kundennummer\":1,\"name\":\"Mustermann\", \"vorname\":\"Max\", \"strasse\":\"Beispielstrasse\", \"postleitzahl\":\"12345\", \"ort\":\"Musterort\"}";
-var kunde = KundeEntity.parse(kundeJSON);
-kunde.name = "Mustermeier";
-println("\nBeispiel: Kunde");
-println(KundeEntity.serialize(kunde));
-```
-## call the server side code generation
-
-```bash
- staticjson interface.sjs -t jaxrs
+staticjson -t jaxrs -o java/ src/sample.sjs
 ```
 
 ## Usage of generated java code
@@ -71,96 +87,61 @@ a useful way to check the validity of the content of the attributes
 within the object.
 
 ```java
-package de.test.entities;
+package de.ww.sample;
 
 import java.util.ArrayList;
-import java.io.Serializable;
+import javax.ws.rs.Path;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Consumes;
+import de.ww.sample.entities.Customer;
 
 /**
-* Generated Type for Entity KundeEntity 
+* Generated Interface for CustomerRepository with JAX-RS Annotations
 */
-public class KundeEntity implements Serializable {
-
-    private int kundennummer;   
-    private String name;   
-    private String vorname;   
-    private String strasse;   
-    private String postleitzahl;   
-    private String ort;   
-
-    public KundeEntity() {
-        this.kundennummer = 0;
-        this.name = null;
-        this.vorname = null;
-        this.strasse = null;
-        this.postleitzahl = null;
-        this.ort = null;
-    }
-
-    public int getKundennummer() {
-        return this.kundennummer;
-    }
-    
-    public void setKundennummer(int value) {
-        this.kundennummer = value;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-    
-    public void setName(String value) {
-        this.name = value;
-    }
-
-    public String getVorname() {
-        return this.vorname;
-    }
-    
-    public void setVorname(String value) {
-        this.vorname = value;
-    }
-
-    public String getStrasse() {
-        return this.strasse;
-    }
-    
-    public void setStrasse(String value) {
-        this.strasse = value;
-    }
-
-    public String getPostleitzahl() {
-        return this.postleitzahl;
-    }
-    
-    public void setPostleitzahl(String value) {
-        this.postleitzahl = value;
-    }
-
-    public String getOrt() {
-        return this.ort;
-    }
-    
-    public void setOrt(String value) {
-        this.ort = value;
-    }
+@Path("/api")
+public interface CustomerRepository {
 
     /**
-    * The function isValid offert a validation function for the
-    * mandatory attributes and other constraints of staticjson code
-    * @param object to check
-    * @return check result
-    */
-    public static boolean isValid(KundeEntity obj) {
-        return obj != null
-        && obj.kundennummer != 0
-        && obj.name != null
-        && (obj.name != null && 
-            obj.name.length() <= 50)
-        && obj.vorname != null
-        && (obj.vorname != null && 
-            obj.vorname.length() <= 50);
-    }
+     * @param id 
+     * @return Customer
+     */
+    @GET
+    @Path("/customer/{id}")
+    @Produces("application/json")
+    public Customer getCustomerById(@PathParam("id") int id);
+
+    /**
+     * @param prename
+     * @param surname 
+     * @return ArrayList<customer>
+     */
+    @GET
+    @Path("/customer")
+    @Produces("application/json")
+    public ArrayList<customer> findCustomer(@QueryParam("prename") String prename, @QueryParam("surname") String surname);
+
+    /**
+     * @param c 
+     * @return Customer
+     */
+    @POST
+    @Path("/customer")
+    @Produces("application/json")
+    @Consumes("application/json")
+    public Customer createCustomer(Customer c);
+
+    /**
+     * @param id 
+     * @return int
+     */
+    @DELETE
+    @Path("/customer/{id}")
+    public int deleteCustomer(@PathParam("id") int id);
 }
 ```
 
@@ -170,36 +151,410 @@ rest like interfaces. The following code listing is the result of the jaxrs gene
 and shows a JAX-RS interface.
 
 ```java
-package de.test.interfaces;
+
+/*
+* de/ww/sample/entities/Customer.java
+*/
+package de.ww.sample.entities;
+
+import java.util.ArrayList;
+import java.io.Serializable;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Id;
+
+/**
+* Generated Type for Entity Customer 
+*/
+@Entity
+@Table(name="tbl_customer")
+public class Customer implements Serializable {
+
+  private static final long serialVersionUID = 1L;
+
+    private int customerId;   
+    private String prename;   
+    private String surname;   
+
+    public Customer() {
+        this.customerId = 0;
+        this.prename = null;
+        this.surname = null;
+    }
+
+    @Id
+    public int getCustomerId() {
+        return this.customerId;
+    }
+    
+    public void setCustomerId(int value) {
+        this.customerId = value;
+    }
+
+    public String getPrename() {
+        return this.prename;
+    }
+    
+    public void setPrename(String value) {
+        this.prename = value;
+    }
+
+    public String getSurname() {
+        return this.surname;
+    }
+    
+    public void setSurname(String value) {
+        this.surname = value;
+    }
+
+    /**
+    * The function isValid offert a validation function for the
+    * mandatory attributes and other constraints of staticjson code
+    * @param object to check
+    * @return check result
+    */
+    public static boolean isValid(Customer obj) {
+        return obj != null
+        && (obj.prename != null && 
+            obj.prename.length() <= 50)
+        && (obj.surname != null && 
+            obj.surname.length() <= 50);
+    }
+}
+
+/*
+* de/ww/sample/CustomerRepository.java
+*/
+package de.ww.sample;
 
 import java.util.ArrayList;
 import javax.ws.rs.Path;
 import javax.ws.rs.GET;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.Produces;
-import de.test.entities.KundeEntity;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Consumes;
+import de.ww.sample.entities.Customer;
 
 /**
-* Generated Interface for KundenRepository with JAX-RS Annotations
+* Generated Interface for CustomerRepository with JAX-RS Annotations
 */
-@Path("/repos")
-public interface KundenRepository {
+@Path("/api")
+public interface CustomerRepository {
 
     /**
      * @param id 
-     * @return KundeEntity
+     * @return Customer
      */
     @GET
-    @Path("/kunde/{id}")
+    @Path("/customer/{id}")
     @Produces("application/json")
-    public KundeEntity getKundeById(@PathParam("id") int id);
+    public Customer getCustomerById(@PathParam("id") int id);
 
-    /** 
-     * @return ArrayList<KundeEntity>
+    /**
+     * @param prename
+     * @param surname 
+     * @return ArrayList<customer>
      */
     @GET
-    @Path("/kunde")
+    @Path("/customer")
     @Produces("application/json")
-    public ArrayList<KundeEntity> getKunden();
+    public ArrayList<customer> findCustomer(@QueryParam("prename") String prename, @QueryParam("surname") String surname);
+
+    /**
+     * @param c 
+     * @return Customer
+     */
+    @POST
+    @Path("/customer")
+    @Produces("application/json")
+    @Consumes("application/json")
+    public Customer createCustomer(Customer c);
+
+    /**
+     * @param id 
+     * @return int
+     */
+    @DELETE
+    @Path("/customer/{id}")
+    public int deleteCustomer(@PathParam("id") int id);
+}
+
+```
+
+## Call the client proxy code generation
+
+```bash
+staticjson -t jquery -o js/ src/sample.sjs
+```
+
+## Generated JavaScript
+
+The code generation process generates the Javascript proxy code which looks like the following
+code sample.
+
+```javascript
+// Namespace generieren
+var de = de || {};
+de.ww = de.ww || {};
+de.ww.sample = de.ww.sample || {};
+de.ww.sample.proxy = de.ww.sample.proxy || {};
+
+
+/**
+* Generated Proxy for CustomerRepository
+*/
+de.ww.sample.proxy.CustomerRepositoryProxy = function(urlBase) {
+    var self = this;
+
+    // URL-Basis aufbauen
+    self.url = urlBase;
+    self.url += "/api";  
+    
+
+    /**
+     * @param id 
+     * @return Customer
+     */ 
+    self.getCustomerById = function(id, successHandler, errorHandler) { 
+        // HTTP-GET call    
+        var method = "GET";
+        var queryParams = ""; 
+        var path = self.url + "/customer/{id}";
+        
+	    path = path.replace("{id}", encodeURIComponent(id)); 
+        if(queryParams.length > 0) {
+            path = path + "?" + queryParams;
+        }        
+        // DEBUG OUTPUT:
+        console.log(method + " " + path);
+        
+        $.ajax({
+            "url": path,
+            "method": method,
+            "dataType": "json",
+            "success": successHandler,
+            "error": errorHandler
+        });
+    }
+
+    /**
+     * @param prename
+     * @param surname 
+     * @return customer
+     */ 
+    self.findCustomer = function(prename, surname, successHandler, errorHandler) { 
+        // HTTP-GET call    
+        var method = "GET";
+        var queryParams = ""; 
+        var path = self.url + "/customer";
+// Namespace generieren
+var de = de || {};
+de.ww = de.ww || {};
+de.ww.sample = de.ww.sample || {};
+de.ww.sample.proxy = de.ww.sample.proxy || {};
+
+
+/**
+* Generated Proxy for CustomerRepository
+*/
+de.ww.sample.proxy.CustomerRepositoryProxy = function(urlBase) {
+    var self = this;
+
+    // URL-Basis aufbauen
+    self.url = urlBase;
+    self.url += "/api";  
+    
+
+    /**
+     * @param id 
+     * @return Customer
+     */ 
+    self.getCustomerById = function(id, successHandler, errorHandler) { 
+        // HTTP-GET call    
+        var method = "GET";
+        var queryParams = ""; 
+        var path = self.url + "/customer/{id}";
+        
+	    path = path.replace("{id}", encodeURIComponent(id)); 
+        if(queryParams.length > 0) {
+            path = path + "?" + queryParams;
+        }        
+        // DEBUG OUTPUT:
+        console.log(method + " " + path);
+        
+        $.ajax({
+            "url": path,
+            "method": method,
+            "dataType": "json",
+            "success": successHandler,
+            "error": errorHandler
+        });
+    }
+
+    /**
+     * @param prename
+     * @param surname 
+     * @return customer
+     */ 
+    self.findCustomer = function(prename, surname, successHandler, errorHandler) { 
+        // HTTP-GET call    
+        var method = "GET";
+        var queryParams = ""; 
+        var path = self.url + "/customer";
+
+        if(queryParams.length > 0) {
+            queryParams += "&";
+        }                
+        queryParams += "prename=" + encodeURIComponent(prename);            
+        if(queryParams.length > 0) {
+            queryParams += "&";
+        }                
+        queryParams += "surname=" + encodeURIComponent(surname);             
+        if(queryParams.length > 0) {
+            path = path + "?" + queryParams;
+        }        
+        // DEBUG OUTPUT:
+        console.log(method + " " + path);
+        
+        $.ajax({
+            "url": path,
+            "method": method,
+            "dataType": "json",
+            "success": successHandler,
+            "error": errorHandler
+        });
+    }
+
+    /**
+     * @param c 
+     * @return Customer
+     */ 
+    self.createCustomer = function(c, successHandler, errorHandler) { 
+        // HTTP-POST call  
+        var method = "POST";
+        var queryParams = ""; 
+        var path = self.url + "/customer";
+ 
+        if(queryParams.length > 0) {
+            path = path + "?" + queryParams;
+        }        
+        // DEBUG OUTPUT:
+        console.log(method + " " + path);
+        
+        $.ajax({
+            "url": path,
+            "method": method,
+            "contentType":'application/json; charset=UTF-8',
+            "data": JSON.stringify(c), 
+            "dataType": "json",
+            "success": successHandler,
+            "error": errorHandler
+        });
+    }
+
+    /**
+     * @param id 
+     * @return int
+     */ 
+    self.deleteCustomer = function(id, successHandler, errorHandler) { 
+        // HTTP-DELETE call    	
+        var method = "DELETE";
+        var queryParams = ""; 
+        var path = self.url + "/customer/{id}";
+        
+	    path = path.replace("{id}", encodeURIComponent(id)); 
+        if(queryParams.length > 0) {
+            path = path + "?" + queryParams;
+        }        
+        // DEBUG OUTPUT:
+        console.log(method + " " + path);
+        
+        $.ajax({
+            "url": path,
+            "method": method,
+            "dataType": "json",
+            "success": successHandler,
+            "error": errorHandler
+        });
+    }
+}
+        if(queryParams.length > 0) {
+            queryParams += "&";
+        }                
+        queryParams += "prename=" + encodeURIComponent(prename);            
+        if(queryParams.length > 0) {
+            queryParams += "&";
+        }                
+        queryParams += "surname=" + encodeURIComponent(surname);             
+        if(queryParams.length > 0) {
+            path = path + "?" + queryParams;
+        }        
+        // DEBUG OUTPUT:
+        console.log(method + " " + path);
+        
+        $.ajax({
+            "url": path,
+            "method": method,
+            "dataType": "json",
+            "success": successHandler,
+            "error": errorHandler
+        });
+    }
+
+    /**
+     * @param c 
+     * @return Customer
+     */ 
+    self.createCustomer = function(c, successHandler, errorHandler) { 
+        // HTTP-POST call  
+        var method = "POST";
+        var queryParams = ""; 
+        var path = self.url + "/customer";
+ 
+        if(queryParams.length > 0) {
+            path = path + "?" + queryParams;
+        }        
+        // DEBUG OUTPUT:
+        console.log(method + " " + path);
+        
+        $.ajax({
+            "url": path,
+            "method": method,
+            "contentType":'application/json; charset=UTF-8',
+            "data": JSON.stringify(c), 
+            "dataType": "json",
+            "success": successHandler,
+            "error": errorHandler
+        });
+    }
+
+    /**
+     * @param id 
+     * @return int
+     */ 
+    self.deleteCustomer = function(id, successHandler, errorHandler) { 
+        // HTTP-DELETE call    	
+        var method = "DELETE";
+        var queryParams = ""; 
+        var path = self.url + "/customer/{id}";
+        
+	    path = path.replace("{id}", encodeURIComponent(id)); 
+        if(queryParams.length > 0) {
+            path = path + "?" + queryParams;
+        }        
+        // DEBUG OUTPUT:
+        console.log(method + " " + path);
+        
+        $.ajax({
+            "url": path,
+            "method": method,
+            "dataType": "json",
+            "success": successHandler,
+            "error": errorHandler
+        });
+    }
 }
 ```
