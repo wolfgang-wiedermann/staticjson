@@ -53,3 +53,12 @@ fn test_ucamel_to_lcamel() {
   let result = util::ucamel_to_lcamel(base);
   assert_eq!(result, target);
 }
+
+#[test]
+fn test_remove_first_char() {
+  let base = "/bla/blu/blub/{abc}";
+  let target = "bla/blu/blub/{abc}";
+  
+  let result = util::remove_first_char(base);
+  assert_eq!(result, target);
+}

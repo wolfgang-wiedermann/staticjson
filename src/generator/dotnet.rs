@@ -138,7 +138,7 @@ fn gen_interface(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -
   str.push_str(" with WebAPI2 Attributes\n*/");
 if ifa.is_param_present("path") { 
     str.push_str("\n[RoutePrefix(\"");
-    str.push_str(&ifa.get_param_value("path"));
+    str.push_str(&util::remove_first_char(&ifa.get_param_value("path")));
     str.push_str("\")]");
 } 
   str.push_str("\npublic interface ");
@@ -164,7 +164,7 @@ if function.is_attribute_value_present("method", "GET") {
       str.push_str("\n    [HttpDelete]");
 } if function.is_attribute_present("path") { 
       str.push_str("\n    [Route(\"");
-      str.push_str(&function.get_attribute_value("path"));
+      str.push_str(&util::remove_first_char(&function.get_attribute_value("path")));
       str.push_str("\")]");
 } 
     str.push_str("\n    public ");
@@ -177,10 +177,10 @@ for param in function.params.iter() {
   i = i+1;   
   if i > 1 { 
     str.push_str(", "); 
-  } if param.is_param_present("query-param") {
-    str.push_str(&format!("@QueryParam(\"{}\") ", param.get_param_value("query-param")));
-  } if param.is_param_present("path-param") {
-    str.push_str(&format!("@PathParam(\"{}\") ", param.get_param_value("path-param")));
+  } if !(param.is_param_present("query-param") || param.is_param_present("path-param")) { 
+  
+        str.push_str("[FromBody] ");
+
   } 
       str.push_str("");
       str.push_str(&get_dotnet_type(&param.typename, param.is_array));
