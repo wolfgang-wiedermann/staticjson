@@ -3,7 +3,8 @@
 type StudentEntity (
     java-package="de.ww.entities",
     jpa-entity="true",
-    jpa-table="tbl_student") {
+    jpa-table="tbl_student",
+    cs-namespace="Test.Model") {
     
   mtknr_id:decimal(maxlen="10", decimals="0", mandatory="true");
   mtknr_id2:int[];
@@ -27,7 +28,8 @@ type StudentEntity (
 type OrtEntity (
     java-package="de.ww.entities",
     jpa-entity="true",
-    jpa-table="tbl_ort") {
+    jpa-table="tbl_ort",
+    cs-namespace="Test.Model") {
     
   postleitzahl:string(
     jpa-column="plz",
@@ -46,7 +48,8 @@ type OrtEntity (
 }
 
 type OtherPackageEntity (
-    java-package="de.ww.entities2") {
+    java-package="de.ww.entities2",
+    cs-namespace="Test.Model") {
   test:string;
   test2:string;
   test3:OrtEntity;
@@ -58,6 +61,7 @@ type OtherPackageEntity (
 interface StudentRepository(
     java-package="de.ww.interfaces",
     js-namespace="de.ww.proxy",
+    cs-namespace="Test.Controller",
     path="/repos") {
 
   // Get-Method for Students
@@ -78,7 +82,7 @@ interface StudentRepository(
     path="/student"
   }
   
-  // Find-Mehtod for Studends by OrtEntity
+  // Find-Method for Studends by OrtEntity
   // helps to check working include functions
   // HINT: Pracitically this method is bullshit because GET can not handle an object payload
   findStudentsByOrt(ort:OrtEntity) -> StudentEntity[] {
@@ -128,6 +132,7 @@ interface StudentRepository(
 //
 interface OrtRepository(
     java-package="de.ww.interfaces",
+    cs-namespace="Test.Controller",
     pattern="Repository", 
     path="/repos/ort") {
     

@@ -1,0 +1,52 @@
+{{ // 
+// Generate code for interface
+//
+fn gen_interface(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {
+  let mut str:String = String::new(); 
+}}using System;
+using System.Collections.Generic;
+using System.Linq; 
+using System.Web.Http;
+using System.Security;
+{{= get_interfaces_referenced_dotnet_namespaces(&ifa, types.clone()) }}
+
+
+{{   if ifa.is_param_present("cs-namespace") {
+}}namespace  {{= ifa.get_param_value("cs-namespace") }} 
+{ {{ } }}
+
+/**
+* Generated Interface for  {{= ifa.name }} with WebAPI2 Attributes
+*/
+{{ if ifa.is_param_present("path") { }}
+[RoutePrefix(" {{= ifa.get_param_value("path") }}")] {{ } }}
+public interface  {{= ifa.name }} : ApiController {
+{{ for function in ifa.functions.iter() { }}
+
+    /** {{ for param in function.params.iter() { }}
+     * @param  {{= param.name }} {{ } }} 
+     * @return  {{= get_dotnet_type(&function.returntype, function.returntype_is_array) }}
+     */ {{ if function.is_attribute_value_present("method", "GET") { }}
+    [HttpGet] {{ } if function.is_attribute_value_present("method", "PUT") { }}
+    [HttpPut] {{ } if function.is_attribute_value_present("method", "POST") { }}
+    [HttpPost] {{ } if function.is_attribute_value_present("method", "DELETE") { }}
+    [HttpDelete] {{ } if function.is_attribute_present("path") { }}
+    [Route(" {{= function.get_attribute_value("path") }}")] {{ } }}
+    public  {{= get_dotnet_type(&function.returntype, function.returntype_is_array) }}  {{= util::lcamel_to_ucamel(&function.name) }}(
+{{ let mut i = 0;
+for param in function.params.iter() { 
+  i = i+1;   
+  if i > 1 { 
+    str.push_str(", "); 
+  } if param.is_param_present("query-param") {
+    str.push_str(&format!("@QueryParam(\"{}\") ", param.get_param_value("query-param")));
+  } if param.is_param_present("path-param") {
+    str.push_str(&format!("@PathParam(\"{}\") ", param.get_param_value("path-param")));
+  } }} {{= get_dotnet_type(&param.typename, param.is_array) }}  {{= param.name }} {{ } }});
+{{ } }}
+}
+{{ if ifa.is_param_present("cs-namespace") { }} 
+
+} {{ } }}
+{{   return str;
+} }}

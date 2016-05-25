@@ -11,6 +11,7 @@ pub mod generator {
   pub mod jaxrs;
   pub mod java_client;
   pub mod jquery;
+  pub mod dotnet;
 //  pub mod rust;
   pub mod htmldoc; // Generator for html documentation
 }

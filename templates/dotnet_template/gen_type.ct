@@ -1,0 +1,64 @@
+{{ // 
+// Generate code for type
+//
+fn gen_type(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {
+  let mut str:String = String::new(); 
+}}  
+using System;
+using System.Collections.Generic;
+using System.Linq; 
+
+{{= get_types_referenced_dotnet_namespaces(&typ, types.clone()) }}
+
+{{   if typ.is_param_present("cs-namespace") {
+}}namespace  {{= typ.get_param_value("cs-namespace") }} 
+{ {{ } }}
+
+/**
+* Generated Type for Entity  {{= typ.typename }} 
+*/
+{{ if typ.is_param_value_present("ef-entity", "true") { }}
+@Entity {{ } if typ.is_param_present("ef-table") { }}
+@Table(name=" {{= typ.get_param_value("ef-table") }}") {{ } }}
+public class  {{= typ.typename }} {
+
+    #region properties
+{{     for attribut in typ.attributes.iter() { }}
+    public  {{= get_dotnet_type(&attribut.attribute_type, attribut.is_array) }}  {{= util::lsnake_to_ucamel(&attribut.name) }} { get; set; }   
+{{     } }}
+    #endregion
+
+    public  {{= typ.typename }}() {
+{{     for attribut in typ.attributes.iter() { }}
+        this. {{= util::lsnake_to_ucamel(&attribut.name) }} =  {{= get_dotnet_type_initial(&attribut.attribute_type, attribut.is_array) }};
+{{     } }}
+    }
+
+    /**
+    * The function isValid offert a validation function for the
+    * mandatory attributes and other constraints of staticjson code
+    * @param object to check
+    * @return check result
+    */
+    public static boolean isValid( {{= typ.typename }} obj) {
+        return obj != null {{     for attribut in typ.attributes.iter() { 
+      if attribut.is_param_value_present("mandatory", "true") { }}
+        && obj. {{= util::lsnake_to_ucamel(&attribut.name) }} !=  {{= get_dotnet_type_initial(&attribut.attribute_type, attribut.is_array) }}
+{{       } if attribut.is_param_present("maxlen") && attribut.attribute_type == "string" && !attribut.is_array { }}
+        && (obj. {{= util::lsnake_to_ucamel(&attribut.name) }} != null && 
+            obj. {{= util::lsnake_to_ucamel(&attribut.name) }}.Length <=  {{= attribut.get_param_value("maxlen") }})
+{{       } if attribut.is_param_present("minlen") && attribut.attribute_type == "string" && !attribut.is_array { }}
+        && (obj. {{= util::lsnake_to_ucamel(&attribut.name) }} != null && 
+            obj. {{= util::lsnake_to_ucamel(&attribut.name) }}.Length >=  {{= attribut.get_param_value("minlen") }})
+{{       } 
+    } }};
+    }
+}
+
+{{   if typ.is_param_present("cs-namespace") {
+}} 
+} {{ }
+    return str;
+} 
+
+}}
