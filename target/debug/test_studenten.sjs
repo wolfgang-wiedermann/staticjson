@@ -4,13 +4,16 @@ type StudentEntity (
     java-package="de.ww.entities",
     jpa-entity="true",
     jpa-table="tbl_student",
-    cs-namespace="Test.Model") {
+    cs-namespace="Test.Model",
+    ef-table="tbl_student") {
     
   mtknr_id:decimal(maxlen="10", decimals="0", mandatory="true");
   mtknr_id2:int[];
   mtknr_id3:uint(
     jpa-id="true",
-    jpa-generated-value="true"
+    jpa-generated-value="true",
+    ef-id="true",
+    ef-generated-value="true"
   );
   mtknr_id4:long;
   mtknr_id5:ulong;

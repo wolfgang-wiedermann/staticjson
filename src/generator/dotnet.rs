@@ -34,11 +34,12 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
 } 
 // 
 // Generate code for type
+// For details about entity frameworks attributes see https://msdn.microsoft.com/en-us/data/jj591583
 //
 fn gen_type(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {
   let mut str:String = String::new(); 
 
-  str.push_str("  \nusing System;\nusing System.Collections.Generic;\nusing System.Linq; \n");
+  str.push_str("  \nusing System;\nusing System.Collections.Generic;\nusing System.Linq; \nusing System.ComponentModel.DataAnnotations;\nusing System.ComponentModel.DataAnnotations.Schema;\n");
   str.push_str(&get_types_referenced_dotnet_namespaces(&typ, types.clone()));
   str.push_str("\n");
   if typ.is_param_present("cs-namespace") {
@@ -50,22 +51,25 @@ fn gen_type(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {
   str.push_str("\n\n/**\n* Generated Type for Entity ");
   str.push_str(&typ.typename);
   str.push_str(" \n*/");
-if typ.is_param_value_present("ef-entity", "true") { 
-    str.push_str("\n@Entity");
-} if typ.is_param_present("ef-table") { 
-    str.push_str("\n@Table(name=\"");
+if typ.is_param_present("ef-table") { 
+    str.push_str("\n[Table(\"");
     str.push_str(&typ.get_param_value("ef-table"));
-    str.push_str("\")");
+    str.push_str("\")]");
 } 
   str.push_str("\npublic class ");
   str.push_str(&typ.typename);
   str.push_str(" {\n\n    #region properties");
     for attribut in typ.attributes.iter() { 
+         if attribut.is_param_value_present("ef-id", "true") { 
+      str.push_str("\n    [Key]");
+} if attribut.is_param_value_present("ef-id", "true") { 
+      str.push_str("\n    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]");
+} 
     str.push_str("\n    public ");
     str.push_str(&get_dotnet_type(&attribut.attribute_type, attribut.is_array));
     str.push_str(" ");
     str.push_str(&util::lsnake_to_ucamel(&attribut.name));
-    str.push_str(" { get; set; }   ");
+    str.push_str(" { get; set; }   \n");
     } 
   str.push_str("\n    #endregion\n\n    public ");
   str.push_str(&typ.typename);
@@ -77,7 +81,7 @@ if typ.is_param_value_present("ef-entity", "true") {
     str.push_str(&get_dotnet_type_initial(&attribut.attribute_type, attribut.is_array));
     str.push_str(";");
     } 
-  str.push_str("\n    }\n\n    /**\n    * The function isValid offert a validation function for the\n    * mandatory attributes and other constraints of staticjson code\n    * @param object to check\n    * @return check result\n    */\n    public static boolean isValid(");
+  str.push_str("\n    }\n\n    /**\n    * The function IsValid offert a validation function for the\n    * mandatory attributes and other constraints of staticjson code\n    * @param object to check\n    * @return check result\n    */\n    public static bool IsValid(");
   str.push_str(&typ.typename);
   str.push_str(" obj) {\n        return obj != null");
     for attribut in typ.attributes.iter() { 
@@ -219,7 +223,7 @@ fn get_dotnet_type(sjtype:&str, is_array:bool) -> String {
     if is_array {
       jtype = "List<string>";
     } else {
-      jtype = "String";
+      jtype = "string";
     }
   } else if sjtype == "decimal" {
     if is_array {
@@ -229,9 +233,9 @@ fn get_dotnet_type(sjtype:&str, is_array:bool) -> String {
     }
   } else if sjtype == "date" {
     if is_array {
-      jtype = "List<Date>";
+      jtype = "List<DateTime>";
     } else {
-      jtype = "Date";
+      jtype = "DateTime?";
     }
   } else {
     jtype = "undef";
@@ -269,11 +273,11 @@ fn get_dotnet_type_initial(sjtype:&str, is_array:bool) -> String {
     if is_array {
       jtype = "new List<decimal>()";
     } else {
-      jtype = "0.0";
+      jtype = "0.0m";
     }
   } else if sjtype == "date" {
     if is_array {
-      jtype = "new List<Date>()";
+      jtype = "new List<DateTime>()";
     } else {
       jtype = "null";
     }
@@ -308,31 +312,24 @@ fn get_types_referenced_dotnet_namespaces(typ:&Box<model::Type>, types:Box<Vec<B
 fn get_interfaces_referenced_dotnet_namespaces(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {    
   let mut package_set:HashSet<String> = HashSet::new();
   for func in ifa.functions.iter() {
-    if !model::Type::is_basic_type(&func.returntype) && func.returntype != "void" {
-      package_set.insert(format!("javax.ws.rs.Consumes"));
+    if !model::Type::is_basic_type(&func.returntype) && func.returntype != "void" {      
       for t in types.iter() {
         if t.typename == func.returntype
            && t.is_param_present("cs-namespace") 
            && !(ifa.is_param_present("cs-namespace") 
                 && ifa.get_param_value("cs-namespace") == t.get_param_value("cs-namespace")){
-           package_set.insert(format!("{}", t.get_param_value("java-package")));
+           package_set.insert(format!("{}", t.get_param_value("cs-namespace")));
         }
       }
     }
-    for param in func.params.iter() {
-      if param.is_param_present("path-param") {
-        package_set.insert(format!("javax.ws.rs.PathParam"));
-      }
-      if param.is_param_present("query-param") {
-        package_set.insert(format!("javax.ws.rs.QueryParam"));
-      }
+    for param in func.params.iter() {      
       if !model::Type::is_basic_type(&param.typename) {
         for t in types.iter() {
           if t.typename == param.typename
              && t.is_param_present("cs-namespace") 
              && !(ifa.is_param_present("cs-namespace") 
-                  && ifa.get_param_value("cs-namespace") == t.get_param_value("java-package")){
-             package_set.insert(format!("{}", t.get_param_value("java-package")));
+                  && ifa.get_param_value("cs-namespace") == t.get_param_value("cs-namespace")){
+             package_set.insert(format!("{}", t.get_param_value("cs-namespace")));
           }
         }
       }
