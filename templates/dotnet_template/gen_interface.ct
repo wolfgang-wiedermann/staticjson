@@ -15,18 +15,18 @@ using System.Security;
 }}namespace  {{= ifa.get_param_value("cs-namespace") }} 
 { {{ } }}
 
-/**
-* Generated Interface for  {{= ifa.name }} with WebAPI2 Attributes
-*/
+///
+/// Generated Interface for  {{= ifa.name }} with WebAPI2 Attributes
+///
 {{ if ifa.is_param_present("path") { }}
 [RoutePrefix(" {{= util::remove_first_char(&ifa.get_param_value("path")) }}")] {{ } }}
 public interface  {{= ifa.name }} : ApiController {
 {{ for function in ifa.functions.iter() { }}
 
-    /** {{ for param in function.params.iter() { }}
-     * @param  {{= param.name }} {{ } }} 
-     * @return  {{= get_dotnet_type(&function.returntype, function.returntype_is_array) }}
-     */ {{ if function.is_attribute_value_present("method", "GET") { }}
+    /// {{ for param in function.params.iter() { }}
+    /// <param name=" {{= param.name }}"></param> {{ } }} 
+    /// <returns> {{= get_dotnet_type(&function.returntype, function.returntype_is_array) }}</returns>
+    /// {{ if function.is_attribute_value_present("method", "GET") { }}
     [HttpGet] {{ } if function.is_attribute_value_present("method", "PUT") { }}
     [HttpPut] {{ } if function.is_attribute_value_present("method", "POST") { }}
     [HttpPost] {{ } if function.is_attribute_value_present("method", "DELETE") { }}

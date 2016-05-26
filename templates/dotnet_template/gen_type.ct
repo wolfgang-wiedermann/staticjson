@@ -17,9 +17,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 }}namespace  {{= typ.get_param_value("cs-namespace") }} 
 { {{ } }}
 
-/**
-* Generated Type for Entity  {{= typ.typename }} 
-*/
+///
+/// Generated Type for Entity  {{= typ.typename }} 
+///
 {{ if typ.is_param_present("ef-table") { }}
 [Table(" {{= typ.get_param_value("ef-table") }}")] {{ } }}
 public class  {{= typ.typename }} {
@@ -40,12 +40,12 @@ public class  {{= typ.typename }} {
 {{     } }}
     }
 
-    /**
-    * The function IsValid offert a validation function for the
-    * mandatory attributes and other constraints of staticjson code
-    * @param object to check
-    * @return check result
-    */
+    ///
+    /// The function IsValid offert a validation function for the
+    /// mandatory attributes and other constraints of staticjson code
+    /// @param object to check
+    /// @return check result
+    ///
     public static bool IsValid( {{= typ.typename }} obj) {
         return obj != null {{     for attribut in typ.attributes.iter() { 
       if attribut.is_param_value_present("mandatory", "true") { }}

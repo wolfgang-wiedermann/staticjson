@@ -48,9 +48,9 @@ fn gen_type(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {
     str.push_str(&typ.get_param_value("cs-namespace"));
     str.push_str(" \n{");
 } 
-  str.push_str("\n\n/**\n* Generated Type for Entity ");
+  str.push_str("\n\n///\n/// Generated Type for Entity ");
   str.push_str(&typ.typename);
-  str.push_str(" \n*/");
+  str.push_str(" \n///");
 if typ.is_param_present("ef-table") { 
     str.push_str("\n[Table(\"");
     str.push_str(&typ.get_param_value("ef-table"));
@@ -81,7 +81,7 @@ if typ.is_param_present("ef-table") {
     str.push_str(&get_dotnet_type_initial(&attribut.attribute_type, attribut.is_array));
     str.push_str(";");
     } 
-  str.push_str("\n    }\n\n    /**\n    * The function IsValid offert a validation function for the\n    * mandatory attributes and other constraints of staticjson code\n    * @param object to check\n    * @return check result\n    */\n    public static bool IsValid(");
+  str.push_str("\n    }\n\n    ///\n    /// The function IsValid offert a validation function for the\n    /// mandatory attributes and other constraints of staticjson code\n    /// @param object to check\n    /// @return check result\n    ///\n    public static bool IsValid(");
   str.push_str(&typ.typename);
   str.push_str(" obj) {\n        return obj != null");
     for attribut in typ.attributes.iter() { 
@@ -133,9 +133,9 @@ fn gen_interface(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -
     str.push_str(&ifa.get_param_value("cs-namespace"));
     str.push_str(" \n{");
 } 
-  str.push_str("\n\n/**\n* Generated Interface for ");
+  str.push_str("\n\n///\n/// Generated Interface for ");
   str.push_str(&ifa.name);
-  str.push_str(" with WebAPI2 Attributes\n*/");
+  str.push_str(" with WebAPI2 Attributes\n///");
 if ifa.is_param_present("path") { 
     str.push_str("\n[RoutePrefix(\"");
     str.push_str(&util::remove_first_char(&ifa.get_param_value("path")));
@@ -145,15 +145,15 @@ if ifa.is_param_present("path") {
   str.push_str(&ifa.name);
   str.push_str(" : ApiController {");
 for function in ifa.functions.iter() { 
-    str.push_str("\n\n    /**");
+    str.push_str("\n\n    ///");
 for param in function.params.iter() { 
-      str.push_str("\n     * @param ");
+      str.push_str("\n    /// <param name=\"");
       str.push_str(&param.name);
-      str.push_str("");
+      str.push_str("\"></param>");
 } 
-    str.push_str(" \n     * @return ");
+    str.push_str(" \n    /// <returns>");
     str.push_str(&get_dotnet_type(&function.returntype, function.returntype_is_array));
-    str.push_str("\n     */");
+    str.push_str("</returns>\n    ///");
 if function.is_attribute_value_present("method", "GET") { 
       str.push_str("\n    [HttpGet]");
 } if function.is_attribute_value_present("method", "PUT") { 
