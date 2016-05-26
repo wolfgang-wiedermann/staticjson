@@ -81,7 +81,7 @@ if typ.is_param_present("ef-table") {
     str.push_str(&get_dotnet_type_initial(&attribut.attribute_type, attribut.is_array));
     str.push_str(";");
     } 
-  str.push_str("\n    }\n\n    ///\n    /// The function IsValid offert a validation function for the\n    /// mandatory attributes and other constraints of staticjson code\n    /// @param object to check\n    /// @return check result\n    ///\n    public static bool IsValid(");
+  str.push_str("\n    }\n\n    ///\n    /// The function IsValid offert a validation function for the\n    /// mandatory attributes and other constraints of staticjson code\n    /// <param name=\"obj\">object to check</param>\n    /// <returns>check result as bool</returns>\n    ///\n    public static bool IsValid(");
   str.push_str(&typ.typename);
   str.push_str(" obj) {\n        return obj != null");
     for attribut in typ.attributes.iter() { 
@@ -141,7 +141,7 @@ if ifa.is_param_present("path") {
     str.push_str(&util::remove_first_char(&ifa.get_param_value("path")));
     str.push_str("\")]");
 } 
-  str.push_str("\npublic interface ");
+  str.push_str("\npublic partial class ");
   str.push_str(&ifa.name);
   str.push_str(" : ApiController {");
 for function in ifa.functions.iter() { 
@@ -188,7 +188,25 @@ for param in function.params.iter() {
       str.push_str(&param.name);
       str.push_str("");
 } 
-    str.push_str(");");
+    str.push_str(")\n    {\n       ");
+if function.returntype != "void" { 
+      str.push_str(" return");
+} 
+    str.push_str(" this.");
+    str.push_str(&util::lcamel_to_ucamel(&function.name));
+    str.push_str("Impl(");
+let mut i = 0;
+for param in function.params.iter() { 
+  i = i+1;   
+  if i > 1 { 
+    str.push_str(", "); 
+  }  
+  
+      str.push_str("");
+      str.push_str(&param.name);
+      str.push_str("");
+} 
+    str.push_str(")\n    }");
 } 
   str.push_str("\n}");
 if ifa.is_param_present("cs-namespace") { 

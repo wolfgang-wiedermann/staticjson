@@ -43,8 +43,8 @@ public class  {{= typ.typename }} {
     ///
     /// The function IsValid offert a validation function for the
     /// mandatory attributes and other constraints of staticjson code
-    /// @param object to check
-    /// @return check result
+    /// <param name="obj">object to check</param>
+    /// <returns>check result as bool</returns>
     ///
     public static bool IsValid( {{= typ.typename }} obj) {
         return obj != null {{     for attribut in typ.attributes.iter() { 

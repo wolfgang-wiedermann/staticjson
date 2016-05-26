@@ -20,7 +20,7 @@ using System.Security;
 ///
 {{ if ifa.is_param_present("path") { }}
 [RoutePrefix(" {{= util::remove_first_char(&ifa.get_param_value("path")) }}")] {{ } }}
-public interface  {{= ifa.name }} : ApiController {
+public partial class  {{= ifa.name }} : ApiController {
 {{ for function in ifa.functions.iter() { }}
 
     /// {{ for param in function.params.iter() { }}
@@ -40,7 +40,17 @@ for param in function.params.iter() {
     str.push_str(", "); 
   } if !(param.is_param_present("query-param") || param.is_param_present("path-param")) { 
   }}[FromBody]  {{ 
-  } }} {{= get_dotnet_type(&param.typename, param.is_array) }}  {{= param.name }} {{ } }});
+  } }} {{= get_dotnet_type(&param.typename, param.is_array) }}  {{= param.name }} {{ } }})
+    {
+        {{ if function.returntype != "void" { }} return {{ } }} this. {{= util::lcamel_to_ucamel(&function.name) }}Impl(
+{{ let mut i = 0;
+for param in function.params.iter() { 
+  i = i+1;   
+  if i > 1 { 
+    str.push_str(", "); 
+  }  
+  }} {{= param.name }} {{ } }})
+    }
 {{ } }}
 }
 {{ if ifa.is_param_present("cs-namespace") { }} 
