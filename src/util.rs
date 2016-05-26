@@ -151,6 +151,22 @@ pub fn to_upper(txt:&str) -> String {
   return buf.clone();
 }
 
+/**
+* Removes the first char from a constant string
+* (For example the first slash from paths)
+*/
+pub fn remove_first_char(txt:&str) -> String {
+  let mut buf:String = String::new();
+  let mut i = 0;
+  for c in txt.chars() {
+    if i > 0 {
+      buf.push(c);
+    }
+    i += 1;
+  }
+  return buf.clone();
+}
+
 enum SnakeState {
   TXT, UNDERSCORE
 }

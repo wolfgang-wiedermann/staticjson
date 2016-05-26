@@ -35,11 +35,11 @@ fn main() {
 
   match opts.target_language {
     model::TargetLanguage::HTMLDOC => staticjson::generator::htmldoc::generate(&result.types, &opts.target_folder),
-    model::TargetLanguage::C => staticjson::generator::jsoninc::generate(&result.types, &opts.target_folder),
-    model::TargetLanguage::SWIFT => staticjson::generator::swift::generate(&result.types, &opts.target_folder),
+    model::TargetLanguage::C => staticjson::generator::jsoninc::generate(&result.types, &opts.target_folder),    
     model::TargetLanguage::JAXRS => staticjson::generator::jaxrs::generate(result, &opts.target_folder),
     model::TargetLanguage::JAVACLIENT => staticjson::generator::java_client::generate(result, &opts.target_folder),
     model::TargetLanguage::JQUERY => staticjson::generator::jquery::generate(result, &opts.target_folder),
+    model::TargetLanguage::DOTNET => staticjson::generator::dotnet::generate(result, &opts.target_folder),
     _ => {
       println!("ERROR: Code generation to target-language not implemented");
     }

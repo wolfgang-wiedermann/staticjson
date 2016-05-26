@@ -10,7 +10,7 @@ fn test_parse_demofile() {
 
   let opts = model::CommandlineOptions {
     filename: currentWD.clone(),
-    target_language:model::TargetLanguage::SWIFT,
+    target_language:model::TargetLanguage::JQUERY,
     target_folder:"".to_string(),
     debug:false,
   };

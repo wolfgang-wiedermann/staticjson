@@ -1,0 +1,146 @@
+{{ // rust utility functions for dotnet webapi2 and entity framework generation 
+
+fn get_dotnet_type(sjtype:&str, is_array:bool) -> String {
+  let mut jtype:&str;
+  if !model::Type::is_basic_type(sjtype) {
+    if is_array {
+      return format!("List<{}>", sjtype);
+    } else {
+      jtype = sjtype;
+    }
+  } else if sjtype == "int" || sjtype == "uint" {
+    if is_array {
+      jtype = "List<int>";
+    } else {
+      jtype = "int";
+    }
+  } else if sjtype == "long" || sjtype == "ulong" {
+    if is_array {
+      jtype = "List<long>";
+    } else {
+      jtype = "long";
+    }
+  } else if sjtype == "string" {
+    if is_array {
+      jtype = "List<string>";
+    } else {
+      jtype = "string";
+    }
+  } else if sjtype == "decimal" {
+    if is_array {
+      jtype = "List<decimal>";
+    } else {
+      jtype = "decimal";
+    }
+  } else if sjtype == "date" {
+    if is_array {
+      jtype = "List<DateTime>";
+    } else {
+      jtype = "DateTime?";
+    }
+  } else {
+    jtype = "undef";
+  }
+  return jtype.to_string();
+}
+
+fn get_dotnet_type_initial(sjtype:&str, is_array:bool) -> String {
+  let mut jtype:&str;
+  if !model::Type::is_basic_type(sjtype) {
+    if is_array {
+      return format!("new List<{}>()", sjtype);
+    } else {
+      jtype = "null";
+    }
+  } else if sjtype == "int" || sjtype == "uint" {
+    if is_array {
+      jtype = "new List<int>()";
+    } else {
+      jtype = "0";
+    }
+  } else if sjtype == "long" || sjtype == "ulong" {
+    if is_array {
+      jtype = "new List<long>()";
+    } else {
+      jtype = "0";
+    }
+  } else if sjtype == "string" {
+    if is_array {
+      jtype = "new List<string>()";
+    } else {
+      jtype = "null";
+    }
+  } else if sjtype == "decimal" {
+    if is_array {
+      jtype = "new List<decimal>()";
+    } else {
+      jtype = "0.0m";
+    }
+  } else if sjtype == "date" {
+    if is_array {
+      jtype = "new List<DateTime>()";
+    } else {
+      jtype = "null";
+    }
+  } else {
+    jtype = "undef";
+  }
+  return jtype.to_string();
+}
+
+fn get_types_referenced_dotnet_namespaces(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {    
+  let mut package_set:HashSet<String> = HashSet::new();
+  for attr in typ.attributes.iter() {
+    if !model::Type::is_basic_type(&attr.attribute_type) {
+      for t in types.iter() {
+        if t.typename == attr.attribute_type
+           && t.is_param_present("cs-namespace") 
+           && !(typ.is_param_present("cs-namespace") 
+                && typ.get_param_value("cs-namespace") == t.get_param_value("cs-namespace")){                
+           package_set.insert(format!("{}", t.get_param_value("cs-namespace")));
+        }
+      }
+    }
+  }
+  let mut ret = String::new();
+  for package in &package_set {
+    ret.push_str(&format!("\nimport {};", package));
+  }
+  return ret.clone();
+}
+
+#[allow(dead_code)]
+fn get_interfaces_referenced_dotnet_namespaces(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {    
+  let mut package_set:HashSet<String> = HashSet::new();
+  for func in ifa.functions.iter() {
+    if !model::Type::is_basic_type(&func.returntype) && func.returntype != "void" {      
+      for t in types.iter() {
+        if t.typename == func.returntype
+           && t.is_param_present("cs-namespace") 
+           && !(ifa.is_param_present("cs-namespace") 
+                && ifa.get_param_value("cs-namespace") == t.get_param_value("cs-namespace")){
+           package_set.insert(format!("{}", t.get_param_value("cs-namespace")));
+        }
+      }
+    }
+    for param in func.params.iter() {      
+      if !model::Type::is_basic_type(&param.typename) {
+        for t in types.iter() {
+          if t.typename == param.typename
+             && t.is_param_present("cs-namespace") 
+             && !(ifa.is_param_present("cs-namespace") 
+                  && ifa.get_param_value("cs-namespace") == t.get_param_value("cs-namespace")){
+             package_set.insert(format!("{}", t.get_param_value("cs-namespace")));
+          }
+        }
+      }
+    }
+  }
+  let mut ret = String::new();
+  for package in &package_set {
+    ret.push_str(&format!("\nusing {};", package));
+  }
+  return ret.clone();
+}
+
+}}

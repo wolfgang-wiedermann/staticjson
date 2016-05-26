@@ -9,7 +9,7 @@ use model;
 pub fn parse_commandline(params:Vec<String>) -> model::CommandlineOptions {
   let mut opt = model::CommandlineOptions {
     filename:"datei.sjs".to_string(), 
-    target_language:model::TargetLanguage::SWIFT, 
+    target_language:model::TargetLanguage::JQUERY, 
     target_folder:"".to_string(),
     debug:false,
   };
@@ -41,12 +41,11 @@ pub fn parse_commandline(params:Vec<String>) -> model::CommandlineOptions {
 
   let language_string = match matches.opt_str("t") {
     Some(x) => format!("{}", x),
-    None    => format!("{}", "swift"),
+    None    => format!("{}", "jquery"),
   };
   let language_str:&str = &language_string;
 
-  let language = match language_str {
-    "swift"      => model::TargetLanguage::SWIFT,
+  let language = match language_str {    
     "c"          => model::TargetLanguage::C,
     "rust"       => model::TargetLanguage::RUST,
     "htmldoc"    => model::TargetLanguage::HTMLDOC,
@@ -54,6 +53,7 @@ pub fn parse_commandline(params:Vec<String>) -> model::CommandlineOptions {
     "jaxrs"      => model::TargetLanguage::JAXRS,
     "javaclient" => model::TargetLanguage::JAVACLIENT,
     "jquery"     => model::TargetLanguage::JQUERY,
+    "dotnet"     => model::TargetLanguage::DOTNET,
     _            => panic!("ERROR: Invalid target language"),
   };
 
