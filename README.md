@@ -160,9 +160,9 @@ public class Customer implements Serializable {
 
 ```
 
-Neben den Typen können in staticjson auch Interfaces defniert werden. Damit unterstützt staticjson die
+Neben den Typen können in staticjson auch Interfaces definiert werden. Damit unterstützt staticjson die
 vollständige Spezifikation der Schnittstelle, bestehend aus deren angebotenem Funktionsumfang 
-einschließlich der in dem Methodensignaturen verwendeten Typen.
+einschließlich der in den Methodensignaturen verwendeten Typen.
 
 Das nachfolgende Code-Listing zeigt den generierten Code für das Interface "CustomerRepository"
 einschließlich der zugehörigen JAX-RS Annotationen. 
