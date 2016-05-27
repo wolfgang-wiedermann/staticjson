@@ -12,7 +12,7 @@ Der vermutete Nutzwert bezüglich der konsistenten Verwendung der Schnittstelle 
 
 # Wie funktioniert staticjson?
 
-Das nachfolgend dragestellte Beispiel zeigt, wie staticjson funktioniert. Dazu wird Schritt für Schritt die Generierung eines serverseitigen Java-Stubs und eines JavaScript-Proxys für den Client dargestellt.
+Das nachfolgende Beispiel zeigt wie staticjson funktioniert. Dazu zeigt es Schritt für Schritt die Generierung eines serverseitigen Java-Stubs und eines JavaScript-Proxys für den Client.
 
 ## staticjson Code (file: sample.sjs)
 
@@ -79,12 +79,12 @@ Der Generierungsprozess hat aus dem obigen staticjson-Code Java-Code für den Ty
 das Interface "CustomerRepository" generiert. 
 
 Das erste Code-Listing zeigt den generierten Code für den Typen "Customer". Er wird als serialisierbare
-öffentliche Java-Klasse mit privaten Attributen und für den Attributzugriff bestimmten gettern und settern
-generiert. Ens handelt sich also um eine klassische Java-Bean. Wenn im staticjson-Code entsprechend angegeben
-kann diese einfach um Annotationen der Java Persistence API (JPA) ergänzt werden.
+öffentliche Java-Klasse mit privaten Attributen und für den Attributzugriff bestimmten Gettern und Settern
+generiert. Es handelt sich also um eine klassische Java-Bean. Wenn im staticjson-Code entsprechend angegeben
+wird diese Klasse automatisch um Annotationen der Java Persistence API (JPA) ergänzt.
 
-Neben den gettern und settern wird auch noch eine Methode generiert, mit der die Gültigkeit der 
-Attributwerte geprüft werden kann.
+Neben den Gettern und Settern wird zusätzlich eine statische Methode generiert, mit der die Gültigkeit der 
+Attributwerte eines Objekts der Klasse Customer geprüft werden kann.
 
 ```java
 
@@ -160,16 +160,18 @@ public class Customer implements Serializable {
 
 ```
 
-Neben den Typen können in staticjson auch Interfaces defniert werden. Sie unterstützt damit die
+Neben den Typen können in staticjson auch Interfaces defniert werden. Damit unterstützt staticjson die
 vollständige Spezifikation der Schnittstelle, bestehend aus deren angebotenem Funktionsumfang 
 einschließlich der in dem Methodensignaturen verwendeten Typen.
 
 Das nachfolgende Code-Listing zeigt den generierten Code für das Interface "CustomerRepository"
 einschließlich der zugehörigen JAX-RS Annotationen. 
 
-Die Möglichkeit zur Annotation im Interface bei JAX-RS Schnittstellen erlaubt eine saubere
+Die Möglichkeit, die JAX-RS Annotationen im Interface unterzubringen erlaubt eine saubere
 Trennung zwischen dem generierten und dem manuell zu programmierenden Code, sodass bei einer
-späteren Neugenerierung des Interfaces kein manuell erstellert Code verloren geht. 
+späteren Neugenerierung des Interfaces kein manuell erstellert Code verloren geht. Die Implementierung
+des Dienstes wird in eine eigene Klasse (z. B. CustomerRepositoryImpl), die das Interface implementiert
+ausgelagert.
 
 ```java
 /*
@@ -405,14 +407,14 @@ proxy.deleteCustomer(12,
 
 ```
 
-# Entwicklungsgeschichte
+# Entwicklungsgeschichte und Motivation
 
-Auslöser für meine Untersuchung war, dass ich im Frühling 2015 im Rahmen meiner ersten Versuche mit der damals von Apple neu
+Der Auslöser für meine Untersuchung war, dass ich im Frühling 2015 im Rahmen meiner ersten Versuche mit der damals von Apple neu
 vorgestellten Programmiersprache Swift feststellen musste, dass aufgrund verschiedener Merkmale der Sprache das Entwickeln einfacher Client-Proxies wesentlich komplizierter war,
 als ich das von den Sprachen Java, C# und JavaScript gewohnt war. Für diesen Unterschied ist vor allem das fehlen umfangreicher Reflection Features bei gleichzeitiger Nutzung
 eines statischen Typsystems verantwortlich.
 
-In statisch typisierten Sprachen mit umfassender Reflection (wie Java oder C#) werden derzeit hervorragende generische Frameworks zur Serialisierung und Deserialisierung von Objekten nach JSON angeboten. In Sprachen mit statischer Typisierung, die keine Reflection unterstützen können die hierzu verwendeten Konzepte nicht angewendet werden. Deshalb war die initiale Idee hinter staticjson eine Lösung zu schaffen, die ähnlichen Komfort bei der Verwendung von JSON auch in die Programmierung mit solchen Sprachen bringt. Hierzu wurde anstelle des generischen Ansatzes ein generierender Ansatz auf der Basis einer IDL gewählt, die mindestens genau jene Informationen enthält auf denen die korrespondierenden generischen Ansätze aus
+In statisch typisierten Sprachen mit umfassender Reflection (wie Java oder C#) werden derzeit hervorragende generische Frameworks zur Serialisierung und Deserialisierung von Objekten nach JSON angeboten. In Sprachen mit statischer Typisierung die keine Reflection unterstützen können die hierzu verwendeten Konzepte nicht angewendet werden. Deshalb war die initiale Idee hinter staticjson eine Lösung zu schaffen, die ähnlichen Komfort bei der Verwendung von JSON auch in die Programmierung mit solchen Sprachen bringt. Hierzu wurde anstelle des generischen Ansatzes ein generierender Ansatz auf der Basis einer IDL gewählt, die mindestens genau jene Informationen enthält auf denen die korrespondierenden generischen Ansätze aus
 den Sprachen Java und C# basieren.
 
 Im Laufe der weiteren Untersuchung sind dann zusätzliche interessante Aspekte rund um die Generierung sowohl von clientseitigem Proxy-Code als auch von serverseitigen Stubs zum
@@ -422,5 +424,11 @@ Einer dieser Aspekte ist, dass in derzeitigen webbasierten Anwendungen üblicher
 
 Ein anderer Aspekt ist, dass webbasierte Schnittstellen in Zeiten mobiler Anwendungen neben der Nutzung aus ebenfalls webbasierten Oberflächen heraus häufig auch von verschiedenen Apps von mobilen Endgeräten aus genutzt werden sollen. Optimale Performance versprechen hier die nativen Implementierungen für die jeweilige mobile Betriebssystemplattform. Das bedeutet, dass die Schnittstellen Clientseitig mindestens aus Swift/Objective-C für iOS, Java für Android und C# für mobile Windowsgeräte verwendet werden können müssen. Hier ist zu vermuten, dass ein generierender Ansatz auf der Basis einer annotierten IDL hilfreich ist, eine über die drei Plattformen hinweg konsistente Nutzung der Schnittstelle zu ermöglichen und Fehler bei Schnittstellenänderungen zu vermeiden. 
 
+# Ausblick
+
 Der nächste Schritt im Rahmen der Untersuchung ist der Einsatz als Generator für serverseitigen C#- und clientseitigen JavaScript-Code im Rahmen eines realen 
 Entwicklungsprojekts an der KDV-FH.
+
+Danach soll dann die Generierung typgebundener Parser und Serialisierer in der Sprache C in den Vordergrund gerückt werden, da diese insbesondere für eingebettete Systeme von Interesse sind.
+
+Die für C angedachten typgebundenen Parser sind in der Lage die Daten aus einem JSON-Objekt direkt in die Attribute der korrespondierenden C-Structs schreiben ohne den bei anderen JSON-Frameworks in C üblichen Umweg über zwischengeschaltete generische Datenstrukturen und manuellen Zuordnungscode gehen zu müssen. Validierungsbedingungen aus dem staticjson-Code lassen sich hierbei direkt im Parser abbilden. Außerdem ist so der gesamte Einlesevorgang im Rahmen eines sequenziellen Durchlaufs des übergebenen JSON-Objekts möglich. 
