@@ -1,40 +1,25 @@
 # staticjson
 
-Das Projekt staticjson ist die Basis für meine aktuelle Untersuchung zur Nützlichkeit von Annotierten IDLs zur Verbesserung des Entwicklungsprozesses von webbasierten Programmierschnittstellen im REST- und RPC-Stil. 
+staticjson is my current proof of concept for a code generation utility which is intended to generate static code for json parsers for specific datatypes
+and interfaces for HTTP based web APIs. The core target of staticjson is to enable easy use of web APIs to statically typed languages without reflection functionality. 
 
-# Entwicklungsgeschichte
+In statically typed languages with reflection we are able to see great generic json to object mapping frameworks. Without reflection the core principles of that frameworks can not be applied. The idea of staticjson is to bring similar usability to languages without reflection.
 
-Auslöser für meine Untersuchung war, dass ich im Frühling 2015 im Rahmen meiner ersten Versuche mit der damals von Apple neu
-vorgestellten Programmiersprache Swift feststellen musste, dass aufgrund verschiedener Merkmale der Sprache das Entwickeln einfacher Client-Proxies wesentlich komplizierter war,
-als ich das von den Sprachen Java, C# und JavaScript gewohnt war. Für diesen Unterschied ist vor allem das fehlen umfangreicher Reflection Features bei gleichzeitiger Nutzung
-eines statischen Typsystems verantwortlich.
+Currently staticjson is in its very early development state. It can not be used in real projects until now but it already shows the potential power 
+of using annotated IDLs in the context of REST APIs.
 
-In statisch typisierten Sprachen mit umfassender Reflection (wie Java oder C#) werden derzeit hervorragende generische Frameworks zur Serialisierung und Deserialisierung von Objekten nach JSON angeboten. In Sprachen mit statischer Typisierung, die keine Reflection unterstützen können die hierzu verwendeten Konzepte nicht angewendet werden. Deshalb war die initiale Idee hinter staticjson eine Lösung zu schaffen, die ähnlichen Komfort bei der Verwendung von JSON auch in die Programmierung mit solchen Sprachen bringt. Hierzu wurde anstelle des generischen Ansatzes ein generierender Ansatz auf der Basis einer IDL gewählt, die mindestens genau jene Informationen enthält auf denen die korrespondierenden generischen Ansätze aus
-den Sprachen Java und C# basieren.
+# Current state of development 
 
-Im Laufe der weiteren Untersuchung sind dann zusätzliche interessante Aspekte rund um die Generierung sowohl von clientseitigem Proxy-Code als auch von serverseitigen Stubs zum
-Vorschein gekommen, die dazu führten, dass die Generierung von JSON-Parsern vorerst zugunsten der Generierung von Proxys und Stubs in Java und C# zurückgestellt wurde. 
+The current version of staticjson is able to produce working serverside Java code (serverside stub) annotated with JAX-RS annotations and 
+JavaScript proxys based on jQuerys ajax functionality. Java and JavaScript both are no statically typed languages without reflection functionality,
+but even with them the power of this IDL based approach is already visible.
 
-Einer dieser Aspekte ist, dass in derzeitigen webbasierten Anwendungen üblicherweise der client- und serverseitige Code in zwei verschiedenen Programmiersprachen verfasst wird. Dabei wird auf beiden Seiten der Schnittstelle viel redundanter Code verfasst. Außerdem besteht eine gewisse Herausvorderung darin, die beiden Seiten der Implementierung der Schnittstelle synchron zu halten.
+# How staticjson works
 
-Ein anderer Aspekt ist, dass webbasierte Schnittstellen in Zeiten mobiler Anwendungen neben der Nutzung aus ebenfalls webbasierten Oberflächen heraus häufig auch von verschiedenen Apps von mobilen Endgeräten aus genutzt werden sollen. Optimale Performance versprechen hier die nativen Implementierungen für die jeweilige mobile Betriebssystemplattform. Das bedeutet, dass die Schnittstellen Clientseitig mindestens aus Swift/Objective-C für iOS, Java für Android und C# für mobile Windowsgeräte verwendet werden können müssen. Hier ist zu vermuten, dass ein generierender Ansatz auf der Basis einer annotierten IDL hilfreich ist, eine über die drei Plattformen hinweg konsistente Nutzung der Schnittstelle zu ermöglichen und Fehler bei Schnittstellenänderungen zu vermeiden. 
+The following sample shows how staticjson works. For this it step by step shows how to generate a serverside Java stub and
+its corresponding JavaScript client proxy.
 
-Der nächste Schritt im Rahmen der Untersuchung ist der Einsatz als Generator für serverseitigen C#- und clientseitigen JavaScript-Code im Rahmen eines realen 
-Entwicklungsprojekts an der KDV-FH.
-
-# Aktueller Entwicklungsstand 
-
-Im aktuellen Entwicklungsstand produziert staticjson funktionsfähigen serverseitigen Java-Code (serverside stub) in Form von vollständig annotierten JPA Entites und mit JAX-RS Annotationen annotierten Interfaces und funktionsfähige JavaScript-Proxys basierend auf der jQuery-Ajax-Funktion. 
-
-Da weder Java noch JavaScript statisch typisierte Sprachen ohne Reflection sind wurde hier die generierung von typisierten JSON-Parsern und Serialisierern zugunsten der gut funktionierenden JSON Serialisierungsmechnismen der beiden Sprachen eingespart. 
-
-Der vermutete Nutzwert bezüglich der konsistenten Verwendung der Schnittstelle im Client und im Server sowie die Einsparung von in mehreren Sprachen zu programmierenden identischen Artefakten tritt hier in gleichem Umfang auf und kann so zur Untersuchung der Auswirkungen der Verwendung einer annotierten IDL in der Entwicklung von auf REST-Schnittstellen basierenden Anwendungssystemen herangezogen werden.
-
-# Wie funktioniert staticjson?
-
-Das nachfolgend dragestellte Beispiel zeigt, wie staticjson funktioniert. Dazu wird Schritt für Schritt die Generierung eines serverseitigen Java-Stubs und eines JavaScript-Proxys für den Client dargestellt.
-
-## staticjson Code (file: sample.sjs)
+## staticjson code (file: sample.sjs)
 
 ```
 type Customer (
@@ -87,24 +72,19 @@ interface CustomerRepository (
 
 ```
 
-## Aufruf der Code-Generierung für den Java-Code
+## Call the server side code generation
 
 ```bash
 staticjson -t jaxrs -o java/ src/sample.sjs
 ```
 
-## Erläuterung des Generierungsergebnisses
+## Usage of generated java code
 
-Der Generierungsprozess hat aus dem obigen staticjson-Code Java-Code für den Typen "Customer" und
-das Interface "CustomerRepository" generiert. 
-
-Das erste Code-Listing zeigt den generierten Code für den Typen "Customer". Er wird als serialisierbare
-öffentliche Java-Klasse mit privaten Attributen und für den Attributzugriff bestimmten gettern und settern
-generiert. Ens handelt sich also um eine klassische Java-Bean. Wenn im staticjson-Code entsprechend angegeben
-kann diese einfach um Annotationen der Java Persistence API (JPA) ergänzt werden.
-
-Neben den gettern und settern wird auch noch eine Methode generiert, mit der die Gültigkeit der 
-Attributwerte geprüft werden kann.
+The code generation process generates java code for types and interfaces.
+A type is a usual java bean with attributes, getters and setters. Additional
+to getters and setters, it generates a validation function which supplies 
+a useful way to check the validity of the content of the attributes
+within the object.
 
 ```java
 
@@ -180,16 +160,10 @@ public class Customer implements Serializable {
 
 ```
 
-Neben den Typen können in staticjson auch Interfaces defniert werden. Sie unterstützt damit die
-vollständige Spezifikation der Schnittstelle, bestehend aus deren angebotenem Funktionsumfang 
-einschließlich der in dem Methodensignaturen verwendeten Typen.
-
-Das nachfolgende Code-Listing zeigt den generierten Code für das Interface "CustomerRepository"
-einschließlich der zugehörigen JAX-RS Annotationen. 
-
-Die Möglichkeit zur Annotation im Interface bei JAX-RS Schnittstellen erlaubt eine saubere
-Trennung zwischen dem generierten und dem manuell zu programmierenden Code, sodass bei einer
-späteren Neugenerierung des Interfaces kein manuell erstellert Code verloren geht. 
+Additional to the generated types, staticjson supports the generation of
+interfaces. So its a fully featured interface definition language for http based
+rest like interfaces. The following code listing is the result of the jaxrs generator
+and shows a JAX-RS interface.
 
 ```java
 /*
@@ -254,7 +228,7 @@ public interface CustomerRepository {
 
 ```
 
-## Aufruf der Code-Generierung für den JavaScript-Code
+## Call the client proxy code generation
 
 ```bash
 staticjson -t jquery -o js/ src/sample.sjs
