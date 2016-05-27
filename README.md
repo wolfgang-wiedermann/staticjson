@@ -401,12 +401,19 @@ de.ww.sample.proxy.CustomerRepositoryProxy = function(urlBase) {
 
 # Verwendung des generierten JavaScript-Proxys
 
+Das folgende Code-Listing zeigt am Beispiel des Aufrufs der deleteCustomer-Methode, wie
+der generierte Proxy verwendet werden kann.
+
 ```javascript
 
 // Neue Proxy-Instanz unter Angabe der Basis-URL erzeugen
 var proxy = new de.ww.sample.proxy.CustomerRepositoryProxy("https://irgendwo.com/application");
 
+//
 // Eine Funktion aufrufen
+// Verbindet mit irgendwo.com an Port 443 per HTTPS und sendet folgenden HTTP-Aufruf
+// DELETE /application/customer/12
+//
 proxy.deleteCustomer(12,
   function(success) {
     console.log("Der Kunde wurde erfolgreich gelöscht");
