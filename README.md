@@ -260,10 +260,9 @@ public interface CustomerRepository {
 staticjson -t jquery -o js/ src/sample.sjs
 ```
 
-## Generated JavaScript
+## Generierter JavaScript-Code
 
-The code generation process generates the Javascript proxy code which looks like the following
-code sample.
+Der Generierungsprozess erzeugt den folgenden Javascript-Proxy-Code.
 
 ```javascript
 // Namespace generieren
@@ -397,5 +396,24 @@ de.ww.sample.proxy.CustomerRepositoryProxy = function(urlBase) {
         });
     }
 }
+
+```
+
+# Verwendung des generierten JavaScript-Proxys
+
+```javascript
+
+// Neue Proxy-Instanz unter Angabe der Basis-URL erzeugen
+var proxy = new de.ww.sample.proxy.CustomerRepositoryProxy("https://irgendwo.com/application");
+
+// Eine Funktion aufrufen
+proxy.deleteCustomer(12,
+  function(success) {
+    console.log("Der Kunde wurde erfolgreich gelöscht");
+  },
+  function(error) {
+    console.log("Fehler beim Löschen des Kunden aufgetreten");
+  }
+);
 
 ```
