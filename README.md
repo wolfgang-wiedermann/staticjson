@@ -2,33 +2,13 @@
 
 Das Projekt staticjson ist die Basis für meine aktuelle Untersuchung zur Nützlichkeit von Annotierten IDLs zur Verbesserung des Entwicklungsprozesses von webbasierten Programmierschnittstellen im REST- und RPC-Stil. 
 
-# Entwicklungsgeschichte
-
-Auslöser für meine Untersuchung war, dass ich im Frühling 2015 im Rahmen meiner ersten Versuche mit der damals von Apple neu
-vorgestellten Programmiersprache Swift feststellen musste, dass aufgrund verschiedener Merkmale der Sprache das Entwickeln einfacher Client-Proxies wesentlich komplizierter war,
-als ich das von den Sprachen Java, C# und JavaScript gewohnt war. Für diesen Unterschied ist vor allem das fehlen umfangreicher Reflection Features bei gleichzeitiger Nutzung
-eines statischen Typsystems verantwortlich.
-
-In statisch typisierten Sprachen mit umfassender Reflection (wie Java oder C#) werden derzeit hervorragende generische Frameworks zur Serialisierung und Deserialisierung von Objekten nach JSON angeboten. In Sprachen mit statischer Typisierung, die keine Reflection unterstützen können die hierzu verwendeten Konzepte nicht angewendet werden. Deshalb war die initiale Idee hinter staticjson eine Lösung zu schaffen, die ähnlichen Komfort bei der Verwendung von JSON auch in die Programmierung mit solchen Sprachen bringt. Hierzu wurde anstelle des generischen Ansatzes ein generierender Ansatz auf der Basis einer IDL gewählt, die mindestens genau jene Informationen enthält auf denen die korrespondierenden generischen Ansätze aus
-den Sprachen Java und C# basieren.
-
-Im Laufe der weiteren Untersuchung sind dann zusätzliche interessante Aspekte rund um die Generierung sowohl von clientseitigem Proxy-Code als auch von serverseitigen Stubs zum
-Vorschein gekommen, die dazu führten, dass die Generierung von JSON-Parsern vorerst zugunsten der Generierung von Proxys und Stubs in Java und C# zurückgestellt wurde. 
-
-Einer dieser Aspekte ist, dass in derzeitigen webbasierten Anwendungen üblicherweise der client- und serverseitige Code in zwei verschiedenen Programmiersprachen verfasst wird. Dabei wird auf beiden Seiten der Schnittstelle viel redundanter Code verfasst. Außerdem besteht eine gewisse Herausvorderung darin, die beiden Seiten der Implementierung der Schnittstelle synchron zu halten.
-
-Ein anderer Aspekt ist, dass webbasierte Schnittstellen in Zeiten mobiler Anwendungen neben der Nutzung aus ebenfalls webbasierten Oberflächen heraus häufig auch von verschiedenen Apps von mobilen Endgeräten aus genutzt werden sollen. Optimale Performance versprechen hier die nativen Implementierungen für die jeweilige mobile Betriebssystemplattform. Das bedeutet, dass die Schnittstellen Clientseitig mindestens aus Swift/Objective-C für iOS, Java für Android und C# für mobile Windowsgeräte verwendet werden können müssen. Hier ist zu vermuten, dass ein generierender Ansatz auf der Basis einer annotierten IDL hilfreich ist, eine über die drei Plattformen hinweg konsistente Nutzung der Schnittstelle zu ermöglichen und Fehler bei Schnittstellenänderungen zu vermeiden. 
-
-Der nächste Schritt im Rahmen der Untersuchung ist der Einsatz als Generator für serverseitigen C#- und clientseitigen JavaScript-Code im Rahmen eines realen 
-Entwicklungsprojekts an der KDV-FH.
-
 # Aktueller Entwicklungsstand 
 
 Im aktuellen Entwicklungsstand produziert staticjson funktionsfähigen serverseitigen Java-Code (serverside stub) in Form von vollständig annotierten JPA Entites und mit JAX-RS Annotationen annotierten Interfaces und funktionsfähige JavaScript-Proxys basierend auf der jQuery-Ajax-Funktion. 
 
-Da weder Java noch JavaScript statisch typisierte Sprachen ohne Reflection sind wurde hier die generierung von typisierten JSON-Parsern und Serialisierern zugunsten der gut funktionierenden JSON Serialisierungsmechnismen der beiden Sprachen eingespart. 
+Da es für Java und JavaScript sehr gut funktionierende Standadmechanismen zur JSON Serialisierung gibt werden diese im generierten Code direkt eingesetzt. Für andere Programmiersprachen wie C oder Swift wäre es allerdings zusätzlich erforderlich typgebundene JSON-Parser und Serialisierer zu generieren.
 
-Der vermutete Nutzwert bezüglich der konsistenten Verwendung der Schnittstelle im Client und im Server sowie die Einsparung von in mehreren Sprachen zu programmierenden identischen Artefakten tritt hier in gleichem Umfang auf und kann so zur Untersuchung der Auswirkungen der Verwendung einer annotierten IDL in der Entwicklung von auf REST-Schnittstellen basierenden Anwendungssystemen herangezogen werden.
+Der vermutete Nutzwert bezüglich der konsistenten Verwendung der Schnittstelle im Client und im Server sowie die Einsparung von in mehreren Sprachen zu programmierenden identischen Artefakten ist unabhängig vom verwendeten JSON-Serialisierer und -Deserialisierer. Deshalb kann bereits der aktuelle Entwicklungsstand zur Untersuchung der Auswirkungen der Verwendung einer annotierten IDL in der Entwicklung von auf REST-Schnittstellen basierenden Anwendungssystemen herangezogen werden.
 
 # Wie funktioniert staticjson?
 
@@ -424,3 +404,23 @@ proxy.deleteCustomer(12,
 );
 
 ```
+
+# Entwicklungsgeschichte
+
+Auslöser für meine Untersuchung war, dass ich im Frühling 2015 im Rahmen meiner ersten Versuche mit der damals von Apple neu
+vorgestellten Programmiersprache Swift feststellen musste, dass aufgrund verschiedener Merkmale der Sprache das Entwickeln einfacher Client-Proxies wesentlich komplizierter war,
+als ich das von den Sprachen Java, C# und JavaScript gewohnt war. Für diesen Unterschied ist vor allem das fehlen umfangreicher Reflection Features bei gleichzeitiger Nutzung
+eines statischen Typsystems verantwortlich.
+
+In statisch typisierten Sprachen mit umfassender Reflection (wie Java oder C#) werden derzeit hervorragende generische Frameworks zur Serialisierung und Deserialisierung von Objekten nach JSON angeboten. In Sprachen mit statischer Typisierung, die keine Reflection unterstützen können die hierzu verwendeten Konzepte nicht angewendet werden. Deshalb war die initiale Idee hinter staticjson eine Lösung zu schaffen, die ähnlichen Komfort bei der Verwendung von JSON auch in die Programmierung mit solchen Sprachen bringt. Hierzu wurde anstelle des generischen Ansatzes ein generierender Ansatz auf der Basis einer IDL gewählt, die mindestens genau jene Informationen enthält auf denen die korrespondierenden generischen Ansätze aus
+den Sprachen Java und C# basieren.
+
+Im Laufe der weiteren Untersuchung sind dann zusätzliche interessante Aspekte rund um die Generierung sowohl von clientseitigem Proxy-Code als auch von serverseitigen Stubs zum
+Vorschein gekommen, die dazu führten, dass die Generierung von JSON-Parsern vorerst zugunsten der Generierung von Proxys und Stubs in Java und C# zurückgestellt wurde. 
+
+Einer dieser Aspekte ist, dass in derzeitigen webbasierten Anwendungen üblicherweise der client- und serverseitige Code in zwei verschiedenen Programmiersprachen verfasst wird. Dabei wird auf beiden Seiten der Schnittstelle viel redundanter Code verfasst. Außerdem besteht eine gewisse Herausvorderung darin, die beiden Seiten der Implementierung der Schnittstelle synchron zu halten.
+
+Ein anderer Aspekt ist, dass webbasierte Schnittstellen in Zeiten mobiler Anwendungen neben der Nutzung aus ebenfalls webbasierten Oberflächen heraus häufig auch von verschiedenen Apps von mobilen Endgeräten aus genutzt werden sollen. Optimale Performance versprechen hier die nativen Implementierungen für die jeweilige mobile Betriebssystemplattform. Das bedeutet, dass die Schnittstellen Clientseitig mindestens aus Swift/Objective-C für iOS, Java für Android und C# für mobile Windowsgeräte verwendet werden können müssen. Hier ist zu vermuten, dass ein generierender Ansatz auf der Basis einer annotierten IDL hilfreich ist, eine über die drei Plattformen hinweg konsistente Nutzung der Schnittstelle zu ermöglichen und Fehler bei Schnittstellenänderungen zu vermeiden. 
+
+Der nächste Schritt im Rahmen der Untersuchung ist der Einsatz als Generator für serverseitigen C#- und clientseitigen JavaScript-Code im Rahmen eines realen 
+Entwicklungsprojekts an der KDV-FH.
