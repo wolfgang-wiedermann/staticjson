@@ -407,6 +407,10 @@ proxy.deleteCustomer(12,
 
 ```
 
+## Vollständiges Beispiel:
+
+Das vollständige Beispiel einschließlich des staticjson IDL-Compilers als Binaries für Windows, Linux oder OS X finden Sie unter https://github.com/wolfgang-wiedermann/staticjson/tree/master/doc/trial zum herunterladen und ausprobieren.
+
 # Entwicklungsgeschichte und Motivation
 
 Der Auslöser für meine Untersuchung war, dass ich im Frühling 2015 im Rahmen meiner ersten Versuche mit der damals von Apple neu
