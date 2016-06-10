@@ -1,0 +1,34 @@
+{{ 
+//
+// Generates Files for Utilities
+//
+fn generate_buffer_code(folder:&str) {
+  generate_sj_buffer_c(folder);
+  generate_sj_buffer_h(folder);
+}
+
+//
+// Buffer-Code-File
+//
+fn generate_sj_buffer_c(folder:&str) {
+  let mut str:String = String::new();
+  }}{{+ jsoninc_template/sj_buffer_c.ct }}{{
+
+  let filename = format!("{}/{}", folder, "sj_buffer.c");
+  let result = format!("{}", str);
+  filehandler::write_file(filename, result);
+}
+
+//
+// Buffer-Header-File
+//
+fn generate_sj_buffer_h(folder:&str) {
+  let mut str:String = String::new();
+  }}{{+ jsoninc_template/sj_buffer_h.ct }}{{
+
+  let filename = format!("{}/{}", folder, "sj_buffer.h");
+  let result = format!("{}", str);
+  filehandler::write_file(filename, result);
+}
+
+}}

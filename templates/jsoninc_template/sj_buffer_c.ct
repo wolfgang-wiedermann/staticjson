@@ -1,0 +1,68 @@
+#include "sj_buffer.h"
+#include <stdlib.h>
+#include <string.h>
+
+// Defines the steps for increasing the buffer size
+#define BUFSIZE_STEP 1024
+
+/*
+ * Create a new buffer instance
+ */
+SjBuffer* sj_buffer_new() {
+    SjBuffer *buf = (SjBuffer*)malloc(sizeof(SjBuffer*));
+    buf->buf = (char*)malloc(sizeof(char)*BUFSIZE_STEP);
+    buf->length = 0;
+    buf->buffer_size = BUFSIZE_STEP;
+    return buf;
+}
+
+/*
+ * Add a char to a buffer
+ */
+void sj_buffer_push(SjBuffer *buf, char c) {
+    if(buf->length+2 >= buf->buffer_size) {
+        // Increase buffer size
+        char *b2 = (char*)malloc(sizeof(char)*(buf->buffer_size+BUFSIZE_STEP));
+        strncpy(b2, buf->buf, buf->buffer_size);
+        buf->buffer_size += BUFSIZE_STEP;
+        free(buf->buf);
+        buf->buf = b2;
+    } 
+    // Add a char to the buffer
+    buf->length += 1;
+    buf->buf[buf->length-1] = c;
+    buf->buf[buf->length] = '\0';
+}
+
+/*
+ * Get the used size of the buffer
+ */
+int sj_buffer_get_size(SjBuffer *buf) {
+    return buf->length;
+}
+
+/*
+ * Gets the content of the given buffer 
+ */
+char* sj_buffer_get_content(SjBuffer *buf) { 
+    char *tmp_buf = (char*)malloc(sizeof(char)*(buf->length+1));
+    strncpy(tmp_buf, buf->buf, (buf->length+1));
+    return tmp_buf;
+}
+
+/*
+ * Clean content of buffer
+ */
+void sj_buffer_clean(SjBuffer *buf) {
+    buf->length = 0;
+    buf->buf[0] = '\0';
+    buf->buf[1] = '\0';
+}
+
+/*
+ * Free Buffer from Memory
+ */
+void sj_buffer_free(SjBuffer *buf) {
+    free(buf->buf);
+    free(buf);
+}

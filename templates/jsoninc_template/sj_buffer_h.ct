@@ -1,0 +1,40 @@
+#ifndef SJ_BUFFER_H
+#define SJ_BUFFER_H
+
+typedef struct sj_buffer {
+    char *buf;
+    int length;
+    int buffer_size;
+} SjBuffer;
+
+/*
+ * Create a new buffer instance
+ */
+SjBuffer* sj_buffer_new();
+
+/*
+ * Add a char to a buffer
+ */
+void sj_buffer_push(SjBuffer *buf, char c);
+
+/*
+ * Free Buffer from Memory
+ */
+void sj_buffer_free(SjBuffer *buf);
+
+/*
+ * Clean Content of Buffer
+ */
+void sj_buffer_clean(SjBuffer *buf);
+
+/*
+ * Get the used size of the buffer
+ */
+int sj_buffer_get_size(SjBuffer *buf);
+
+/*
+ * Gets a copy of the content of the given buffer 
+ */
+char* sj_buffer_get_content(SjBuffer *buf);
+
+#endif 
