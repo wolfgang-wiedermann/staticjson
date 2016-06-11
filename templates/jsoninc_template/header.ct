@@ -8,7 +8,7 @@ fn generate_header(types:&Box<Vec<Box<model::Type>>>, folder:&str) {
 #ifndef JSONINC_PARSER_H
 #define JSONINC_PARSER_H
 
-{{+ jsoninc_template/structs.ct }}
+{{+ jsoninc_template/structs.ct }}{{+ jsoninc_template/functionstubs.ct }}
 
 #endif
 {{

@@ -11,7 +11,7 @@ template:
 test: all
 	./target/debug/staticjson ./target/debug/test_studenten.sjs -t jquery --debug
 	./target/debug/staticjson ./target/debug/test_studenten.sjs -t jaxrs --debug
-	./target/debug/staticjson ./target/debug/test_studenten.sjs -t c --debug
+	./target/debug/staticjson ./doc/trial/src/sample.sjs -t c --debug
 	
 copy: test 
 	cp output/* ../../Desktop/develop/ParserSample/ParserSample/

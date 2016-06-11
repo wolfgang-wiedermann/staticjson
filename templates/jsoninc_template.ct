@@ -16,6 +16,7 @@ pub fn generate(types:&Box<Vec<Box<model::Type>>>, folder:&str) {
   */
 
 #include "sj_buffer.h"
+#include "jsoninc_parser.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
