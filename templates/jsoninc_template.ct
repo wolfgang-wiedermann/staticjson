@@ -30,6 +30,6 @@ struct  {{= util::ucamel_to_lsnake(&typ.typename) }} {
 // end of data structures
 
 {{   // write it to one single file 
-  let filename = format!("{}/jsonparser.c", folder);
+  let filename = format!("{}/main.c", folder);
   filehandler::write_file(filename, str);
 } }}

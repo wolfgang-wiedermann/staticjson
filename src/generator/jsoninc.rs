@@ -53,46 +53,85 @@ for typ in (*types).iter() {
     str.push_str(&util::ucamel_to_lsnake(&typ.typename));
     str.push_str(" {");
  for attribut in typ.attributes.iter() {
-
-      str.push_str("\n  // ");
-      str.push_str(&attribut.attribute_type);
-      str.push_str(" ");
-      str.push_str(&attribut.name);
-if attribut.attribute_type == "string" { 
-        str.push_str("\n  char *");
-        str.push_str(&attribut.name);
-        str.push_str(";\n  int ");
-        str.push_str(&attribut.name);
-        str.push_str("_length;");
+    if attribut.is_array { 
+      if attribut.attribute_type == "string" { 
+          str.push_str("\n        char **");
+          str.push_str(&attribut.name);
+          str.push_str(";\n        int ");
+          str.push_str(&attribut.name);
+          str.push_str("_length;");
 } else if attribut.attribute_type == "int" { 
-        str.push_str("\n  int ");
-        str.push_str(&attribut.name);
-        str.push_str(";");
+          str.push_str("\n        int *");
+          str.push_str(&attribut.name);
+          str.push_str(";");
 } else if attribut.attribute_type == "uint" { 
-        str.push_str("\n  unsigned int ");
-        str.push_str(&attribut.name);
-        str.push_str(";");
+          str.push_str("\n        unsigned int *");
+          str.push_str(&attribut.name);
+          str.push_str(";");
 } else if attribut.attribute_type == "long" { 
-        str.push_str("\n  long ");
-        str.push_str(&attribut.name);
-        str.push_str(";");
+          str.push_str("\n        long *");
+          str.push_str(&attribut.name);
+          str.push_str(";");
 } else if attribut.attribute_type == "ulong" { 
-        str.push_str("\n  unsigned long ");
-        str.push_str(&attribut.name);
-        str.push_str(";");
+          str.push_str("\n        unsigned long *");
+          str.push_str(&attribut.name);
+          str.push_str(";");
 } else if attribut.attribute_type == "decimal" { 
-        str.push_str("\n  double ");
-        str.push_str(&attribut.name);
-        str.push_str(";");
+          str.push_str("\n        double *");
+          str.push_str(&attribut.name);
+          str.push_str(";");
+} else if attribut.attribute_type == "date" { 
+          str.push_str("\n        // ERROR: at ");
+          str.push_str(&attribut.name);
+          str.push_str("\n        // Date is currently unsupported in C Parsers");
 } else { 
-        str.push_str("\n  ");
-        str.push_str(&attribut.attribute_type);
-        str.push_str(" *");
-        str.push_str(&attribut.name);
-        str.push_str(";");
+        // TODO: date, datetime and time missing !!! 
+          str.push_str("\n        ");
+          str.push_str(&attribut.attribute_type);
+          str.push_str(" **");
+          str.push_str(&attribut.name);
+          str.push_str(";");
+}
+    } else {
+    if attribut.attribute_type == "string" { 
+          str.push_str("\n        char *");
+          str.push_str(&attribut.name);
+          str.push_str(";\n        int ");
+          str.push_str(&attribut.name);
+          str.push_str("_length;");
+} else if attribut.attribute_type == "int" { 
+          str.push_str("\n        int ");
+          str.push_str(&attribut.name);
+          str.push_str(";");
+} else if attribut.attribute_type == "uint" { 
+          str.push_str("\n        unsigned int ");
+          str.push_str(&attribut.name);
+          str.push_str(";");
+} else if attribut.attribute_type == "long" { 
+          str.push_str("\n        long ");
+          str.push_str(&attribut.name);
+          str.push_str(";");
+} else if attribut.attribute_type == "ulong" { 
+          str.push_str("\n        unsigned long ");
+          str.push_str(&attribut.name);
+          str.push_str(";");
+} else if attribut.attribute_type == "decimal" { 
+          str.push_str("\n        double ");
+          str.push_str(&attribut.name);
+          str.push_str(";");
+} else if attribut.attribute_type == "date" { 
+          str.push_str("\n        // ERROR: at ");
+          str.push_str(&attribut.name);
+          str.push_str("\n        // Date is currently unsupported in C Parsers");
+} else { 
+          str.push_str("\n        ");
+          str.push_str(&attribut.attribute_type);
+          str.push_str(" *");
+          str.push_str(&attribut.name);
+          str.push_str(";");
 } 
-      str.push_str("");
- }
+        str.push_str("");
+ } }
 
     str.push_str("\n} ");
     str.push_str(&typ.typename);
@@ -120,6 +159,6 @@ for typ in (*types).iter() {
 } 
   str.push_str("\n// end of data structures\n");
   // write it to one single file 
-  let filename = format!("{}/jsonparser.c", folder);
+  let filename = format!("{}/main.c", folder);
   filehandler::write_file(filename, str);
 } 

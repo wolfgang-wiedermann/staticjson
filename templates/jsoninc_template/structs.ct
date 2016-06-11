@@ -5,17 +5,32 @@
 for typ in (*types).iter() { }}
 typedef struct  {{= util::ucamel_to_lsnake(&typ.typename) }} {
 {{  for attribut in typ.attributes.iter() {
-}}
-  //  {{= attribut.attribute_type }}  {{= attribut.name }}{{ if attribut.attribute_type == "string" { }}
-  char * {{= attribut.name }};
-  int  {{= attribut.name }}_length; {{ } else if attribut.attribute_type == "int" { }}
-  int  {{= attribut.name }}; {{ } else if attribut.attribute_type == "uint" { }}
-  unsigned int  {{= attribut.name }}; {{ } else if attribut.attribute_type == "long" { }}
-  long  {{= attribut.name }}; {{ } else if attribut.attribute_type == "ulong" { }}
-  unsigned long  {{= attribut.name }}; {{ } else if attribut.attribute_type == "decimal" { }}
-  double  {{= attribut.name }}; {{ } else { }}
-   {{= attribut.attribute_type }} * {{= attribut.name }}; {{ } }}
-{{  }
+    if attribut.is_array { 
+      if attribut.attribute_type == "string" { }}
+        char ** {{= attribut.name }};
+        int  {{= attribut.name }}_length; {{ } else if attribut.attribute_type == "int" { }}
+        int * {{= attribut.name }}; {{ } else if attribut.attribute_type == "uint" { }}
+        unsigned int * {{= attribut.name }}; {{ } else if attribut.attribute_type == "long" { }}
+        long * {{= attribut.name }}; {{ } else if attribut.attribute_type == "ulong" { }}
+        unsigned long * {{= attribut.name }}; {{ } else if attribut.attribute_type == "decimal" { }}
+        double * {{= attribut.name }}; {{ } else if attribut.attribute_type == "date" { }}
+        // ERROR: at  {{= attribut.name }}
+        // Date is currently unsupported in C Parsers {{ } else { 
+        // TODO: date, datetime and time missing !!! }}
+         {{= attribut.attribute_type }} ** {{= attribut.name }}; {{ }
+    } else {
+    if attribut.attribute_type == "string" { }}
+        char * {{= attribut.name }};
+        int  {{= attribut.name }}_length; {{ } else if attribut.attribute_type == "int" { }}
+        int  {{= attribut.name }}; {{ } else if attribut.attribute_type == "uint" { }}
+        unsigned int  {{= attribut.name }}; {{ } else if attribut.attribute_type == "long" { }}
+        long  {{= attribut.name }}; {{ } else if attribut.attribute_type == "ulong" { }}
+        unsigned long  {{= attribut.name }}; {{ } else if attribut.attribute_type == "decimal" { }}
+        double  {{= attribut.name }}; {{ } else if attribut.attribute_type == "date" { }}
+        // ERROR: at  {{= attribut.name }}
+        // Date is currently unsupported in C Parsers {{ } else { }}
+         {{= attribut.attribute_type }} * {{= attribut.name }}; {{ } }}
+{{  } }
 }}
 }  {{= typ.typename }};
 
