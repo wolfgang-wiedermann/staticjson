@@ -1,0 +1,40 @@
+// REGION Parser state definitions
+{{ for typ in (*types).iter() {
+    let t = util::to_upper(&typ.typename); 
+}}
+// parser states for  {{= typ.typename }}
+typedef enum {
+  SJ_ {{= t }}_INITIAL = 0; 
+  SJ_ {{= t }}_INOBJECT = 1;
+  SJ_ {{= t }}_INFIELDNAME = 2;  
+{{    let mut enum_idx = 0;
+   for attribut in typ.attributes.iter() { 
+      enum_idx += 1;
+      let enum_idx_str = format!("{}", enum_idx);
+      let fieldname = util::to_upper(&attribut.name);
+
+      if attribut.is_array { }}
+        // Array attribute parser states
+        // TODO: Implementation still missing
+{{    } else {
+        // Scalar attribute parser states
+        if attribut.attribute_type == "string" 
+           || attribut.attribute_type == "date"
+           || attribut.attribute_type == "datetime"
+           || attribut.attribute_type == "time" { }}
+  SJ_ {{= t }}_ {{= fieldname }}_BEHINDFIELDNAME =  {{= enum_idx_str }}0,
+  SJ_ {{= t }}_ {{= fieldname }}_INVALUE =  {{= enum_idx_str }}1,
+  SJ_ {{= t }}_ {{= fieldname }}_INSTRING =  {{= enum_idx_str }}2,
+{{        } else if attribut.attribute_type == "int" 
+           || attribut.attribute_type == "uint"
+           || attribut.attribute_type == "long"
+           || attribut.attribute_type == "ulong" { }}
+  SJ_ {{= t }}_ {{= fieldname }}_BEHINDFIELDNAME =  {{= enum_idx_str }}0,
+  SJ_ {{= t }}_ {{= fieldname }}_INVALUE =  {{= enum_idx_str }}1,
+{{        }
+      }
+   } }}
+  SJ_ {{= t }}_FINAL = 9
+} Sj {{= typ.typename }}Enum;
+{{ } }}
+// ENDREGION Parser state definitions

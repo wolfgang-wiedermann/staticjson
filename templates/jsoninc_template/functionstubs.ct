@@ -1,6 +1,6 @@
 
 /*
- * Generation of parser functions
+ * Generation of parser function stubs
  */ 
 
 {{ for typ in (*types).iter() { }}

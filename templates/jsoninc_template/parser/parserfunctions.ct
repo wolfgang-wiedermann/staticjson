@@ -1,0 +1,9 @@
+{{ for typ in (*types).iter() { }} 
+
+/*
+ * Parser function for Type  {{= typ.typename }}
+ */
+ {{= typ.typename }}* sj_parse_ {{= util::ucamel_to_lsnake(&typ.typename) 
+}}(int *pos, char *txt) {
+}
+{{ } }}
