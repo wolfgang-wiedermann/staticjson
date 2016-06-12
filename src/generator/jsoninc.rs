@@ -265,19 +265,60 @@ for typ in (*types).iter() {
     str.push_str(&typ.typename);
     str.push_str("*)malloc(sizeof(");
     str.push_str(&typ.typename);
-    str.push_str("*));\n\n    while((*pos) < length && state != SJ_");
+    str.push_str("*));\n    char c = NULL; // for current character\n\n    while((*pos) < length && state != SJ_");
     str.push_str(&t);
-    str.push_str("_FINAL) {\n        // TODO: Parse content of obj from txt\n        switch(state) {\n            case SJ_");
+    str.push_str("_FINAL) {        \n        c = txt[pos];        \n        pos += 1;\n        // TODO: Parse content of obj from txt\n        switch(state) {\n            case SJ_");
     str.push_str(&t);
     str.push_str("_INITIAL:\n                // TODO: Implementation\n                break;\n            case SJ_");
     str.push_str(&t);
     str.push_str("_INOBJECT:\n                // TODO: Implementation\n                break;\n            case SJ_");
     str.push_str(&t);
-    str.push_str("_INFIELDNAME:\n                // TODO: Implementation\n                break;\n            // --\n            // TODO: Loop over attributes\n            //       to add attribute specific cases\n            // --\n            case SJ_");
+    str.push_str("_INFIELDNAME:\n                // TODO: Implementation\n                break;\n            // --\n            // Loop over attributes\n            // to add attribute specific cases                ");
+  for attribut in typ.attributes.iter() { 
+     let fieldname = util::to_upper(&attribut.name); 
+
+      if attribut.is_array { 
+        str.push_str("\n        // Array attribute parser states\n        // TODO: Implementation still missing");
+   } else { 
+        // Scalar attribute parser states
+        if attribut.attribute_type == "string" 
+           || attribut.attribute_type == "date"
+           || attribut.attribute_type == "datetime"
+           || attribut.attribute_type == "time" { 
+          str.push_str("\n            case SJ_");
+          str.push_str(&t);
+          str.push_str("_");
+          str.push_str(&fieldname);
+          str.push_str("_BEHINDFIELDNAME:\n                // TODO: Implementation\n                break;\n            case SJ_");
+          str.push_str(&t);
+          str.push_str("_");
+          str.push_str(&fieldname);
+          str.push_str("_INVALUE:\n                // TODO: Implementation\n                break;\n            case SJ_");
+          str.push_str(&t);
+          str.push_str("_");
+          str.push_str(&fieldname);
+          str.push_str("_INSTRING:\n                // TODO: Implementation\n                break;");
+     } else if attribut.attribute_type == "int" 
+           || attribut.attribute_type == "uint"
+           || attribut.attribute_type == "long"
+           || attribut.attribute_type == "ulong" { 
+          str.push_str("\n            case SJ_");
+          str.push_str(&t);
+          str.push_str("_");
+          str.push_str(&fieldname);
+          str.push_str("_BEHINDFIELDNAME:\n                // TODO: Implementation\n                break;\n            case SJ_");
+          str.push_str(&t);
+          str.push_str("_");
+          str.push_str(&fieldname);
+          str.push_str("_INVALUE:\n                // TODO: Implementation\n                break;            ");
+       }
+      } 
+   } 
+    str.push_str("                        \n            // --\n            case SJ_");
     str.push_str(&t);
     str.push_str("_FINAL:\n                // Debug output, comment it out later\n                printf(\"Finished Parsing of ");
     str.push_str(&t);
-    str.push_str(" successfully\\n\");\n                break;\n        } \n    }    \n    \n    return obj;\n}");
+    str.push_str(" successfully\\n\");\n                break;\n            default:\n                printf(\"ERROR: invalid parser state %d at position %d\\n\", state, pos);\n                return NULL;                \n        } \n    }    \n    \n    return obj;\n}");
 } 
   str.push_str("");
   let filename = format!("{}/jsoninc_parser.c", folder);

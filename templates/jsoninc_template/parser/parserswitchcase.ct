@@ -9,11 +9,48 @@
                 // TODO: Implementation
                 break;
             // --
-            // TODO: Loop over attributes
-            //       to add attribute specific cases
+            // Loop over attributes
+            // to add attribute specific cases                
+{{   for attribut in typ.attributes.iter() { 
+     let fieldname = util::to_upper(&attribut.name); 
+
+      if attribut.is_array { }}
+        // Array attribute parser states
+        // TODO: Implementation still missing
+{{    } else { 
+        // Scalar attribute parser states
+        if attribut.attribute_type == "string" 
+           || attribut.attribute_type == "date"
+           || attribut.attribute_type == "datetime"
+           || attribut.attribute_type == "time" { }}
+            case SJ_ {{= t }}_ {{= fieldname }}_BEHINDFIELDNAME:
+                // TODO: Implementation
+                break;
+            case SJ_ {{= t }}_ {{= fieldname }}_INVALUE:
+                // TODO: Implementation
+                break;
+            case SJ_ {{= t }}_ {{= fieldname }}_INSTRING:
+                // TODO: Implementation
+                break;
+{{      } else if attribut.attribute_type == "int" 
+           || attribut.attribute_type == "uint"
+           || attribut.attribute_type == "long"
+           || attribut.attribute_type == "ulong" { }}
+            case SJ_ {{= t }}_ {{= fieldname }}_BEHINDFIELDNAME:
+                // TODO: Implementation
+                break;
+            case SJ_ {{= t }}_ {{= fieldname }}_INVALUE:
+                // TODO: Implementation
+                break;            
+{{        }
+      } 
+   } }}                        
             // --
             case SJ_ {{= t }}_FINAL:
                 // Debug output, comment it out later
                 printf("Finished Parsing of  {{= t }} successfully\n");
                 break;
+            default:
+                printf("ERROR: invalid parser state %d at position %d\n", state, pos);
+                return NULL;                
         }
