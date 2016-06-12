@@ -3,5 +3,5 @@
 	//,"command": "cargo"
     ,"command":"make"
 	,"isShellCommand": true
-	//,"args": ["build"]
+	,"args": ["test"]
 }

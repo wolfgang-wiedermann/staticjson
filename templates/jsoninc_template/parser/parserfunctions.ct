@@ -1,9 +1,22 @@
-{{ for typ in (*types).iter() { }} 
+{{ for typ in (*types).iter() {
+    let t = util::to_upper(&typ.typename); 
+}} 
 
 /*
  * Parser function for Type  {{= typ.typename }}
  */
  {{= typ.typename }}* sj_parse_ {{= util::ucamel_to_lsnake(&typ.typename) 
 }}(int *pos, int length, char *txt) {
+    Sj {{= typ.typename }}Enum state;
+    state = SJ_ {{= t }}_INITIAL;
+     {{= typ.typename }} *obj;
+    obj = ( {{= typ.typename }}*)malloc(sizeof( {{= typ.typename }}*));
+
+    while((*pos) < length && state != SJ_ {{= t }}_FINAL) {
+        // TODO: Parse content of obj from txt
+{{+ jsoninc_template/parser/parserswitchcase.ct }} 
+    }    
+    
+    return obj;
 }
 {{ } }}

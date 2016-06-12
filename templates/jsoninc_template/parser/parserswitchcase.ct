@@ -1,0 +1,19 @@
+        switch(state) {
+            case SJ_ {{= t }}_INITIAL:
+                // TODO: Implementation
+                break;
+            case SJ_ {{= t }}_INOBJECT:
+                // TODO: Implementation
+                break;
+            case SJ_ {{= t }}_INFIELDNAME:
+                // TODO: Implementation
+                break;
+            // --
+            // TODO: Loop over attributes
+            //       to add attribute specific cases
+            // --
+            case SJ_ {{= t }}_FINAL:
+                // Debug output, comment it out later
+                printf("Finished Parsing of  {{= t }} successfully\n");
+                break;
+        }

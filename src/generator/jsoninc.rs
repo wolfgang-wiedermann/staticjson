@@ -245,7 +245,9 @@ for typ in (*types).iter() {
     str.push_str("Enum;");
 } 
   str.push_str("\n// ENDREGION Parser state definitions");
-for typ in (*types).iter() { 
+for typ in (*types).iter() {
+    let t = util::to_upper(&typ.typename); 
+
     str.push_str(" \n\n/*\n * Parser function for Type ");
     str.push_str(&typ.typename);
     str.push_str("\n */\n");
@@ -253,7 +255,29 @@ for typ in (*types).iter() {
     str.push_str("* sj_parse_");
     str.push_str(&util::ucamel_to_lsnake(&typ.typename) 
 );
-    str.push_str("(int *pos, int length, char *txt) {\n}");
+    str.push_str("(int *pos, int length, char *txt) {\n    Sj");
+    str.push_str(&typ.typename);
+    str.push_str("Enum state;\n    state = SJ_");
+    str.push_str(&t);
+    str.push_str("_INITIAL;\n    ");
+    str.push_str(&typ.typename);
+    str.push_str(" *obj;\n    obj = (");
+    str.push_str(&typ.typename);
+    str.push_str("*)malloc(sizeof(");
+    str.push_str(&typ.typename);
+    str.push_str("*));\n\n    while((*pos) < length && state != SJ_");
+    str.push_str(&t);
+    str.push_str("_FINAL) {\n        // TODO: Parse content of obj from txt\n        switch(state) {\n            case SJ_");
+    str.push_str(&t);
+    str.push_str("_INITIAL:\n                // TODO: Implementation\n                break;\n            case SJ_");
+    str.push_str(&t);
+    str.push_str("_INOBJECT:\n                // TODO: Implementation\n                break;\n            case SJ_");
+    str.push_str(&t);
+    str.push_str("_INFIELDNAME:\n                // TODO: Implementation\n                break;\n            // --\n            // TODO: Loop over attributes\n            //       to add attribute specific cases\n            // --\n            case SJ_");
+    str.push_str(&t);
+    str.push_str("_FINAL:\n                // Debug output, comment it out later\n                printf(\"Finished Parsing of ");
+    str.push_str(&t);
+    str.push_str(" successfully\\n\");\n                break;\n        } \n    }    \n    \n    return obj;\n}");
 } 
   str.push_str("");
   let filename = format!("{}/jsoninc_parser.c", folder);
