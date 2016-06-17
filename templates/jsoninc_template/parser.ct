@@ -12,6 +12,7 @@ fn generate_parsers(types:&Box<Vec<Box<model::Type>>>, folder:&str) {
 #include <string.h>
 
 {{+ jsoninc_template/parser/parserstates.ct }}
+{{+ jsoninc_template/parser/parserstatefunctions.ct }}
 {{+ jsoninc_template/parser/parserfunctions.ct }}
 {{
   let filename = format!("{}/jsoninc_parser.c", folder);

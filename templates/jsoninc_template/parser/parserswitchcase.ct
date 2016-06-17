@@ -1,12 +1,12 @@
         switch(state) {
             case SJ_ {{= t }}_INITIAL:
-                // TODO: Implementation
+                sj_ {{= util::to_lower(&t) }}_doInitial(c, &state);
                 break;
             case SJ_ {{= t }}_INOBJECT:
-                // TODO: Implementation
+                sj_ {{= util::to_lower(&t) }}_doInObject(c, &state);
                 break;
             case SJ_ {{= t }}_INFIELDNAME:
-                // TODO: Implementation
+                sj_ {{= util::to_lower(&t) }}_doInFieldname(c, &state, buf);
                 break;
             // --
             // Loop over attributes

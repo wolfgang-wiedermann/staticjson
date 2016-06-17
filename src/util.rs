@@ -151,6 +151,16 @@ pub fn to_upper(txt:&str) -> String {
   return buf.clone();
 }
 
+pub fn to_lower(txt:&str) -> String {
+  let mut buf:String = String::new();
+  for c in txt.chars() {
+    for c2 in c.to_lowercase() {
+      buf.push(c2);
+    }
+  }
+  return buf.clone();
+}
+
 /**
 * Removes the first char from a constant string
 * (For example the first slash from paths)

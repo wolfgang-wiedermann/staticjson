@@ -12,10 +12,12 @@
      {{= typ.typename }} *obj;
     obj = ( {{= typ.typename }}*)malloc(sizeof( {{= typ.typename }}*));
     char c = NULL; // for current character
+    SjBuffer *buf;
+    buf = sj_buffer_new();
 
     while((*pos) < length && state != SJ_ {{= t }}_FINAL) {        
-        c = txt[pos];        
-        pos += 1;
+        c = txt[*pos];        
+        (*pos) += 1;
         // TODO: Parse content of obj from txt
 {{+ jsoninc_template/parser/parserswitchcase.ct }} 
     }    

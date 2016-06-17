@@ -1,0 +1,37 @@
+{{ for typ in (*types).iter() {
+    let typ_upper = util::to_upper(&typ.typename); 
+    let typ_lower = util::to_lower(&typ.typename); 
+}}
+
+// Function for Initial-State 
+void sj_ {{= typ_lower }}_doInitial(char c, Sj {{= typ.typename }}Enum *state) {
+    if(c == '{') {
+        *state = SJ_ {{= typ_upper }}_INOJBECT;
+    }
+}
+
+// Function for InObject-State
+void sj_ {{= typ_lower }}_doInObject(char c, Sj {{= typ.typename }}Enum *state) {
+    if(c == '"') {
+        *state = SJ_ {{= typ_upper }}_INFIELDNAME;
+    }
+}
+
+// Function for InFieldname-State
+void sj_ {{= typ_lower }}_doInFieldname(char c, Sj {{= typ.typename }}Enum *state, SjBuffer *buf) {
+    if(c == '"') {
+        char *name = sj_buffer_get_content(buf);
+{{ for attribut in typ.attributes.iter() { }}
+        if(strcmp(name, " {{= attribut.name }}") == 0) {
+            sj_buffer_clean(buf);
+            printf(" {{= attribut.name }}\n");
+            *state = SJ_ {{= typ_upper }}_ {{= util::to_upper(&attribut.name) }}_BEHINDFIELDNAME;
+        } else {{ } }} {
+            printf("INVALID TOKEN: %s\n", sj_buffer_get_content(buf));
+            exit(-1);
+        }
+    } else {
+        sj_buffer_push(buf, c);
+    }
+}
+{{ } }}

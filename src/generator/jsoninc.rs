@@ -246,6 +246,41 @@ for typ in (*types).iter() {
 } 
   str.push_str("\n// ENDREGION Parser state definitions");
 for typ in (*types).iter() {
+    let typ_upper = util::to_upper(&typ.typename); 
+    let typ_lower = util::to_lower(&typ.typename); 
+
+    str.push_str("\n\n// Function for Initial-State \nvoid sj_");
+    str.push_str(&typ_lower);
+    str.push_str("_doInitial(char c, Sj");
+    str.push_str(&typ.typename);
+    str.push_str("Enum *state) {\n    if(c == '{') {\n        *state = SJ_");
+    str.push_str(&typ_upper);
+    str.push_str("_INOJBECT;\n    }\n}\n\n// Function for InObject-State\nvoid sj_");
+    str.push_str(&typ_lower);
+    str.push_str("_doInObject(char c, Sj");
+    str.push_str(&typ.typename);
+    str.push_str("Enum *state) {\n    if(c == '\"') {\n        *state = SJ_");
+    str.push_str(&typ_upper);
+    str.push_str("_INFIELDNAME;\n    }\n}\n\n// Function for InFieldname-State\nvoid sj_");
+    str.push_str(&typ_lower);
+    str.push_str("_doInFieldname(char c, Sj");
+    str.push_str(&typ.typename);
+    str.push_str("Enum *state, SjBuffer *buf) {\n    if(c == '\"') {\n        char *name = sj_buffer_get_content(buf);");
+for attribut in typ.attributes.iter() { 
+      str.push_str("\n        if(strcmp(name, \"");
+      str.push_str(&attribut.name);
+      str.push_str("\") == 0) {\n            sj_buffer_clean(buf);\n            printf(\"");
+      str.push_str(&attribut.name);
+      str.push_str("\\n\");\n            *state = SJ_");
+      str.push_str(&typ_upper);
+      str.push_str("_");
+      str.push_str(&util::to_upper(&attribut.name));
+      str.push_str("_BEHINDFIELDNAME;\n        } else");
+} 
+    str.push_str(" {\n            printf(\"INVALID TOKEN: %s\\n\", sj_buffer_get_content(buf));\n            exit(-1);\n        }\n    } else {\n        sj_buffer_push(buf, c);\n    }\n}");
+} 
+  str.push_str("");
+for typ in (*types).iter() {
     let t = util::to_upper(&typ.typename); 
 
     str.push_str(" \n\n/*\n * Parser function for Type ");
@@ -265,15 +300,21 @@ for typ in (*types).iter() {
     str.push_str(&typ.typename);
     str.push_str("*)malloc(sizeof(");
     str.push_str(&typ.typename);
-    str.push_str("*));\n    char c = NULL; // for current character\n\n    while((*pos) < length && state != SJ_");
+    str.push_str("*));\n    char c = NULL; // for current character\n    SjBuffer *buf;\n    buf = sj_buffer_new();\n\n    while((*pos) < length && state != SJ_");
     str.push_str(&t);
-    str.push_str("_FINAL) {        \n        c = txt[pos];        \n        pos += 1;\n        // TODO: Parse content of obj from txt\n        switch(state) {\n            case SJ_");
+    str.push_str("_FINAL) {        \n        c = txt[*pos];        \n        (*pos) += 1;\n        // TODO: Parse content of obj from txt\n        switch(state) {\n            case SJ_");
     str.push_str(&t);
-    str.push_str("_INITIAL:\n                // TODO: Implementation\n                break;\n            case SJ_");
+    str.push_str("_INITIAL:\n                sj_");
+    str.push_str(&util::to_lower(&t));
+    str.push_str("_doInitial(c, &state);\n                break;\n            case SJ_");
     str.push_str(&t);
-    str.push_str("_INOBJECT:\n                // TODO: Implementation\n                break;\n            case SJ_");
+    str.push_str("_INOBJECT:\n                sj_");
+    str.push_str(&util::to_lower(&t));
+    str.push_str("_doInObject(c, &state);\n                break;\n            case SJ_");
     str.push_str(&t);
-    str.push_str("_INFIELDNAME:\n                // TODO: Implementation\n                break;\n            // --\n            // Loop over attributes\n            // to add attribute specific cases                ");
+    str.push_str("_INFIELDNAME:\n                sj_");
+    str.push_str(&util::to_lower(&t));
+    str.push_str("_doInFieldname(c, &state, buf);\n                break;\n            // --\n            // Loop over attributes\n            // to add attribute specific cases                ");
   for attribut in typ.attributes.iter() { 
      let fieldname = util::to_upper(&attribut.name); 
 
