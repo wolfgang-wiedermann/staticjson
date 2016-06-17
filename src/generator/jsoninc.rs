@@ -277,7 +277,112 @@ for attribut in typ.attributes.iter() {
       str.push_str(&util::to_upper(&attribut.name));
       str.push_str("_BEHINDFIELDNAME;\n        } else");
 } 
-    str.push_str(" {\n            printf(\"INVALID TOKEN: %s\\n\", sj_buffer_get_content(buf));\n            exit(-1);\n        }\n    } else {\n        sj_buffer_push(buf, c);\n    }\n}");
+    str.push_str(" {\n            printf(\"INVALID TOKEN: %s\\n\", sj_buffer_get_content(buf));\n            exit(-1);\n        }\n    } else {\n        sj_buffer_push(buf, c);\n    }\n}\n");
+for attribut in typ.attributes.iter() {
+    if attribut.attribute_type == "string" { 
+        str.push_str("\n// Attribute specific functions for ");
+        str.push_str(&typ.typename);
+        str.push_str(".");
+        str.push_str(&attribut.name);
+        str.push_str("\nvoid sj_");
+        str.push_str(&typ_lower);
+        str.push_str("_do");
+        str.push_str(&util::lsnake_to_ucamel(&attribut.name));
+        str.push_str("BehindFieldname(char c, Sj");
+        str.push_str(&typ.typename);
+        str.push_str("StateEnum *state) {\n    //printf(\"SJ_");
+        str.push_str(&typ_upper);
+        str.push_str("_NAME_INVALUE\\n\");\n    if(c == ':') {\n        *state = SJ_");
+        str.push_str(&typ_upper);
+        str.push_str("_NAME_INVALUE;\n    } // else if(!is_whitespace(c)) { return error_code }\n}\n\nvoid sj_");
+        str.push_str(&typ_lower);
+        str.push_str("_do");
+        str.push_str(&util::lsnake_to_ucamel(&attribut.name));
+        str.push_str("InValue(char c, Sj");
+        str.push_str(&typ.typename);
+        str.push_str("StateEnum *state, SjBuffer *buf) {\n    if(c == '\"') {\n        *state = SJ_");
+        str.push_str(&typ_upper);
+        str.push_str("_NAME_INSTRING;\n    } if (c == ',') {\n        *state = SJ_");
+        str.push_str(&typ_upper);
+        str.push_str("_INOJBECT;\n    } // else if(!is_whitespace(c)) { return error_code }\n}\n\nvoid sj_");
+        str.push_str(&typ_lower);
+        str.push_str("_do");
+        str.push_str(&util::lsnake_to_ucamel(&attribut.name));
+        str.push_str("InString(char c, Sj");
+        str.push_str(&typ.typename);
+        str.push_str("StateEnum *state, SjBuffer *buf, SjPerson *");
+        str.push_str(&typ_lower);
+        str.push_str(") {\n    if (c == '\"') {\n        *state = SJ_");
+        str.push_str(&typ_upper);
+        str.push_str("_NAME_INVALUE;\n        ");
+        str.push_str(&typ_lower);
+        str.push_str("->");
+        str.push_str(&attribut.name);
+        str.push_str(" = sj_buffer_get_content(buf);\n        ");
+        str.push_str(&typ_lower);
+        str.push_str("->");
+        str.push_str(&attribut.name);
+        str.push_str("_len = sj_buffer_get_size(buf);\n        printf(\"NAME: %s\\n\", person->name);\n        sj_buffer_clean(buf);\n    } else {\n        sj_buffer_push(buf, c);\n    }\n}\n// ---\n   ");
+} else if attribut.attribute_type == "int"
+              || attribut.attribute_type == "uint"
+              || attribut.attribute_type == "long"
+              || attribut.attribute_type == "ulong" { 
+        str.push_str("\n// Parser for Numbers\nvoid sj_");
+        str.push_str(&typ_lower);
+        str.push_str("_do");
+        str.push_str(&util::lsnake_to_ucamel(&attribut.name));
+        str.push_str("BehindFieldname(char c, Sj");
+        str.push_str(&typ.typename);
+        str.push_str("StateEnum *state) {\n    if(c == ':') {\n        *state = SJ_");
+        str.push_str(&typ_upper);
+        str.push_str("_");
+        str.push_str(&util::to_upper(&attribut.name));
+        str.push_str("_INVALUE;\n    } // else if(!is_whitespace(c)) { return error_code }\n}\n\nvoid sj_");
+        str.push_str(&typ_lower);
+        str.push_str("_do");
+        str.push_str(&util::lsnake_to_ucamel(&attribut.name));
+        str.push_str("InValue(char c, Sj");
+        str.push_str(&typ.typename);
+        str.push_str("StateEnum *state, SjBuffer *buf, Sj");
+        str.push_str(&typ.typename);
+        str.push_str(" *");
+        str.push_str(&typ_lower);
+        str.push_str(") {\n    //printf(\"SJ_");
+        str.push_str(&typ_upper);
+        str.push_str("_");
+        str.push_str(&util::to_upper(&attribut.name));
+        str.push_str("_INVALUE : %d\\n\", is_numeric(c));\n    if(is_numeric(c)) {\n        sj_buffer_push(buf, c);\n    } else if (c == ',') {\n        char *b = sj_buffer_get_content(buf);\n        ");
+        str.push_str(&typ_lower);
+        str.push_str("->");
+        str.push_str(&attribut.name);
+        str.push_str(" = atoi(b);\n        free(b);\n\n        printf(\"");
+        str.push_str(&util::to_upper(&typ_upper));
+        str.push_str(": %d\\n\", ");
+        str.push_str(&typ_lower);
+        str.push_str("->");
+        str.push_str(&attribut.name);
+        str.push_str(");\n        sj_buffer_clean(buf);\n        *state = SJ_");
+        str.push_str(&typ_upper);
+        str.push_str("_INOJBECT;\n    } else if (c == '}') {\n        char *b = sj_buffer_get_content(buf);\n        ");
+        str.push_str(&typ_lower);
+        str.push_str("->");
+        str.push_str(&attribut.name);
+        str.push_str(" = atoi(b);\n        free(b);\n\n        printf(\"");
+        str.push_str(&util::to_upper(&typ_upper));
+        str.push_str(": %d\\n\", ");
+        str.push_str(&typ_lower);
+        str.push_str("->");
+        str.push_str(&attribut.name);
+        str.push_str(");\n        sj_buffer_clean(buf);\n        *state = SJ_");
+        str.push_str(&typ_upper);
+        str.push_str("_INITIAL;\n    }// else { return error_code }\n}\n   ");
+} else {
+// Einzelfunktionen für das Parsen der Attribute  {{= attribut.name 
+        str.push_str("\n// TODO: In einzelne Dateien zerlegen für String-Attribute,\n//       Ganzzahl-Attribute oder Gleitpunktzahl-Attribute.");
+ } 
+      str.push_str("\n");
+} 
+    str.push_str("");
 } 
   str.push_str("");
 for typ in (*types).iter() {

@@ -1,0 +1,29 @@
+// Parser for Numbers
+void sj_ {{= typ_lower }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}BehindFieldname(char c, Sj {{= typ.typename }}StateEnum *state) {
+    if(c == ':') {
+        *state = SJ_ {{= typ_upper }}_ {{= util::to_upper(&attribut.name) }}_INVALUE;
+    } // else if(!is_whitespace(c)) { return error_code }
+}
+
+void sj_ {{= typ_lower }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}InValue(char c, Sj {{= typ.typename }}StateEnum *state, SjBuffer *buf, Sj {{= typ.typename }} * {{= typ_lower }}) {
+    //printf("SJ_ {{= typ_upper }}_ {{= util::to_upper(&attribut.name) }}_INVALUE : %d\n", is_numeric(c));
+    if(is_numeric(c)) {
+        sj_buffer_push(buf, c);
+    } else if (c == ',') {
+        char *b = sj_buffer_get_content(buf);
+         {{= typ_lower }}-> {{= attribut.name }} = atoi(b);
+        free(b);
+
+        printf(" {{= util::to_upper(&typ_upper) }}: %d\n",  {{= typ_lower }}-> {{= attribut.name }});
+        sj_buffer_clean(buf);
+        *state = SJ_ {{= typ_upper }}_INOJBECT;
+    } else if (c == '}') {
+        char *b = sj_buffer_get_content(buf);
+         {{= typ_lower }}-> {{= attribut.name }} = atoi(b);
+        free(b);
+
+        printf(" {{= util::to_upper(&typ_upper) }}: %d\n",  {{= typ_lower }}-> {{= attribut.name }});
+        sj_buffer_clean(buf);
+        *state = SJ_ {{= typ_upper }}_INITIAL;
+    }// else { return error_code }
+}

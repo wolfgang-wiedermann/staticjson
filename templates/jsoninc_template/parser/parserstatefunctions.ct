@@ -34,4 +34,20 @@ void sj_ {{= typ_lower }}_doInFieldname(char c, Sj {{= typ.typename }}Enum *stat
         sj_buffer_push(buf, c);
     }
 }
+
+{{ for attribut in typ.attributes.iter() {
+    if attribut.attribute_type == "string" { }}
+{{+ jsoninc_template/parser/parserstatefunctions_string.ct }}
+    {{ } else if attribut.attribute_type == "int"
+              || attribut.attribute_type == "uint"
+              || attribut.attribute_type == "long"
+              || attribut.attribute_type == "ulong" { }}
+{{+ jsoninc_template/parser/parserstatefunctions_int.ct }}
+    {{ } else {
+// Einzelfunktionen für das Parsen der Attribute  {{= attribut.name }}
+// TODO: In einzelne Dateien zerlegen für String-Attribute,
+//       Ganzzahl-Attribute oder Gleitpunktzahl-Attribute.
+{{  } }}
+
+{{ } }}
 {{ } }}
