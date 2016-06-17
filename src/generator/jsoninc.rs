@@ -292,9 +292,13 @@ for attribut in typ.attributes.iter() {
         str.push_str(&typ.typename);
         str.push_str("StateEnum *state) {\n    //printf(\"SJ_");
         str.push_str(&typ_upper);
-        str.push_str("_NAME_INVALUE\\n\");\n    if(c == ':') {\n        *state = SJ_");
+        str.push_str("_");
+        str.push_str(&util::to_upper(&attribut.name));
+        str.push_str("_INVALUE\\n\");\n    if(c == ':') {\n        *state = SJ_");
         str.push_str(&typ_upper);
-        str.push_str("_NAME_INVALUE;\n    } // else if(!is_whitespace(c)) { return error_code }\n}\n\nvoid sj_");
+        str.push_str("_");
+        str.push_str(&util::to_upper(&attribut.name));
+        str.push_str("_INVALUE;\n    } // else if(!is_whitespace(c)) { return error_code }\n}\n\nvoid sj_");
         str.push_str(&typ_lower);
         str.push_str("_do");
         str.push_str(&util::lsnake_to_ucamel(&attribut.name));
@@ -302,7 +306,9 @@ for attribut in typ.attributes.iter() {
         str.push_str(&typ.typename);
         str.push_str("StateEnum *state, SjBuffer *buf) {\n    if(c == '\"') {\n        *state = SJ_");
         str.push_str(&typ_upper);
-        str.push_str("_NAME_INSTRING;\n    } if (c == ',') {\n        *state = SJ_");
+        str.push_str("_");
+        str.push_str(&util::to_upper(&attribut.name));
+        str.push_str("_INSTRING;\n    } if (c == ',') {\n        *state = SJ_");
         str.push_str(&typ_upper);
         str.push_str("_INOJBECT;\n    } // else if(!is_whitespace(c)) { return error_code }\n}\n\nvoid sj_");
         str.push_str(&typ_lower);
@@ -310,11 +316,15 @@ for attribut in typ.attributes.iter() {
         str.push_str(&util::lsnake_to_ucamel(&attribut.name));
         str.push_str("InString(char c, Sj");
         str.push_str(&typ.typename);
-        str.push_str("StateEnum *state, SjBuffer *buf, SjPerson *");
+        str.push_str("StateEnum *state, SjBuffer *buf, Sj");
+        str.push_str(&typ.typename);
+        str.push_str(" *");
         str.push_str(&typ_lower);
         str.push_str(") {\n    if (c == '\"') {\n        *state = SJ_");
         str.push_str(&typ_upper);
-        str.push_str("_NAME_INVALUE;\n        ");
+        str.push_str("_");
+        str.push_str(&util::to_upper(&attribut.name));
+        str.push_str("_INVALUE;\n        ");
         str.push_str(&typ_lower);
         str.push_str("->");
         str.push_str(&attribut.name);
@@ -322,7 +332,13 @@ for attribut in typ.attributes.iter() {
         str.push_str(&typ_lower);
         str.push_str("->");
         str.push_str(&attribut.name);
-        str.push_str("_len = sj_buffer_get_size(buf);\n        printf(\"NAME: %s\\n\", person->name);\n        sj_buffer_clean(buf);\n    } else {\n        sj_buffer_push(buf, c);\n    }\n}\n// ---\n   ");
+        str.push_str("_len = sj_buffer_get_size(buf);\n        printf(\"");
+        str.push_str(&util::to_upper(&attribut.name));
+        str.push_str(": %s\\n\", ");
+        str.push_str(&typ_lower);
+        str.push_str("->");
+        str.push_str(&attribut.name);
+        str.push_str(");\n        sj_buffer_clean(buf);\n    } else {\n        sj_buffer_push(buf, c);\n    }\n}\n// ---\n   ");
 } else if attribut.attribute_type == "int"
               || attribut.attribute_type == "uint"
               || attribut.attribute_type == "long"

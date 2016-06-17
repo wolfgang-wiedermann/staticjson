@@ -1,25 +1,25 @@
 // Attribute specific functions for  {{= typ.typename }}. {{= attribut.name }}
 void sj_ {{= typ_lower }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}BehindFieldname(char c, Sj {{= typ.typename }}StateEnum *state) {
-    //printf("SJ_ {{= typ_upper }}_NAME_INVALUE\n");
+    //printf("SJ_ {{= typ_upper }}_ {{= util::to_upper(&attribut.name) }}_INVALUE\n");
     if(c == ':') {
-        *state = SJ_ {{= typ_upper }}_NAME_INVALUE;
+        *state = SJ_ {{= typ_upper }}_ {{= util::to_upper(&attribut.name) }}_INVALUE;
     } // else if(!is_whitespace(c)) { return error_code }
 }
 
 void sj_ {{= typ_lower }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}InValue(char c, Sj {{= typ.typename }}StateEnum *state, SjBuffer *buf) {
     if(c == '"') {
-        *state = SJ_ {{= typ_upper }}_NAME_INSTRING;
+        *state = SJ_ {{= typ_upper }}_ {{= util::to_upper(&attribut.name) }}_INSTRING;
     } if (c == ',') {
         *state = SJ_ {{= typ_upper }}_INOJBECT;
     } // else if(!is_whitespace(c)) { return error_code }
 }
 
-void sj_ {{= typ_lower }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}InString(char c, Sj {{= typ.typename }}StateEnum *state, SjBuffer *buf, SjPerson * {{= typ_lower }}) {
+void sj_ {{= typ_lower }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}InString(char c, Sj {{= typ.typename }}StateEnum *state, SjBuffer *buf, Sj {{= typ.typename }} * {{= typ_lower }}) {
     if (c == '"') {
-        *state = SJ_ {{= typ_upper }}_NAME_INVALUE;
+        *state = SJ_ {{= typ_upper }}_ {{= util::to_upper(&attribut.name) }}_INVALUE;
          {{= typ_lower }}-> {{= attribut.name }} = sj_buffer_get_content(buf);
          {{= typ_lower }}-> {{= attribut.name }}_len = sj_buffer_get_size(buf);
-        printf("NAME: %s\n", person->name);
+        printf(" {{= util::to_upper(&attribut.name) }}: %s\n",  {{= typ_lower }}-> {{= attribut.name }});
         sj_buffer_clean(buf);
     } else {
         sj_buffer_push(buf, c);
