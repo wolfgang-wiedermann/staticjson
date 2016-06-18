@@ -4,21 +4,21 @@
 }}
 
 // Function for Initial-State 
-void sj_ {{= typ_lower }}_doInitial(char c, Sj {{= typ.typename }}Enum *state) {
+void sj_ {{= typ_lower }}_doInitial(char c, Sj {{= typ.typename }}StateEnum *state) {
     if(c == '{') {
-        *state = SJ_ {{= typ_upper }}_INOJBECT;
+        *state = SJ_ {{= typ_upper }}_INOBJECT;
     }
 }
 
 // Function for InObject-State
-void sj_ {{= typ_lower }}_doInObject(char c, Sj {{= typ.typename }}Enum *state) {
+void sj_ {{= typ_lower }}_doInObject(char c, Sj {{= typ.typename }}StateEnum *state) {
     if(c == '"') {
         *state = SJ_ {{= typ_upper }}_INFIELDNAME;
     }
 }
 
 // Function for InFieldname-State
-void sj_ {{= typ_lower }}_doInFieldname(char c, Sj {{= typ.typename }}Enum *state, SjBuffer *buf) {
+void sj_ {{= typ_lower }}_doInFieldname(char c, Sj {{= typ.typename }}StateEnum *state, SjBuffer *buf) {
     if(c == '"') {
         char *name = sj_buffer_get_content(buf);
 {{ for attribut in typ.attributes.iter() { }}

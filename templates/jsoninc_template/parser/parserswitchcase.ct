@@ -51,6 +51,6 @@
                 printf("Finished Parsing of  {{= t }} successfully\n");
                 break;
             default:
-                printf("ERROR: invalid parser state %d at position %d\n", state, pos);
+                printf("ERROR: invalid parser state %d at position %d\n", state, *pos);
                 return NULL;                
         }

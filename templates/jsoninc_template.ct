@@ -22,14 +22,13 @@ pub fn generate(types:&Box<Vec<Box<model::Type>>>, folder:&str) {
 #include <stdlib.h>
 #include <string.h>
 
-// data structures
-{{ for typ in (*types).iter() { }}
-struct  {{= util::ucamel_to_lsnake(&typ.typename) }} {
-  // TODO: Attributes
-};
-
-{{ } }}
-// end of data structures
+int main(int argc, char *argv[]) {
+  printf("Hello World\n");
+  char *json = "{\"customer_id\":123, \"prename\": \"Maximilian\", \"surname\":\"Mustermann\"}";
+  int pos = 0;
+  printf("%s\n", json);
+  Customer *cust = sj_parse_customer(&pos, strlen(json), json);
+}
 
 {{   // write it to one single file 
   let filename = format!("{}/main.c", folder);

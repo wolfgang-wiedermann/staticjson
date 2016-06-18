@@ -5,7 +5,7 @@ void sj_ {{= typ_lower }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}Behind
     } // else if(!is_whitespace(c)) { return error_code }
 }
 
-void sj_ {{= typ_lower }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}InValue(char c, Sj {{= typ.typename }}StateEnum *state, SjBuffer *buf, Sj {{= typ.typename }} * {{= typ_lower }}) {
+void sj_ {{= typ_lower }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}InValue(char c, Sj {{= typ.typename }}StateEnum *state, SjBuffer *buf,  {{= typ.typename }} * {{= typ_lower }}) {
     //printf("SJ_ {{= typ_upper }}_ {{= util::to_upper(&attribut.name) }}_INVALUE : %d\n", is_numeric(c));
     if(is_numeric(c)) {
         sj_buffer_push(buf, c);
@@ -16,7 +16,7 @@ void sj_ {{= typ_lower }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}InValu
 
         printf(" {{= util::to_upper(&typ_upper) }}: %d\n",  {{= typ_lower }}-> {{= attribut.name }});
         sj_buffer_clean(buf);
-        *state = SJ_ {{= typ_upper }}_INOJBECT;
+        *state = SJ_ {{= typ_upper }}_INOBJECT;
     } else if (c == '}') {
         char *b = sj_buffer_get_content(buf);
          {{= typ_lower }}-> {{= attribut.name }} = atoi(b);

@@ -4,9 +4,9 @@
 }}
 // parser states for  {{= typ.typename }}
 typedef enum {
-  SJ_ {{= t }}_INITIAL = 0; 
-  SJ_ {{= t }}_INOBJECT = 1;
-  SJ_ {{= t }}_INFIELDNAME = 2;  
+  SJ_ {{= t }}_INITIAL = 0, 
+  SJ_ {{= t }}_INOBJECT = 1,
+  SJ_ {{= t }}_INFIELDNAME = 2,  
 {{    let mut enum_idx = 0;
    for attribut in typ.attributes.iter() { 
       enum_idx += 1;
@@ -35,6 +35,6 @@ typedef enum {
       }
    } }}
   SJ_ {{= t }}_FINAL = 9
-} Sj {{= typ.typename }}Enum;
+} Sj {{= typ.typename }}StateEnum;
 {{ } }}
 // ENDREGION Parser state definitions
