@@ -417,7 +417,11 @@ for typ in (*types).iter() {
     str.push_str(&t);
     str.push_str("_INITIAL;\n    ");
     str.push_str(&typ.typename);
-    str.push_str(" *obj;\n    obj = (");
+    str.push_str(" *");
+    str.push_str(&util::to_lower(&typ.typename));
+    str.push_str(";\n    ");
+    str.push_str(&util::to_lower(&typ.typename));
+    str.push_str(" = (");
     str.push_str(&typ.typename);
     str.push_str("*)malloc(sizeof(");
     str.push_str(&typ.typename);
@@ -451,15 +455,29 @@ for typ in (*types).iter() {
           str.push_str(&t);
           str.push_str("_");
           str.push_str(&fieldname);
-          str.push_str("_BEHINDFIELDNAME:\n                // TODO: Implementation\n                break;\n            case SJ_");
+          str.push_str("_BEHINDFIELDNAME:\n                sj_");
+          str.push_str(&util::to_lower(&t));
+          str.push_str("_do");
+          str.push_str(&util::lsnake_to_ucamel(&attribut.name));
+          str.push_str("BehindFieldname(c, &state);\n                break;\n            case SJ_");
           str.push_str(&t);
           str.push_str("_");
           str.push_str(&fieldname);
-          str.push_str("_INVALUE:\n                // TODO: Implementation\n                break;\n            case SJ_");
+          str.push_str("_INVALUE:\n                sj_");
+          str.push_str(&util::to_lower(&t));
+          str.push_str("_do");
+          str.push_str(&util::lsnake_to_ucamel(&attribut.name));
+          str.push_str("InValue(c, &state, buf);\n                break;\n            case SJ_");
           str.push_str(&t);
           str.push_str("_");
           str.push_str(&fieldname);
-          str.push_str("_INSTRING:\n                // TODO: Implementation\n                break;");
+          str.push_str("_INSTRING:\n                sj_");
+          str.push_str(&util::to_lower(&t));
+          str.push_str("_do");
+          str.push_str(&util::lsnake_to_ucamel(&attribut.name));
+          str.push_str("InString(c, &state, buf, ");
+          str.push_str(&util::to_lower(&t));
+          str.push_str(");\n                break;");
      } else if attribut.attribute_type == "int" 
            || attribut.attribute_type == "uint"
            || attribut.attribute_type == "long"
@@ -468,11 +486,21 @@ for typ in (*types).iter() {
           str.push_str(&t);
           str.push_str("_");
           str.push_str(&fieldname);
-          str.push_str("_BEHINDFIELDNAME:\n                // TODO: Implementation\n                break;\n            case SJ_");
+          str.push_str("_BEHINDFIELDNAME:\n                sj_");
+          str.push_str(&util::to_lower(&t));
+          str.push_str("_do");
+          str.push_str(&util::lsnake_to_ucamel(&attribut.name));
+          str.push_str("BehindFieldname(c, &state);\n                break;\n            case SJ_");
           str.push_str(&t);
           str.push_str("_");
           str.push_str(&fieldname);
-          str.push_str("_INVALUE:\n                // TODO: Implementation\n                break;            ");
+          str.push_str("_INVALUE:\n                sj_");
+          str.push_str(&util::to_lower(&t));
+          str.push_str("_do");
+          str.push_str(&util::lsnake_to_ucamel(&attribut.name));
+          str.push_str("InValue(c, &state, buf, ");
+          str.push_str(&util::to_lower(&t));
+          str.push_str(");\n                break;            ");
        }
       } 
    } 
@@ -480,7 +508,9 @@ for typ in (*types).iter() {
     str.push_str(&t);
     str.push_str("_FINAL:\n                // Debug output, comment it out later\n                printf(\"Finished Parsing of ");
     str.push_str(&t);
-    str.push_str(" successfully\\n\");\n                break;\n            default:\n                printf(\"ERROR: invalid parser state %d at position %d\\n\", state, pos);\n                return NULL;                \n        } \n    }    \n    \n    return obj;\n}");
+    str.push_str(" successfully\\n\");\n                break;\n            default:\n                printf(\"ERROR: invalid parser state %d at position %d\\n\", state, pos);\n                return NULL;                \n        } \n    }    \n    \n    return ");
+    str.push_str(&util::to_lower(&typ.typename));
+    str.push_str(";\n}");
 } 
   str.push_str("");
   let filename = format!("{}/jsoninc_parser.c", folder);

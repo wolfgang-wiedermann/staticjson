@@ -24,23 +24,23 @@
            || attribut.attribute_type == "datetime"
            || attribut.attribute_type == "time" { }}
             case SJ_ {{= t }}_ {{= fieldname }}_BEHINDFIELDNAME:
-                // TODO: Implementation
+                sj_ {{= util::to_lower(&t) }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}BehindFieldname(c, &state);
                 break;
             case SJ_ {{= t }}_ {{= fieldname }}_INVALUE:
-                // TODO: Implementation
+                sj_ {{= util::to_lower(&t) }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}InValue(c, &state, buf);
                 break;
             case SJ_ {{= t }}_ {{= fieldname }}_INSTRING:
-                // TODO: Implementation
+                sj_ {{= util::to_lower(&t) }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}InString(c, &state, buf,  {{= util::to_lower(&t) }});
                 break;
 {{      } else if attribut.attribute_type == "int" 
            || attribut.attribute_type == "uint"
            || attribut.attribute_type == "long"
            || attribut.attribute_type == "ulong" { }}
             case SJ_ {{= t }}_ {{= fieldname }}_BEHINDFIELDNAME:
-                // TODO: Implementation
+                sj_ {{= util::to_lower(&t) }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}BehindFieldname(c, &state);
                 break;
             case SJ_ {{= t }}_ {{= fieldname }}_INVALUE:
-                // TODO: Implementation
+                sj_ {{= util::to_lower(&t) }}_do {{= util::lsnake_to_ucamel(&attribut.name) }}InValue(c, &state, buf,  {{= util::to_lower(&t) }});
                 break;            
 {{        }
       } 
