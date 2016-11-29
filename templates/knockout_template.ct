@@ -8,9 +8,18 @@ use std::collections::HashSet;
 // of knockout-JS Model-Prototypes for the given types
 //
 pub fn generate(tree:model::ParserResult, folder:&str) {
+  let mut code:String = String::new();
+
   for typ in tree.types.iter() {
-    let result = gen_type(typ, tree.types.clone());
-    let filename = format!("{}/{}.js", folder, typ.typename);
-    filehandler::write_file(filename, result);    
+    if typ.is_param_value_present("knockout-js", "true") {
+      let result = gen_type(typ, tree.types.clone());  
+      code.push_str(&result);
+      code.push_str("\n");    
+    }
   }
+
+  code.push_str(&generate_main_model(tree.types.clone()));
+
+  let filename = format!("{}/knockout_model.js", folder);
+  filehandler::write_file(filename, code);    
 } }}{{+ knockout_template/gen_type.ct }}{{+ jquery_template/namespace_fcts.ct }}{{+ knockout_template/functions.ct }}

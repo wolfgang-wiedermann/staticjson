@@ -142,6 +142,7 @@ impl Type {
         || name == "int"
         || name == "decimal"
         || name == "byte"
+        || name == "bool"
         || name == "char"
         || name == "uint"
         || name == "long"

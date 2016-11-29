@@ -8,11 +8,20 @@ use std::collections::HashSet;
 // of knockout-JS Model-Prototypes for the given types
 //
 pub fn generate(tree:model::ParserResult, folder:&str) {
+  let mut code:String = String::new();
+
   for typ in tree.types.iter() {
-    let result = gen_type(typ, tree.types.clone());
-    let filename = format!("{}/{}.js", folder, typ.typename);
-    filehandler::write_file(filename, result);    
+    if typ.is_param_value_present("knockout-js", "true") {
+      let result = gen_type(typ, tree.types.clone());  
+      code.push_str(&result);
+      code.push_str("\n");    
+    }
   }
+
+  code.push_str(&generate_main_model(tree.types.clone()));
+
+  let filename = format!("{}/knockout_model.js", folder);
+  filehandler::write_file(filename, code);    
 } 
 /** 
  * staticjson Code-Generation for Types
@@ -129,8 +138,26 @@ fn get_js_namespace_from_ifa(i:&model::Interface) -> String {
 }
 
 
-// Helper functions for knockout template generation
+// Function for generating the main model
+fn generate_main_model(types:Box<Vec<Box<model::Type>>>) -> String {
+    let mut str:String = String::new(); 
+  str.push_str("\nvar MainModel = function() {\n    var self = this;");
+   for typ in types.iter() { 
+    str.push_str("\n    self.");
+    str.push_str(&util::ucamel_to_lsnake(&typ.typename));
+    str.push_str("_selected = ko.observable(new ");
+    str.push_str(&get_js_namespace_from_type(typ));
+    str.push_str(".");
+    str.push_str(&typ.typename);
+    str.push_str("());\n    self.");
+    str.push_str(&util::ucamel_to_lsnake(&typ.typename));
+    str.push_str("_list = ko.observableArray([]);");
+   } 
+  str.push_str("    \n};    ");
+    return str;
+} 
 
+// Helper functions for knockout template generation
 fn get_initializer_for_attribute(attr:&model::Attribute) -> String {
     let mut str:String = String::new();
     if attr.is_array {
@@ -163,6 +190,8 @@ fn get_initializer_for_attribute_and_value(attr:&model::Attribute, string:&str) 
         str.push_str(")"); 
     } else {
         // TODO: hier muss rekursiv abgestiegen werden: new mit Attribut-Typ!
+        //       dafür brauch ich hier aber die Liste der Typen, denn sonst bekomm
+        //       ich den js-namespace nicht für den Typ und kann so kein new machen!
         str.push_str("ko.observable()");
     }
     return str;
