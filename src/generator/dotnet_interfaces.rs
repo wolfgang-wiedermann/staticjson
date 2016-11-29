@@ -44,7 +44,7 @@ fn gen_interface(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -
 } 
   str.push_str("\n\n///\n/// Generated Interface for ");
   str.push_str(&ifa.name);
-  str.push_str(" with WebAPI2 Attributes\n///");
+  str.push_str(" with WebAPI2 Attributes\n/// (this is a partial class for separation of generated and manual written code)\n///");
 if ifa.is_param_present("path") { 
     str.push_str("\n[RoutePrefix(\"");
     str.push_str(&util::remove_first_char(&ifa.get_param_value("path")));
@@ -115,7 +115,7 @@ for param in function.params.iter() {
       str.push_str(&param.name);
       str.push_str("");
 } 
-    str.push_str(")\n    }");
+    str.push_str(");\n    }");
 } 
   str.push_str("\n}");
 if ifa.is_param_present("cs-namespace") { 
