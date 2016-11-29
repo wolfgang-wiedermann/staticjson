@@ -11,9 +11,15 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
   for typ in tree.types.iter() {
     let result = gen_type(typ, tree.types.clone());
     if typ.is_param_present("cs-namespace") {
-      let package = typ.get_param_value("cs-namespace").replace(".", "/");
-      let filename = format!("{}/{}/{}.cs", folder, package, typ.typename);
-      filehandler::write_file(filename, result);
+      if typ.is_param_present("cs-namespace-const") {
+        let package = typ.get_param_value("cs-namespace").replace(&typ.get_param_value("cs-namespace-const"), "").replace(".", "/");      
+        let filename = format!("{}/{}/{}.cs", folder, package, typ.typename);      
+        filehandler::write_file(filename, result);
+      } else {
+        let package = typ.get_param_value("cs-namespace").replace(".", "/");      
+        let filename = format!("{}/{}/{}.cs", folder, package, typ.typename);      
+        filehandler::write_file(filename, result);
+      }
     } else {
       let filename = format!("{}/{}.cs", folder, typ.typename);
       filehandler::write_file(filename, result);
@@ -225,6 +231,12 @@ fn get_dotnet_type(sjtype:&str, is_array:bool) -> String {
     } else {
       jtype = sjtype;
     }
+  } else if sjtype == "bool" {
+    if is_array {
+      jtype = "List<bool>";
+    } else {
+      jtype = "bool";
+    }
   } else if sjtype == "int" || sjtype == "uint" {
     if is_array {
       jtype = "List<int>";
@@ -268,6 +280,12 @@ fn get_dotnet_type_initial(sjtype:&str, is_array:bool) -> String {
       return format!("new List<{}>()", sjtype);
     } else {
       jtype = "null";
+    }
+  } else if sjtype == "bool" {
+    if is_array {
+      jtype = "new List<bool>()";
+    } else {
+      jtype = "false";
     }
   } else if sjtype == "int" || sjtype == "uint" {
     if is_array {

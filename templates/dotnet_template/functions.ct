@@ -8,6 +8,12 @@ fn get_dotnet_type(sjtype:&str, is_array:bool) -> String {
     } else {
       jtype = sjtype;
     }
+  } else if sjtype == "bool" {
+    if is_array {
+      jtype = "List<bool>";
+    } else {
+      jtype = "bool";
+    }
   } else if sjtype == "int" || sjtype == "uint" {
     if is_array {
       jtype = "List<int>";
@@ -51,6 +57,12 @@ fn get_dotnet_type_initial(sjtype:&str, is_array:bool) -> String {
       return format!("new List<{}>()", sjtype);
     } else {
       jtype = "null";
+    }
+  } else if sjtype == "bool" {
+    if is_array {
+      jtype = "new List<bool>()";
+    } else {
+      jtype = "false";
     }
   } else if sjtype == "int" || sjtype == "uint" {
     if is_array {

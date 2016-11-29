@@ -8,4 +8,5 @@ cargo build
 
 .\target\debug\staticjson.exe C:\Users\wiw39784\Documents\git\KDV.Plandaten\KDV.Plandaten\Meta\schnittstelle.sjs -t jquery -o C:\Users\wiw39784\Documents\git\KDV.Plandaten\KDV.Plandaten\Scripts\kdv\
 .\target\debug\staticjson.exe C:\Users\wiw39784\Documents\git\KDV.Plandaten\KDV.Plandaten\Meta\schnittstelle.sjs -t knockout -o C:\Users\wiw39784\Documents\git\KDV.Plandaten\KDV.Plandaten\Scripts\kdv\
-.\target\debug\staticjson.exe C:\Users\wiw39784\Documents\git\KDV.Plandaten\KDV.Plandaten\Meta\schnittstelle.sjs -t dotnet
+.\target\debug\staticjson.exe C:\Users\wiw39784\Documents\git\KDV.Plandaten\KDV.Plandaten\Meta\schnittstelle.sjs -t dotnet -o C:\Users\wiw39784\Documents\git\KDV.Plandaten\KDV.PlandatenLib\
+

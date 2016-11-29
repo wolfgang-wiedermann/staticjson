@@ -3,10 +3,12 @@ fn generate_main_model(types:Box<Vec<Box<model::Type>>>) -> String {
     let mut str:String = String::new(); }}
 var MainModel = function() {
     var self = this;
-{{    for typ in types.iter() { }}
+{{    for typ in types.iter() { 
+        if typ.is_param_value_present("knockout-in-main", "true") { }}
     self. {{= util::ucamel_to_lsnake(&typ.typename) }}_selected = ko.observable(new  {{= get_js_namespace_from_type(typ) }}. {{= typ.typename }}());
     self. {{= util::ucamel_to_lsnake(&typ.typename) }}_list = ko.observableArray([]);
-{{    } }}    
+{{        }
+    } }}    
 };    
 {{
     return str;

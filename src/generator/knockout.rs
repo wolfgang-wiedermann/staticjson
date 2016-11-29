@@ -143,16 +143,18 @@ fn generate_main_model(types:Box<Vec<Box<model::Type>>>) -> String {
     let mut str:String = String::new(); 
   str.push_str("\nvar MainModel = function() {\n    var self = this;");
    for typ in types.iter() { 
-    str.push_str("\n    self.");
-    str.push_str(&util::ucamel_to_lsnake(&typ.typename));
-    str.push_str("_selected = ko.observable(new ");
-    str.push_str(&get_js_namespace_from_type(typ));
-    str.push_str(".");
-    str.push_str(&typ.typename);
-    str.push_str("());\n    self.");
-    str.push_str(&util::ucamel_to_lsnake(&typ.typename));
-    str.push_str("_list = ko.observableArray([]);");
-   } 
+        if typ.is_param_value_present("knockout-in-main", "true") { 
+      str.push_str("\n    self.");
+      str.push_str(&util::ucamel_to_lsnake(&typ.typename));
+      str.push_str("_selected = ko.observable(new ");
+      str.push_str(&get_js_namespace_from_type(typ));
+      str.push_str(".");
+      str.push_str(&typ.typename);
+      str.push_str("());\n    self.");
+      str.push_str(&util::ucamel_to_lsnake(&typ.typename));
+      str.push_str("_list = ko.observableArray([]);");
+       }
+    } 
   str.push_str("    \n};    ");
     return str;
 } 
