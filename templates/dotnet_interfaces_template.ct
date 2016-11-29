@@ -8,23 +8,6 @@ use std::collections::HashSet;
 // of html documentation about the given types
 //
 pub fn generate(tree:model::ParserResult, folder:&str) {
-  for typ in tree.types.iter() {
-    let result = gen_type(typ, tree.types.clone());
-    if typ.is_param_present("cs-namespace") {
-      if typ.is_param_present("cs-namespace-const") {
-        let package = typ.get_param_value("cs-namespace").replace(&typ.get_param_value("cs-namespace-const"), "").replace(".", "/");      
-        let filename = format!("{}/{}/{}.cs", folder, package, typ.typename);      
-        filehandler::write_file(filename, result);
-      } else {
-        let package = typ.get_param_value("cs-namespace").replace(".", "/");      
-        let filename = format!("{}/{}/{}.cs", folder, package, typ.typename);      
-        filehandler::write_file(filename, result);
-      }
-    } else {
-      let filename = format!("{}/{}.cs", folder, typ.typename);
-      filehandler::write_file(filename, result);
-    }
-  }
   
   for ifa in tree.interfaces.iter() {
     let result = gen_interface(ifa, tree.types.clone());
@@ -43,4 +26,4 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
       filehandler::write_file(filename, result);
     }
   }
-} }}{{+ dotnet_template/gen_type.ct }}{{+ dotnet_template/gen_interface.ct }}{{+ dotnet_template/functions.ct }}
+} }}{{+ dotnet_template/gen_interface.ct }}{{+ dotnet_template/functions.ct }}

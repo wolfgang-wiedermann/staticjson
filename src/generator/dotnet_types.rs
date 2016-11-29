@@ -25,24 +25,7 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
       filehandler::write_file(filename, result);
     }
   }
-  
-  for ifa in tree.interfaces.iter() {
-    let result = gen_interface(ifa, tree.types.clone());
-    if ifa.is_param_present("cs-namespace") {
-      if ifa.is_param_present("cs-namespace-const") {
-        let package = ifa.get_param_value("cs-namespace").replace(&ifa.get_param_value("cs-namespace-const"), "").replace(".", "/");      
-        let filename = format!("{}/{}/{}.cs", folder, package, ifa.name);      
-        filehandler::write_file(filename, result);
-      } else {
-        let package = ifa.get_param_value("cs-namespace").replace(".", "/");      
-        let filename = format!("{}/{}/{}.cs", folder, package, ifa.name);      
-        filehandler::write_file(filename, result);
-      }
-    } else {
-      let filename = format!("{}/{}.cs", folder, ifa.name);
-      filehandler::write_file(filename, result);
-    }
-  }
+    
 } 
 // 
 // Generate code for type
@@ -130,103 +113,6 @@ if typ.is_param_present("ef-table") {
 } 
 
 
-// 
-// Generate code for interface
-//
-fn gen_interface(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> String {
-  let mut str:String = String::new(); 
-
-  str.push_str("using System;\nusing System.Collections.Generic;\nusing System.Linq; \nusing System.Web.Http;\nusing System.Security;");
-  str.push_str(&get_interfaces_referenced_dotnet_namespaces(&ifa, types.clone()));
-  str.push_str("\n\n");
-  if ifa.is_param_present("cs-namespace") {
-
-    str.push_str("namespace ");
-    str.push_str(&ifa.get_param_value("cs-namespace"));
-    str.push_str(" \n{");
-} 
-  str.push_str("\n\n///\n/// Generated Interface for ");
-  str.push_str(&ifa.name);
-  str.push_str(" with WebAPI2 Attributes\n///");
-if ifa.is_param_present("path") { 
-    str.push_str("\n[RoutePrefix(\"");
-    str.push_str(&util::remove_first_char(&ifa.get_param_value("path")));
-    str.push_str("\")]");
-} 
-  str.push_str("\npublic partial class ");
-  str.push_str(&ifa.name);
-  str.push_str(" : ApiController {");
-for function in ifa.functions.iter() { 
-    str.push_str("\n\n    ///");
-for param in function.params.iter() { 
-      str.push_str("\n    /// <param name=\"");
-      str.push_str(&param.name);
-      str.push_str("\"></param>");
-} 
-    str.push_str(" \n    /// <returns>");
-    str.push_str(&get_dotnet_type(&function.returntype, function.returntype_is_array));
-    str.push_str("</returns>\n    ///");
-if function.is_attribute_value_present("method", "GET") { 
-      str.push_str("\n    [HttpGet]");
-} if function.is_attribute_value_present("method", "PUT") { 
-      str.push_str("\n    [HttpPut]");
-} if function.is_attribute_value_present("method", "POST") { 
-      str.push_str("\n    [HttpPost]");
-} if function.is_attribute_value_present("method", "DELETE") { 
-      str.push_str("\n    [HttpDelete]");
-} if function.is_attribute_present("path") { 
-      str.push_str("\n    [Route(\"");
-      str.push_str(&util::remove_first_char(&function.get_attribute_value("path")));
-      str.push_str("\")]");
-} 
-    str.push_str("\n    public ");
-    str.push_str(&get_dotnet_type(&function.returntype, function.returntype_is_array));
-    str.push_str(" ");
-    str.push_str(&util::lcamel_to_ucamel(&function.name));
-    str.push_str("(");
-let mut i = 0;
-for param in function.params.iter() { 
-  i = i+1;   
-  if i > 1 { 
-    str.push_str(", "); 
-  } if !(param.is_param_present("query-param") || param.is_param_present("path-param")) { 
-  
-        str.push_str("[FromBody] ");
-
-  } 
-      str.push_str("");
-      str.push_str(&get_dotnet_type(&param.typename, param.is_array));
-      str.push_str(" ");
-      str.push_str(&param.name);
-      str.push_str("");
-} 
-    str.push_str(")\n    {\n       ");
-if function.returntype != "void" { 
-      str.push_str(" return");
-} 
-    str.push_str(" this.");
-    str.push_str(&util::lcamel_to_ucamel(&function.name));
-    str.push_str("Impl(");
-let mut i = 0;
-for param in function.params.iter() { 
-  i = i+1;   
-  if i > 1 { 
-    str.push_str(", "); 
-  }  
-  
-      str.push_str("");
-      str.push_str(&param.name);
-      str.push_str("");
-} 
-    str.push_str(")\n    }");
-} 
-  str.push_str("\n}");
-if ifa.is_param_present("cs-namespace") { 
-    str.push_str(" \n\n}");
-} 
-  str.push_str("");
-  return str;
-} 
 // rust utility functions for dotnet webapi2 and entity framework generation 
 
 fn get_dotnet_type(sjtype:&str, is_array:bool) -> String {

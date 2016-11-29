@@ -13,6 +13,8 @@ pub mod generator {
   pub mod jquery;
   pub mod knockout;
   pub mod dotnet;
+  pub mod dotnet_types;
+  pub mod dotnet_interfaces;
 //  pub mod rust;
   pub mod htmldoc; // Generator for html documentation
 }

@@ -41,6 +41,8 @@ fn main() {
     model::TargetLanguage::JQUERY => staticjson::generator::jquery::generate(result, &opts.target_folder),
     model::TargetLanguage::KNOCKOUT => staticjson::generator::knockout::generate(result, &opts.target_folder),
     model::TargetLanguage::DOTNET => staticjson::generator::dotnet::generate(result, &opts.target_folder),
+    model::TargetLanguage::DOTNET_TYPES => staticjson::generator::dotnet_types::generate(result, &opts.target_folder),
+    model::TargetLanguage::DOTNET_INTERFACES => staticjson::generator::dotnet_interfaces::generate(result, &opts.target_folder),
     _ => {
       println!("ERROR: Code generation to target-language not implemented");
     }

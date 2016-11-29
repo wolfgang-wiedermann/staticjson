@@ -8,23 +8,6 @@ use std::collections::HashSet;
 // of html documentation about the given types
 //
 pub fn generate(tree:model::ParserResult, folder:&str) {
-  for typ in tree.types.iter() {
-    let result = gen_type(typ, tree.types.clone());
-    if typ.is_param_present("cs-namespace") {
-      if typ.is_param_present("cs-namespace-const") {
-        let package = typ.get_param_value("cs-namespace").replace(&typ.get_param_value("cs-namespace-const"), "").replace(".", "/");      
-        let filename = format!("{}/{}/{}.cs", folder, package, typ.typename);      
-        filehandler::write_file(filename, result);
-      } else {
-        let package = typ.get_param_value("cs-namespace").replace(".", "/");      
-        let filename = format!("{}/{}/{}.cs", folder, package, typ.typename);      
-        filehandler::write_file(filename, result);
-      }
-    } else {
-      let filename = format!("{}/{}.cs", folder, typ.typename);
-      filehandler::write_file(filename, result);
-    }
-  }
   
   for ifa in tree.interfaces.iter() {
     let result = gen_interface(ifa, tree.types.clone());
@@ -44,92 +27,6 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
     }
   }
 } 
-// 
-// Generate code for type
-// For details about entity frameworks attributes see https://msdn.microsoft.com/en-us/data/jj591583
-//
-fn gen_type(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {
-  let mut str:String = String::new(); 
-
-  str.push_str("  \nusing System;\nusing System.Collections.Generic;\nusing System.Linq; \nusing System.ComponentModel.DataAnnotations;\nusing System.ComponentModel.DataAnnotations.Schema;\n");
-  str.push_str(&get_types_referenced_dotnet_namespaces(&typ, types.clone()));
-  str.push_str("\n");
-  if typ.is_param_present("cs-namespace") {
-
-    str.push_str("namespace ");
-    str.push_str(&typ.get_param_value("cs-namespace"));
-    str.push_str(" \n{");
-} 
-  str.push_str("\n\n///\n/// Generated Type for Entity ");
-  str.push_str(&typ.typename);
-  str.push_str(" \n///");
-if typ.is_param_present("ef-table") { 
-    str.push_str("\n[Table(\"");
-    str.push_str(&typ.get_param_value("ef-table"));
-    str.push_str("\")]");
-} 
-  str.push_str("\npublic class ");
-  str.push_str(&typ.typename);
-  str.push_str(" {\n\n    #region properties");
-    for attribut in typ.attributes.iter() { 
-         if attribut.is_param_value_present("ef-id", "true") { 
-      str.push_str("\n    [Key]");
-} if attribut.is_param_value_present("ef-id", "true") { 
-      str.push_str("\n    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]");
-} 
-    str.push_str("\n    public ");
-    str.push_str(&get_dotnet_type(&attribut.attribute_type, attribut.is_array));
-    str.push_str(" ");
-    str.push_str(&util::lsnake_to_ucamel(&attribut.name));
-    str.push_str(" { get; set; }   \n");
-    } 
-  str.push_str("\n    #endregion\n\n    public ");
-  str.push_str(&typ.typename);
-  str.push_str("() {");
-    for attribut in typ.attributes.iter() { 
-    str.push_str("\n        this.");
-    str.push_str(&util::lsnake_to_ucamel(&attribut.name));
-    str.push_str(" = ");
-    str.push_str(&get_dotnet_type_initial(&attribut.attribute_type, attribut.is_array));
-    str.push_str(";");
-    } 
-  str.push_str("\n    }\n\n    ///\n    /// The function IsValid offert a validation function for the\n    /// mandatory attributes and other constraints of staticjson code\n    /// <param name=\"obj\">object to check</param>\n    /// <returns>check result as bool</returns>\n    ///\n    public static bool IsValid(");
-  str.push_str(&typ.typename);
-  str.push_str(" obj) {\n        return obj != null");
-    for attribut in typ.attributes.iter() { 
-      if attribut.is_param_value_present("mandatory", "true") { 
-      str.push_str("\n        && obj.");
-      str.push_str(&util::lsnake_to_ucamel(&attribut.name));
-      str.push_str(" != ");
-      str.push_str(&get_dotnet_type_initial(&attribut.attribute_type, attribut.is_array));
-      str.push_str("");
-      } if attribut.is_param_present("maxlen") && attribut.attribute_type == "string" && !attribut.is_array { 
-      str.push_str("\n        && (obj.");
-      str.push_str(&util::lsnake_to_ucamel(&attribut.name));
-      str.push_str(" != null && \n            obj.");
-      str.push_str(&util::lsnake_to_ucamel(&attribut.name));
-      str.push_str(".Length <= ");
-      str.push_str(&attribut.get_param_value("maxlen"));
-      str.push_str(")");
-      } if attribut.is_param_present("minlen") && attribut.attribute_type == "string" && !attribut.is_array { 
-      str.push_str("\n        && (obj.");
-      str.push_str(&util::lsnake_to_ucamel(&attribut.name));
-      str.push_str(" != null && \n            obj.");
-      str.push_str(&util::lsnake_to_ucamel(&attribut.name));
-      str.push_str(".Length >= ");
-      str.push_str(&attribut.get_param_value("minlen"));
-      str.push_str(")");
-      } 
-    } 
-  str.push_str(";\n    }\n}\n");
-  if typ.is_param_present("cs-namespace") {
-
-    str.push_str(" \n}");
-}
-    return str;
-} 
-
-
 // 
 // Generate code for interface
 //

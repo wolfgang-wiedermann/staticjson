@@ -55,6 +55,8 @@ pub fn parse_commandline(params:Vec<String>) -> model::CommandlineOptions {
     "jquery"     => model::TargetLanguage::JQUERY,
     "knockout"   => model::TargetLanguage::KNOCKOUT,
     "dotnet"     => model::TargetLanguage::DOTNET,
+    "dotnet_typ" => model::TargetLanguage::DOTNET_TYPES,
+    "dotnet_ifa" => model::TargetLanguage::DOTNET_INTERFACES,
     _            => panic!("ERROR: Invalid target language"),
   };
 
