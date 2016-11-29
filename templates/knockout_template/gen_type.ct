@@ -1,0 +1,31 @@
+{{ /** 
+ * staticjson Code-Generation for Types
+ */
+fn gen_type(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {
+  let mut str:String = String::new(); 
+  
+}}// Knockout-Model für  {{= typ.typename }}
+// Dieser Code wurde mit staticjson generiert 
+// Namespace:
+
+{{= buildup_js_namespace_from_type(typ) }}
+
+ {{= get_js_namespace_from_type(typ) }}. {{= typ.typename }} = function(data) {
+    var self = this;
+    if(!!data) {
+{{        for attribut in typ.attributes.iter() { 
+            let mut temp:String = String::new();
+            temp.push_str("data."); 
+            temp.push_str(&util::lsnake_to_ucamel(&attribut.name)); }}                
+        self. {{= util::lsnake_to_ucamel(&attribut.name) }} =  {{= get_initializer_for_attribute_and_value(&attribut, &temp) }};
+{{        } }}
+    } else {
+{{        for attribut in typ.attributes.iter() { }}
+        self. {{= util::lsnake_to_ucamel(&attribut.name) }} =  {{= get_initializer_for_attribute(&attribut) }};
+{{        } }}
+    }
+};
+
+{{ return str;
+}
+}}

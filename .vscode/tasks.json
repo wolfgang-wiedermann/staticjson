@@ -1,7 +1,21 @@
 {
 	"version": "0.1.0"
-	//,"command": "cargo"
-    ,"command":"make"
-	,"isShellCommand": true
-	//,"args": ["build"]
+	,"windows": {
+		//,"command": "cargo"
+    	"command":"build_dotnet.bat"
+		,"isShellCommand": true
+		//,"args": ["build"]
+	}
+	,"linux": {
+		//,"command": "cargo"
+    	"command":"make"
+		,"isShellCommand": true
+		//,"args": ["build"]
+	}
+	,"osx": {
+		//,"command": "cargo"
+    	"command":"make"
+		,"isShellCommand": true
+		//,"args": ["build"]
+	}
 }

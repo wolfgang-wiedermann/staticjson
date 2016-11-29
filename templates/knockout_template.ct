@@ -1,0 +1,16 @@
+{{ use model;
+use filehandler;
+use util;
+use std::collections::HashSet;
+
+//
+// This generate Method is the entry point to generation
+// of knockout-JS Model-Prototypes for the given types
+//
+pub fn generate(tree:model::ParserResult, folder:&str) {
+  for typ in tree.types.iter() {
+    let result = gen_type(typ, tree.types.clone());
+    let filename = format!("{}/{}.js", folder, typ.typename);
+    filehandler::write_file(filename, result);    
+  }
+} }}{{+ knockout_template/gen_type.ct }}{{+ jquery_template/namespace_fcts.ct }}{{+ knockout_template/functions.ct }}

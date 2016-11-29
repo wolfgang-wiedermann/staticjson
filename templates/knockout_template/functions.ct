@@ -1,0 +1,42 @@
+{{ // Helper functions for knockout template generation
+
+fn get_initializer_for_attribute(attr:&model::Attribute) -> String {
+    let mut str:String = String::new();
+    if attr.is_array {
+        str.push_str("ko.observableArray([])");
+    } else if attr.attribute_type == "string" {
+        str.push_str("ko.observable(\"\")");
+    } else if attr.attribute_type == "bool" {
+        str.push_str("ko.observable(false)");
+    } else if attr.attribute_type == "date" {
+        str.push_str("ko.observable()");
+    } else if attr.attribute_type == "time" {
+        str.push_str("ko.observable()");
+    } else if attr.attribute_type == "datetime" {
+        str.push_str("ko.observable()");                
+    } else if model::Type::is_basic_type(&attr.attribute_type) {
+        str.push_str("ko.observable(0)");
+    } else {
+        str.push_str("ko.observable()");
+    }
+    return str;
+} 
+
+fn get_initializer_for_attribute_and_value(attr:&model::Attribute, string:&str) -> String {
+    let mut str:String = String::new();
+    if attr.is_array {
+        str.push_str("ko.observableArray([])");
+    } else if model::Type::is_basic_type(&attr.attribute_type) {
+        str.push_str("ko.observable(");
+        str.push_str(string);
+        str.push_str(")"); 
+    } else {
+        // TODO: hier muss rekursiv abgestiegen werden: new mit Attribut-Typ!
+        //       dafür brauch ich hier aber die Liste der Typen, denn sonst bekomm
+        //       ich den js-namespace nicht für den Typ und kann so kein new machen!
+        str.push_str("ko.observable()");
+    }
+    return str;
+} 
+
+}}

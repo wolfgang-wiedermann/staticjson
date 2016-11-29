@@ -3,7 +3,7 @@
 */
 #[derive(Clone, Debug)]
 pub enum TargetLanguage {
-  C, RUST, HTMLDOC, JSVALIDATE, JAXRS, JAVACLIENT, JQUERY, DOTNET
+  C, RUST, HTMLDOC, JSVALIDATE, JAXRS, JAVACLIENT, JQUERY, KNOCKOUT, DOTNET
 }
 
 #[derive(Clone, Debug)]
