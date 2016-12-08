@@ -8,19 +8,13 @@ use std::collections::HashSet;
 // of jquery proxies for the given interfaces and types
 //
 pub fn generate(tree:model::ParserResult, folder:&str) {
-/*
-  for typ in tree.types.iter() {
-    let result = gen_type(typ, tree.types.clone());
-    let filename = format!("{}/{}.js", folder, typ.typename);
-    filehandler::write_file(filename, result);    
-  }
-*/
   
   for ifa in tree.interfaces.iter() {
     let result = gen_proxy(ifa, tree.types.clone());
-    let filename = format!("{}/{}.js", folder, ifa.name);
+    let filename = format!("{}/{}Proxy.js", folder, ifa.name);
     filehandler::write_file(filename, result);    
   }
+  
 } 
 // 
 // Generate code for interface

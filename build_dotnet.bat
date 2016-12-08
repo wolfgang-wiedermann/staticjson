@@ -2,6 +2,7 @@ python tools/generate_code.py  ./templates/dotnet_template.ct c > ./src/generato
 python tools/generate_code.py  ./templates/dotnet_types_template.ct c > ./src/generator/dotnet_types.rs
 python tools/generate_code.py  ./templates/dotnet_interfaces_template.ct c > ./src/generator/dotnet_interfaces.rs
 python tools/generate_code.py  ./templates/knockout_template.ct c > ./src/generator/knockout.rs
+python tools/generate_code.py  ./templates/jquery_template.ct c > ./src/generator/jquery.rs
 
 cargo build
 
