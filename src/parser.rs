@@ -1,4 +1,5 @@
 use model;
+use std::collections::HashSet;
 
 pub struct Parser {
   buffer: String,
@@ -40,7 +41,7 @@ impl Parser {
                                            is_array: false, 
                                            params: Vec::new() }),
       current_attribute: Box::new(model::Attribute { name: String::new(), 
-                                                     attribute_type: String::new(),
+                                                     attribute_type: String::new(),                                                     
                                                      is_array: false, 
                                                      params: Vec::new() }),
       current_param: Box::new(model::Parameter {name:String::new(), value:String::new()}),
@@ -104,10 +105,18 @@ impl Parser {
         //_  => self.raise_syntax_error("\nERROR: Invalid State\n"),
       }
       self.cminus1 = c;
+    }
+
+    // generate a hashset of typenames defined in the staticjson code
+    let mut set = HashSet::new();
+    for t in self.types.iter() {
+      set.insert(t.typename.clone());
     }     
     
+    // Return the Result of Parsing
     return model::ParserResult {
       types: self.types.clone(),
+      typenames: set.clone(),
       interfaces: self.interfaces.clone()
     }
   }
@@ -1029,5 +1038,6 @@ impl Parser {
     panic!("SYNTAX-ERROR: {} in line {}:{}", txt, self.line+1, self.column-1);
     //panic!("SYNTAX-ERROR: {} : {:?}", txt, self.state);
   }
+
   // #end_region helper functions
 }

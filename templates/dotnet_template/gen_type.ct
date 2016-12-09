@@ -2,7 +2,7 @@
 // Generate code for type
 // For details about entity frameworks attributes see https://msdn.microsoft.com/en-us/data/jj591583
 //
-fn gen_type(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {
+fn gen_type(typ:&Box<model::Type>, result:model::ParserResult) -> String {
   let mut str:String = String::new(); 
 }}  
 using System;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-{{= get_types_referenced_dotnet_namespaces(&typ, types.clone()) }}
+{{= get_types_referenced_dotnet_namespaces(&typ, result.types.clone()) }}
 
 {{   if typ.is_param_present("cs-namespace") {
 }}namespace  {{= typ.get_param_value("cs-namespace") }} 
@@ -35,8 +35,12 @@ public class  {{= typ.typename }} {
     #endregion
 
     public  {{= typ.typename }}() {
-{{     for attribut in typ.attributes.iter() { }}
+{{     for attribut in typ.attributes.iter() {
+         // println!("{} -> {}", attribut.attribute_type, result.is_defined_typename(&attribut.attribute_type));
+         if result.is_defined_typename(&attribut.attribute_type) 
+            || model::Type::is_basic_type(&attribut.attribute_type) {  }}
         this. {{= util::lsnake_to_ucamel(&attribut.name) }} =  {{= get_dotnet_type_initial(&attribut.attribute_type, attribut.is_array) }};
+{{         } }}        
 {{     } }}
     }
 

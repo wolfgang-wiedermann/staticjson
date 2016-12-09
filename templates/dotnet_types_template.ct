@@ -9,7 +9,7 @@ use std::collections::HashSet;
 //
 pub fn generate(tree:model::ParserResult, folder:&str) {
   for typ in tree.types.iter() {
-    let result = gen_type(typ, tree.types.clone());
+    let result = gen_type(typ, tree.clone());
     if typ.is_param_present("cs-namespace") {
       if typ.is_param_present("cs-namespace-const") {
         let package = typ.get_param_value("cs-namespace").replace(&typ.get_param_value("cs-namespace-const"), "").replace(".", "/");      

@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 /*
 * This file contains the datastructures of the staticjson tool
 */
@@ -71,7 +73,16 @@ pub struct CommandlineOptions {
 #[derive(Clone, Debug)]
 pub struct ParserResult {
   pub types: Box<Vec<Box<Type>>>,
+  pub typenames: HashSet<String>,
   pub interfaces: Box<Vec<Box<Interface>>>
+}
+
+impl ParserResult {
+  // This function detects whether a given typename is defined
+  // by the parsed staticjson code or not.
+  pub fn is_defined_typename(&self, typename:&str) -> bool {
+    return self.typenames.contains(typename);
+  }
 }
 
 #[derive(Clone, Debug)]
@@ -83,7 +94,7 @@ pub struct Parameter {
 #[derive(Clone, Debug)]
 pub struct Attribute {
   pub name:String,
-  pub attribute_type:String,
+  pub attribute_type:String,  
   pub is_array:bool,
   pub params:Vec<Box<Parameter>>
 }
@@ -396,3 +407,5 @@ pub struct GeneralModel<'a> {
   pub options:&'a CommandlineOptions,
   pub code:String,
 }
+
+

@@ -9,7 +9,7 @@ use std::collections::HashSet;
 //
 pub fn generate(tree:model::ParserResult, folder:&str) {
   for typ in tree.types.iter() {
-    let result = gen_type(typ, tree.types.clone());
+    let result = gen_type(typ, tree.clone());
     if typ.is_param_present("cs-namespace") {
       if typ.is_param_present("cs-namespace-const") {
         let package = typ.get_param_value("cs-namespace").replace(&typ.get_param_value("cs-namespace-const"), "").replace(".", "/");      
@@ -48,11 +48,11 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
 // Generate code for type
 // For details about entity frameworks attributes see https://msdn.microsoft.com/en-us/data/jj591583
 //
-fn gen_type(typ:&Box<model::Type>, types:Box<Vec<Box<model::Type>>>) -> String {
+fn gen_type(typ:&Box<model::Type>, result:model::ParserResult) -> String {
   let mut str:String = String::new(); 
 
   str.push_str("  \nusing System;\nusing System.Collections.Generic;\nusing System.Linq; \nusing System.ComponentModel.DataAnnotations;\nusing System.ComponentModel.DataAnnotations.Schema;\n");
-  str.push_str(&get_types_referenced_dotnet_namespaces(&typ, types.clone()));
+  str.push_str(&get_types_referenced_dotnet_namespaces(&typ, result.types.clone()));
   str.push_str("\n");
   if typ.is_param_present("cs-namespace") {
 
@@ -86,12 +86,17 @@ if typ.is_param_present("ef-table") {
   str.push_str("\n    #endregion\n\n    public ");
   str.push_str(&typ.typename);
   str.push_str("() {");
-    for attribut in typ.attributes.iter() { 
-    str.push_str("\n        this.");
-    str.push_str(&util::lsnake_to_ucamel(&attribut.name));
-    str.push_str(" = ");
-    str.push_str(&get_dotnet_type_initial(&attribut.attribute_type, attribut.is_array));
-    str.push_str(";");
+    for attribut in typ.attributes.iter() {
+         // println!("{} -> {}", attribut.attribute_type, result.is_defined_typename(&attribut.attribute_type));
+         if result.is_defined_typename(&attribut.attribute_type) 
+            || model::Type::is_basic_type(&attribut.attribute_type) {  
+      str.push_str("\n        this.");
+      str.push_str(&util::lsnake_to_ucamel(&attribut.name));
+      str.push_str(" = ");
+      str.push_str(&get_dotnet_type_initial(&attribut.attribute_type, attribut.is_array));
+      str.push_str(";");
+        } 
+    str.push_str("        ");
     } 
   str.push_str("\n    }\n\n    ///\n    /// The function IsValid offert a validation function for the\n    /// mandatory attributes and other constraints of staticjson code\n    /// <param name=\"obj\">object to check</param>\n    /// <returns>check result as bool</returns>\n    ///\n    public static bool IsValid(");
   str.push_str(&typ.typename);
