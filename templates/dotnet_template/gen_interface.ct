@@ -31,7 +31,9 @@ public partial class  {{= ifa.name }} : ApiController {
     [HttpGet] {{ } if function.is_attribute_value_present("method", "PUT") { }}
     [HttpPut] {{ } if function.is_attribute_value_present("method", "POST") { }}
     [HttpPost] {{ } if function.is_attribute_value_present("method", "DELETE") { }}
-    [HttpDelete] {{ } if function.is_attribute_present("path") { }}
+    [HttpDelete] {{ } if function.is_attribute_present("cs-custom-auth") { }}
+    [ {{= function.get_attribute_value("cs-custom-auth") }}] {{ } if function.is_attribute_present("cs-authorized-role") { }}
+    [Authorize(Roles = " {{= function.get_attribute_value("cs-authorized-role") }}")] {{ } if function.is_attribute_present("path") { }}
     [Route(" {{= util::remove_first_char(&function.get_attribute_value("path")) }}")] {{ } }}
     public  {{= get_dotnet_type(&function.returntype, function.returntype_is_array) }}  {{= util::lcamel_to_ucamel(&function.name) }}(
 {{ let mut i = 0;

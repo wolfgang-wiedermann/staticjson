@@ -187,6 +187,14 @@ if function.is_attribute_value_present("method", "GET") {
       str.push_str("\n    [HttpPost]");
 } if function.is_attribute_value_present("method", "DELETE") { 
       str.push_str("\n    [HttpDelete]");
+} if function.is_attribute_present("cs-custom-auth") { 
+      str.push_str("\n    [");
+      str.push_str(&function.get_attribute_value("cs-custom-auth"));
+      str.push_str("]");
+} if function.is_attribute_present("cs-authorized-role") { 
+      str.push_str("\n    [Authorize(Roles = \"");
+      str.push_str(&function.get_attribute_value("cs-authorized-role"));
+      str.push_str("\")]");
 } if function.is_attribute_present("path") { 
       str.push_str("\n    [Route(\"");
       str.push_str(&util::remove_first_char(&function.get_attribute_value("path")));
