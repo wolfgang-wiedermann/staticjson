@@ -34,7 +34,11 @@ pub fn generate(tree:model::ParserResult, folder:&str) {
 fn gen_type(typ:&Box<model::Type>, result:model::ParserResult) -> String {
   let mut str:String = String::new(); 
 
-  str.push_str("  \nusing System;\nusing System.Collections.Generic;\nusing System.Linq; \nusing System.ComponentModel.DataAnnotations;\nusing System.ComponentModel.DataAnnotations.Schema;\n");
+  str.push_str("  \nusing System;\nusing System.Collections.Generic;\nusing System.Linq; \nusing System.ComponentModel.DataAnnotations;\nusing System.ComponentModel.DataAnnotations.Schema;");
+if typ.is_param_present("cs-data-contract") || typ.is_attribute_param_present("cs-data-contract") { 
+    str.push_str("\nusing System.Runtime.Serialization;");
+} 
+  str.push_str("\n");
   str.push_str(&get_types_referenced_dotnet_namespaces(&typ, result.types.clone()));
   str.push_str("\n");
   if typ.is_param_present("cs-namespace") {
@@ -50,6 +54,8 @@ if typ.is_param_present("ef-table") {
     str.push_str("\n[Table(\"");
     str.push_str(&typ.get_param_value("ef-table"));
     str.push_str("\")]");
+} if typ.is_param_value_present("cs-data-contract", "true") { 
+    str.push_str("\n[DataContract]");
 } 
   str.push_str("\npublic class ");
   str.push_str(&typ.typename);
@@ -59,6 +65,8 @@ if typ.is_param_present("ef-table") {
       str.push_str("\n    [Key]");
 } if attribut.is_param_value_present("ef-id", "true") { 
       str.push_str("\n    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]");
+} if attribut.is_param_value_present("cs-data-contract", "true") { 
+      str.push_str("\n    [DataMember]");
 } 
     str.push_str("\n    public ");
     str.push_str(&get_dotnet_type(&attribut.attribute_type, attribut.is_array));

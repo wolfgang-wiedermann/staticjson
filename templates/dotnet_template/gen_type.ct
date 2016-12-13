@@ -9,7 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq; 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema; {{ if typ.is_param_present("cs-data-contract") || typ.is_attribute_param_present("cs-data-contract") { }}
+using System.Runtime.Serialization; {{ } }}
 
 {{= get_types_referenced_dotnet_namespaces(&typ, result.types.clone()) }}
 
@@ -21,14 +22,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 /// Generated Type for Entity  {{= typ.typename }} 
 ///
 {{ if typ.is_param_present("ef-table") { }}
-[Table(" {{= typ.get_param_value("ef-table") }}")] {{ } }}
+[Table(" {{= typ.get_param_value("ef-table") }}")] {{ } if typ.is_param_value_present("cs-data-contract", "true") { }}
+[DataContract] {{ } }}
 public class  {{= typ.typename }} {
 
     #region properties
 {{     for attribut in typ.attributes.iter() { 
          if attribut.is_param_value_present("ef-id", "true") { }}
     [Key] {{ } if attribut.is_param_value_present("ef-id", "true") { }}
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)] {{ } }}
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)] {{ } if attribut.is_param_value_present("cs-data-contract", "true") { }}
+    [DataMember] {{ } }}
     public  {{= get_dotnet_type(&attribut.attribute_type, attribut.is_array) }}  {{= util::lsnake_to_ucamel(&attribut.name) }} { get; set; }   
 
 {{     } }}
