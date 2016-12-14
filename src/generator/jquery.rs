@@ -26,7 +26,7 @@ fn gen_proxy(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> St
   str.push_str(&buildup_js_namespace_from_ifa(ifa));
   str.push_str("\n\n/**\n* Generated Proxy for ");
   str.push_str(&ifa.name);
-  str.push_str("\n*/\n");
+  str.push_str("\n* @param {string} urlBase baseURL of the REST services like for example /something or http://hostname/something/\n*/\n");
   str.push_str(&get_js_namespace_from_ifa(ifa));
   str.push_str(".");
   str.push_str(&ifa.name);
@@ -40,13 +40,15 @@ if ifa.is_param_present("path") {
 for function in ifa.functions.iter() { 
     str.push_str("\n\n    /**");
 for param in function.params.iter() { 
-      str.push_str("\n     * @param ");
+      str.push_str("\n     * @param {");
+      str.push_str(&param.typename);
+      str.push_str("} ");
       str.push_str(&param.name);
       str.push_str("");
 } 
-    str.push_str(" \n     * @return ");
+    str.push_str(" \n     * @return {");
     str.push_str(&function.returntype);
-    str.push_str("\n     */ \n    self.");
+    str.push_str("}\n     */ \n    self.");
     str.push_str(&function.name);
     str.push_str(" = function(");
 for param in function.params.iter() { 

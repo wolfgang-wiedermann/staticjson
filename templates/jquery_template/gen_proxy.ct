@@ -9,6 +9,7 @@ fn gen_proxy(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> St
 
 /**
 * Generated Proxy for  {{= ifa.name }}
+* @param {string} urlBase baseURL of the REST services like for example /something or http://hostname/something/
 */
  {{= get_js_namespace_from_ifa(ifa) }}. {{= ifa.name }}Proxy = function(urlBase) {
     var self = this;
@@ -22,8 +23,8 @@ fn gen_proxy(ifa:&Box<model::Interface>, types:Box<Vec<Box<model::Type>>>) -> St
 {{ for function in ifa.functions.iter() { }}
 
     /** {{ for param in function.params.iter() { }}
-     * @param  {{= param.name }} {{ } }} 
-     * @return  {{= function.returntype }}
+     * @param { {{= param.typename }}}  {{= param.name }} {{ } }} 
+     * @return { {{= function.returntype }}}
      */ 
     self. {{= function.name }} = function( {{ for param in function.params.iter() { }}{{= param.name }}{{ str.push_str(", ");  } }}successHandler, errorHandler) { 
 {{     if function.is_attribute_value_present("method", "GET") {
